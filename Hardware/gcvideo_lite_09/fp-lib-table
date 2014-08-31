@@ -1,0 +1,3 @@
+(fp_lib_table
+  (lib (name SOLDER_JUMPER)(type KiCad)(uri ${KIPRJMOD}/solder_jumper.pretty)(options "")(descr ""))
+)

@@ -1,0 +1,76 @@
+----------------------------------------------------------------------------------
+-- GCVideo Lite HDL Version 1.0
+-- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- All rights reserved.
+--
+-- Redistribution and use in source and binary forms, with or without
+-- modification, are permitted provided that the following conditions are met:
+--
+-- 1. Redistributions of source code must retain the above copyright notice,
+--    this list of conditions and the following disclaimer.
+-- 2. Redistributions in binary form must reproduce the above copyright notice,
+--    this list of conditions and the following disclaimer in the documentation
+--    and/or other materials provided with the distribution.
+--
+-- THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+-- AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+-- IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+-- ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+-- LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+-- CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+-- SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+-- INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+-- CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+-- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+-- THE POSSIBILITY OF SUCH DAMAGE.
+--
+-- video_defs.vhd: Video signal record definitions
+--
+----------------------------------------------------------------------------------
+
+library IEEE;
+use IEEE.STD_LOGIC_1164.all;
+use IEEE.NUMERIC_STD.ALL;
+
+package video_defs is
+
+  type VideoYCbCr is record
+    PixelY       : unsigned(7 downto 0);
+    PixelCb      : unsigned(7 downto 0);
+    PixelCr      : unsigned(7 downto 0);
+
+    -- pixel-exact signals
+    Blanking     : boolean;
+    HSync        : boolean;
+    VSync        : boolean;
+    CSync        : boolean;
+    IsEvenField  : boolean;
+
+    -- non-pixel-exact signals
+    IsProgressive: boolean;
+    IsPAL        : boolean;
+    Is30kHz      : boolean;
+  end record;
+
+  type VideoRGB is record
+    PixelR       : unsigned(7 downto 0);
+    PixelG       : unsigned(7 downto 0);
+    PixelB       : unsigned(7 downto 0);
+
+    -- pixel-exact signals
+    Blanking     : boolean;
+    HSync        : boolean;
+    VSync        : boolean;
+    CSync        : boolean;
+    IsEvenField  : boolean;
+
+    -- non-pixel-exact signals
+    IsProgressive: boolean;
+    IsPAL        : boolean;
+    Is30kHz      : boolean;
+  end record;
+
+end video_defs;
+
+package body video_defs is
+end video_defs;
