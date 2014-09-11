@@ -41,21 +41,22 @@ use work.video_defs.all;
 
 entity convert_yuv_to_rgb is
   port (
-    PixelClock      : in  std_logic;
-    PixelClockEnable: in  boolean;
+    PixelClock        : in  std_logic;
+    PixelClockEnable  : in  boolean;
+    PixelClockEnable2x: in  boolean;
     
     -- input video
-    VideoIn         : in  VideoYCbCr;
-    Limited_Range   : in  boolean;
+    VideoIn           : in  VideoYCbCr;
+    Limited_Range     : in  boolean;
 
     -- output video
-    VideoOut        : out VideoRGB
+    VideoOut          : out VideoRGB
   );
 end convert_yuv_to_rgb;
 
 architecture Behavioral of convert_yuv_to_rgb is
   -- delay in (enabled) clock cycles for untouched signals
-  constant Delayticks: Natural := 5;
+  constant Delayticks: Natural := 3;
 
   -- Y path
   signal y_scaled5 : signed(11 downto 0);
@@ -64,13 +65,11 @@ architecture Behavioral of convert_yuv_to_rgb is
 
   -- Cb
   signal cb_buffered : signed( 7 downto 0);
-  signal cb_scaled3  : signed( 9 downto 0);
   signal cb_scaled25 : signed(12 downto 0);
   signal cb_scaled129: signed(15 downto 0);
   signal cb_buffered2: signed( 7 downto 0);
 
   -- Cr
-  signal cr_scaled3  : signed( 9 downto 0);
   signal cr_scaled51 : signed(13 downto 0);
   signal cr_buf51    : signed(13 downto 0);
 
@@ -120,38 +119,42 @@ begin
     variable cr_signed: signed(7 downto 0);
     variable cb_signed: signed(7 downto 0);
   begin
-    if rising_edge(PixelClock) and PixelClockEnable then
-      -- stage 1: conversion, first scaling step
-      y_signed     := mksigned(VideoIn.PixelY);
-      cb_signed    := mksigned_offset(VideoIn.PixelCb);
-      cr_signed    := mksigned_offset(VideoIn.PixelCr);
-      y_scaled5    <= resize(y_signed, 12) + (resize(y_signed, 12) sll 2);
-      cb_buffered  <= cb_signed;
-      cb_scaled3   <= resize(cb_signed, 10) + (resize(cb_signed, 10) sll 1);
-      cr_scaled3   <= resize(cr_signed, 10) + (resize(cr_signed, 10) sll 1);
+    if rising_edge(PixelClock) and PixelClockEnable2x then
+      -- double-clocked conversion to reuse registers between adjacent stages
+      if PixelClockEnable then
+        -- stage 1: conversion, first scaling step
+        y_signed    := mksigned(VideoIn.PixelY);
+        cb_signed   := mksigned_offset(VideoIn.PixelCb);
+        cr_signed   := mksigned_offset(VideoIn.PixelCr);
+        y_scaled75  <= resize(y_signed, 16) + (resize(y_signed, 16) sll 2);
+        cb_buffered <= cb_signed;
+        cb_scaled25 <= resize(cb_signed, 13) + (resize(cb_signed, 13) sll 1);
+        cr_scaled51 <= resize(cr_signed, 14) + (resize(cr_signed, 14) sll 1);
 
-      -- stage 2: continue scaling
-      y_scaled75   <= (resize(y_scaled5, 16) sll 4) - resize(y_scaled5, 16);
-      cb_scaled25  <= resize(cb_buffered, 13) + (resize(cb_scaled3, 13) sll 3);
-      cr_scaled51  <= resize(cr_scaled3,  14) + (resize(cr_scaled3,  14) sll 4);
-      cb_buffered2 <= cb_buffered;
+        -- stage 3: Y offset, calculate green intermediate
+        -- subtract 24 for better rounding, value selected for best PSNR
+        rsum     <= resize(y_scaled75, 17)   - to_signed(1224, 17); -- 1224 == (75 * -16) - 24
+        gsum     <= resize(cr_scaled51, 17)  + resize(cb_scaled25, 17);
+        cr_buf51 <= cr_scaled51;
+        bsum     <= resize(cb_buffered, 17) + (resize(cb_buffered, 17) sll 7);
 
-      -- stage 3: Y offset, calculate green intermediate
-      -- subtract 24 for better rounding, value selected for best PSNR
-      y_shifted    <= y_scaled75 - to_signed(1224, 16); -- 1224 == (75 * -16) - 24
-      green_temp   <= resize(cr_scaled51, 15) + resize(cb_scaled25, 15);
-      cr_buf51     <= cr_scaled51;
-      cb_scaled129 <= resize(cb_buffered2, 16) + (resize(cb_buffered2, 16) sll 7);
+        -- stage 5: clipping
+        VideoOut.PixelR <= clip(rsum / 64);
+        VideoOut.PixelG <= clip(gsum / 64);
+        VideoOut.PixelB <= clip(bsum / 64);
+      else
+        -- stage 2: continue scaling
+        y_scaled75   <= (y_scaled75  sll 4) - y_scaled75;
+        cb_scaled25  <= (cb_scaled25 sll 3) + resize(cb_buffered, 13);
+        cr_scaled51  <= (cr_scaled51 sll 4) + cr_scaled51;
 
-      -- stage 4: calculate RGB values
-      rsum <= resize(y_shifted, 17) + (resize(cr_buf51, 17) sll 1);
-      gsum <= resize(y_shifted, 17) - resize(green_temp, 17);
-      bsum <= resize(y_shifted, 17) + resize(cb_scaled129, 17);
+        -- stage 4: calculate RGB values
+        rsum <= rsum + (resize(cr_buf51, 17) sll 1);
+        gsum <= rsum - gsum;
+        bsum <= rsum + bsum;
 
-      -- stage 5: clipping
-      VideoOut.PixelR <= clip(rsum / 64);
-      VideoOut.PixelG <= clip(gsum / 64);
-      VideoOut.PixelB <= clip(bsum / 64);
+        -- stage 6: nothing to do, values are already in the output registers
+      end if;
     end if;
   end process;
 

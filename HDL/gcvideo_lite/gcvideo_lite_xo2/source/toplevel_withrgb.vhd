@@ -97,11 +97,12 @@ begin
 
   -- convert to RGB
   Inst_yuv_to_rgb: convert_yuv_to_rgb PORT MAP (
-    PixelClock       => VClockI,
-    PixelClockEnable => pixel_clk_en,
-    Limited_Range    => false,
-    VideoIn          => video_444,
-    VideoOut         => video_rgb
+    PixelClock         => VClockI,
+    PixelClockEnable   => pixel_clk_en,
+    PixelClockEnable2x => pixel_clk_en_2x,
+    Limited_Range      => false,
+    VideoIn            => video_444,
+    VideoOut           => video_rgb
   );
 
   -- create DAC clock

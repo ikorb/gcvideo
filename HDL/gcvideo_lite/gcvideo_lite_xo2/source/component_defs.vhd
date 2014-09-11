@@ -93,15 +93,16 @@ package component_defs is
 
   component convert_yuv_to_rgb is
     port (
-      PixelClock      : in  std_logic;
-      PixelClockEnable: in  boolean;
+      PixelClock        : in  std_logic;
+      PixelClockEnable  : in  boolean;
+      PixelClockEnable2x: in  boolean;
       
       -- input video
-      VideoIn         : in  VideoYCbCr;
-      Limited_Range   : in  boolean;
+      VideoIn           : in  VideoYCbCr;
+      Limited_Range     : in  boolean;
 
       -- output video
-      VideoOut        : out VideoRGB
+      VideoOut          : out VideoRGB
     );
   end component;
 
