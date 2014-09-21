@@ -1,4 +1,5 @@
--- GCVideo Lite HDL Version 1.0
+----------------------------------------------------------------------------------
+-- GCVideo Lite for N64 HDL Version 1.0
 -- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
