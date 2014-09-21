@@ -4,7 +4,8 @@ GCVideo is a small series of devices capable of converting the
 GameCube's Digital Video port signals to standard video signals
 without using the custom chip in the original component video cable.
 There is currently just on device, GCVideo Lite, which outputs analog
-RGB or Component video signals.
+RGB or Component video signals. It has also been adapted to be used as
+an RGB DAC for the N64 since the board was already done.
 
 The schematics and layout are in the [Hardware](Hardware) directory
 and the HDL project is in the [HDL](HDL) directory. Each directory

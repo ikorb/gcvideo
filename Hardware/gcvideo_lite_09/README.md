@@ -25,7 +25,10 @@ The board is connected to the GameCube's digital video port using the
 pins of the P1 connector. Since the original connector in the GameCube
 is proprietary and no alternative is known, this needs to be done
 using wires. It is strongly recommended to keep these wires as short
-as possible since one of them is a 54MHz clock signal.
+as possible since one of them is a 54MHz clock signal. Be absolutely
+sure to not connect or bridge anything to pin 5 (+12V) - an accidental
+short between that pin and any of the data lines will instantly fry
+the Gamecube.
 
 The pins of the P1 connector on the GCVideo Lite board correspond 1:1
 with the pins of the GC's digital video connector, pin 1 is marked

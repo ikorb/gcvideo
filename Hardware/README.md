@@ -5,7 +5,7 @@ scheme suitable for submission to OSHPark. Each directory has a file
 `BOM.csv` which lists the required parts and their Digikey part
 numbers and its own README with more details about the board.
 
-There are currently only one variant of the board available:
+There is currently only one variant of the board available:
 
 * gcvideo_lite_09
 

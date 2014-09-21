@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<BaliProject version="3.2" title="gcvlite_n64" device="LCMXO2-640HC-4TG100C" default_implementation="gcvlite_n64">
+    <Options>
+        <Option name="HDL type" value="Verilog"/>
+    </Options>
+    <Implementation title="gcvlite_n64" dir="gcvlite_n64" description="gcvlite_n64" synthesis="lse" default_strategy="Strategy1">
+        <Options>
+            <Option name="HDL type" value="Verilog"/>
+            <Option name="HDL_KEYFILE" value=""/>
+            <Option name="HDL_PARAM" value=""/>
+            <Option name="VERILOG_DIRECTIVES" value=""/>
+            <Option name="lib" value="work"/>
+            <Option name="top" value=""/>
+            <Option name="include path" value=""/>
+        </Options>
+        <Source name="gcvlite_n64/source/toplevel_gcv64.vhd" type="VHDL" type_short="VHDL">
+            <Options lib="work"/>
+        </Source>
+        <Source name="gcvlite_n64/source/component_defs.vhd" type="VHDL" type_short="VHDL">
+            <Options lib="work"/>
+        </Source>
+        <Source name="gcvlite_n64/source/video_defs.vhd" type="VHDL" type_short="VHDL">
+            <Options lib="work"/>
+        </Source>
+        <Source name="gcvlite_n64/source/n64v_decoder.vhd" type="VHDL" type_short="VHDL">
+            <Options lib="work"/>
+        </Source>
+        <Source name="gcvlite_n64/source/convert_rgb_to_ycbcr.vhd" type="VHDL" type_short="VHDL">
+            <Options lib="work"/>
+        </Source>
+        <Source name="gcvlite_n64/source/delayline_bool.vhd" type="VHDL" type_short="VHDL">
+            <Options lib="work"/>
+        </Source>
+        <Source name="gcvlite_n64.lpf" type="Logic Preference" type_short="LPF"/>
+        <Source name="gcvlite_n64/gcvlite_n64.xcf" type="Programming Project File" type_short="Programming"/>
+    </Implementation>
+    <Strategy name="Strategy1" file="gcvlite_n641.sty"/>
+</BaliProject>
