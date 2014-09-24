@@ -5,11 +5,13 @@ project by Tim Worthington, found [here](http://members.optusnet.com.au/eviltim/
 Current features:
 * Analog RGB and Component output
 
-There are two precompiled bitstreams in this directory, a `.bit` and a
-`.jed` file. Lattice Diamond will accept either one for programming
+There are three precompiled bitstreams in this directory, a `.bit`, a
+`.jed` and a `.svf` file. Lattice Diamond will accept either one for programming
 the internal configuration flash, but that process always fails for me
 unless I use the `.jed` file. On the other hand, the quick SRAM upload
-requires the `.bit` file, so both have been included.
+requires the `.bit` file, so both have been included. The `.svf` file
+is useful for programming the chip with non-Lattice tools which
+support SVF playback, e.g. Xilinx' Impact.
 
 To connect the GCVideo Lite board to the N64, please refer to the
 pinout diagrams at [Tim's page](http://members.optusnet.com.au/eviltim/n64rgb/n64rgb.html)
