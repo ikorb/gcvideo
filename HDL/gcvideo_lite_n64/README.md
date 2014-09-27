@@ -29,7 +29,6 @@ GCVideo Lite board - pins not mentioned are left unconnected:
 15  D5
 16  D6
 17  +3.3V
-18  D7
 20  GND</pre>
 
 The RGB select jumper pads can be used to choose between RGB and
