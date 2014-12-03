@@ -1,0 +1,90 @@
+# -------------------------------------------------------------------------------
+# GCVideo DVI HDL Version 1.0
+# Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
+#
+# pindefs-p2xh: Pin definitions for the Pluto IIx-HDMI board
+#
+# -------------------------------------------------------------------------------
+
+# video output
+NET "DVI_Clock[0]" LOC = P34 | IOSTANDARD = TMDS_33;
+NET "DVI_Clock[1]" LOC = P35 | IOSTANDARD = TMDS_33;
+NET "DVI_Red[0]"   LOC = P48 | IOSTANDARD = TMDS_33;
+NET "DVI_Red[1]"   LOC = P49 | IOSTANDARD = TMDS_33;
+NET "DVI_Green[0]" LOC = P43 | IOSTANDARD = TMDS_33;
+NET "DVI_Green[1]" LOC = P44 | IOSTANDARD = TMDS_33;
+NET "DVI_Blue[0]"  LOC = P36 | IOSTANDARD = TMDS_33;
+NET "DVI_Blue[1]"  LOC = P37 | IOSTANDARD = TMDS_33;
+# The DDC pins are unused, but setting them to PCI mode enables the upper clamp diode
+NET "DDC_SDA" LOC = P50 | IOSTANDARD = PCI33_3;
+NET "DDC_SCL" LOC = P33 | IOSTANDARD = PCI33_3;
+
+# Gamecube digital video port
+NET "CableDetect" LOC = P20 | IOSTANDARD = LVCMOS33;
+NET "CSel"        LOC = P19 | IOSTANDARD = LVCMOS33 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+NET "VData[0]"    LOC = P16 | IOSTANDARD = LVCMOS33 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+NET "VData[1]"    LOC = P15 | IOSTANDARD = LVCMOS33 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+NET "VData[2]"    LOC = P13 | IOSTANDARD = LVCMOS33 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+NET "VData[3]"    LOC = P12 | IOSTANDARD = LVCMOS33 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+NET "VData[4]"    LOC = P10 | IOSTANDARD = LVCMOS33 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+NET "VData[5]"    LOC = P9  | IOSTANDARD = LVCMOS33 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+NET "VData[6]"    LOC = P6  | IOSTANDARD = LVCMOS33 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+NET "VData[7]"    LOC = P5  | IOSTANDARD = LVCMOS33 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+
+NET "VClockN" LOC = P89 | IOSTANDARD = LVCMOS33;
+NET "VClockN" TNM_NET = "CLOCK_54";
+TIMESPEC TS_CLOCK_54 = PERIOD "CLOCK_54" 54 MHz HIGH 50 %;
+
+# LEDs
+NET "LED1" LOC = P28 | IOSTANDARD = LVCMOS33;
+NET "LED2" LOC = P29 | IOSTANDARD = LVCMOS33;
+
+# Jumpers
+NET "Jumper1[0]" LOC = P94 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "Jumper1[1]" LOC = P98 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "Jumper1[2]" LOC = P4  | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "Jumper2[0]" LOC = P77 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "Jumper2[1]" LOC = P83 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "Jumper2[2]" LOC = P84 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "SLSPins[0]" LOC = P60 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "SLSPins[1]" LOC = P61 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "SLSPins[2]" LOC = P62 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "SLSPins[3]" LOC = P64 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "SLSPins[4]" LOC = P65 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "SLSPins[5]" LOC = P70 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "SLSPins[6]" LOC = P71 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "SLSPins[7]" LOC = P72 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "SLSPins[8]" LOC = P73 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+
+# Test port
+#NET "TestGND" LOC = P60 | IOSTANDARD = LVCMOS33;
+#NET "Test[0]" LOC = P61 | IOSTANDARD = LVCMOS33;
+#NET "Test[1]" LOC = P62 | IOSTANDARD = LVCMOS33;
+#NET "Test[2]" LOC = P64 | IOSTANDARD = LVCMOS33;
+#NET "Test[3]" LOC = P65 | IOSTANDARD = LVCMOS33;
+#NET "Test[4]" LOC = P70 | IOSTANDARD = LVCMOS33;
+#NET "Test[5]" LOC = P71 | IOSTANDARD = LVCMOS33;
+#NET "Test[6]" LOC = P72 | IOSTANDARD = LVCMOS33;
+#NET "Test[7]" LOC = P73 | IOSTANDARD = LVCMOS33;

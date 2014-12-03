@@ -37,8 +37,8 @@ site](http://gamesx.com/wiki/doku.php?id=av:nintendodigitalav) shows
 the pin numbering directly on the connector. Alternatively, if you
 look at the bottom of the GameCube's main PCB with the video
 connectors facing away from you, pin 1 of the DV connector should be
-the top right pin, pin2 the one below it. (Disclaimer: Not verified,
-just reasoned - if in doubt, measure)
+the bottom right pin, pin 2 the one above it. There are also numbers
+for the outermost pins marked besides the connector on the top side.
 
 I have no idea what your options are if you have a later-model
 GameCube where Nintendo removed the digital AV port.
