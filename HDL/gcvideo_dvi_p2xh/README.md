@@ -280,8 +280,9 @@ Notes about other issues will be added as time permits.
 ## Credits ##
 
 Thanks to:
-- Mike Field for releasing his (DVI encoder)[http://hamsterworks.co.nz/mediawiki/index.php/Dvid_test] under an open-source license
+
+- Mike Field for releasing his [DVI encoder](http://hamsterworks.co.nz/mediawiki/index.php/Dvid_test) under an open-source license
 - bobrocks95 on gc-forever for pointing me towards the Pluto IIx HDMI board
-- Artemio for his incredible (240p test suite)[http://junkerhq.net/xrgb/index.php/240p_test_suite] which has been extremely
+- Artemio for his incredible [240p test suite](http://junkerhq.net/xrgb/index.php/240p_test_suite) which has been extremely
     useful for quickly switching between modes during development
 - Nintendo for filing such a detailed patent for their console
