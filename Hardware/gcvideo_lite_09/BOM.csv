@@ -1,22 +1,22 @@
-Id	Designator	Package	Quantity	Designation	Digikey part no	Notes
-1	C1,C2,C3,C4,C5,C17,C18,C20,C21	SMD_Packages:SM0805	9	100n	399-1170-1-ND	or any other 100nF 0805 capacitor rated at least 6.3V
-2	C6,C22	SMD_Packages:SM1206POL	2	10u	479-8151-1-ND	or similar (rated at least 6.3V)
-3	C9,C7,C8,C10,C11,C12,C13,C14,C15,C16,C19	SMD_Packages:SM0805	11	10n	399-1159-1-ND	or any other 100nF 0805 capacitor rated at least 6.3V
-4	JP1	SOLDER_JUMPER:SOLDER_JUMPER	1	RGB/COMP	-	
-5	L1	SMD_Packages:SM0805	1	INDUCTOR	1276-6349-1-ND	Decouples DAC supply from FPGA supply, can be replaced with piece of wire in emergencies
-6	P1	Pin_Headers:Pin_Header_Straight_2x11	1	CONN_11X2	-	
-7	P2	Connect:SIL-5	1	CONN_5	-	
-8	P3	Connect:SIL-4	1	CONN_4	-	
-9	P4	Connect:SIL-6	1	CONN_6	-	
-10	P5	Pin_Headers:Pin_Header_Straight_2x02	1	CONN_2X2	-	
-11	P6,P7,P8,P9	Wire_Pads:SolderWirePad_single_0-8mmDrill	4	CONN_1	-	
-12	R1	SMD_Packages:SM0805	1	348	311-348CRCT-ND	Can be replaced with stacked 390 and 3900 Ohm resistors if necessary
-13	R2,R3,R4,R5	SMD_Packages:SM0805	4	75	311-75ARCT-ND	or any other 75 ohm 0805 resistor
-14	R6	SMD_Packages:SM0805	1	100	311-100CRCT-ND	or any other 50-200 ohm 0805 resistor – just a cautionary device on the Csync line
-15	R7,R8	SMD_Packages:SM0805	2	4k7	311-4.70KCRCT-ND	or any other 1k-10k ohm 0805 resistor (pullups/pulldowns)
-16	U1	SMD_Packages:TQFP_100	1	MachXO2-640-TQ100	220-1492-ND	It's still an XO2-256 in the schematic, but an XO2-640 is required!
-17	U2	Housings_QFP:lqfp-48	1	CDK3404	1016-1935-ND 	
-18	U4	Housings_SOIC:SOIC-14_Narrow	1	74LVC14	296-1699-1-ND	
-						
-						
-	Warning: Part numbers for resistors and capacitors have not been checked!					
+Id,Designator,Package,Quantity,Designation,Digikey part no,Notes
+1,"C1,C2,C3,C4,C5,C17,C18,C20,C21",SMD_Packages:SM0805,9,100n,399-1170-1-ND,or any other 100nF 0805 capacitor rated at least 6.3V
+2,"C6,C22",SMD_Packages:SM1206POL,2,10u,479-8151-1-ND,or similar (rated at least 6.3V)
+3,"C9,C7,C8,C10,C11,C12,C13,C14,C15,C16,C19",SMD_Packages:SM0805,11,10n,399-1159-1-ND,or any other 100nF 0805 capacitor rated at least 6.3V
+4,JP1,SOLDER_JUMPER:SOLDER_JUMPER,1,RGB/COMP,-,
+5,L1,SMD_Packages:SM0805,1,INDUCTOR,1276-6349-1-ND,"Decouples DAC supply from FPGA supply, can be replaced with piece of wire in emergencies"
+6,P1,Pin_Headers:Pin_Header_Straight_2x11,1,CONN_11X2,-,
+7,P2,Connect:SIL-5,1,CONN_5,-,
+8,P3,Connect:SIL-4,1,CONN_4,-,
+9,P4,Connect:SIL-6,1,CONN_6,-,
+10,P5,Pin_Headers:Pin_Header_Straight_2x02,1,CONN_2X2,-,
+11,"P6,P7,P8,P9",Wire_Pads:SolderWirePad_single_0-8mmDrill,4,CONN_1,-,
+12,R1,SMD_Packages:SM0805,1,348,311-348CRCT-ND,Can be replaced with stacked 390 and 3900 Ohm resistors if necessary
+13,"R2,R3,R4,R5",SMD_Packages:SM0805,4,75,311-75ARCT-ND,or any other 75 ohm 0805 resistor
+14,R6,SMD_Packages:SM0805,1,100,311-100CRCT-ND,or any other 50-200 ohm 0805 resistor - just a cautionary device on the Csync line
+15,"R7,R8",SMD_Packages:SM0805,2,4k7,311-4.70KCRCT-ND,or any other 1k-10k ohm 0805 resistor (pullups/pulldowns)
+16,U1,SMD_Packages:TQFP_100,1,MachXO2-640-TQ100,220-1492-ND,"It's still an XO2-256 in the schematic, but an XO2-640 is required!"
+17,U2,Housings_QFP:lqfp-48,1,CDK3404,1016-1935-ND ,
+18,U4,Housings_SOIC:SOIC-14_Narrow,1,74LVC14,296-1699-1-ND,
+,,,,,,
+,,,,,,
+,Warning: Part numbers for resistors and capacitors have not been checked!,,,,,
