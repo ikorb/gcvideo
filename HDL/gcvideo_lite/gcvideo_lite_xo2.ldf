@@ -1,11 +1,12 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<BaliProject version="3.0" title="gcvideo_lite_xo2" device="LCMXO2-640HC-4TG100C" default_implementation="gcvideo_lite_xo2">
+<BaliProject version="3.2" title="gcvideo_lite_xo2" device="LCMXO2-640HC-4TG100C" default_implementation="gcvideo_lite_xo2">
     <Options>
         <Option name="HDL type" value="Verilog"/>
     </Options>
     <Implementation title="gcvideo_lite_xo2" dir="gcvideo_lite_xo2" description="gcvideo_lite_xo2" synthesis="lse" default_strategy="Strategy1">
         <Options>
             <Option name="HDL type" value="Verilog"/>
+            <Option name="HDL_KEYFILE" value=""/>
             <Option name="HDL_PARAM" value=""/>
             <Option name="VERILOG_DIRECTIVES" value=""/>
             <Option name="lib" value="work"/>
@@ -34,6 +35,18 @@
             <Options lib="work"/>
         </Source>
         <Source name="gcvideo_lite_xo2/source/toplevel_withrgb.vhd" type="VHDL" type_short="VHDL">
+            <Options lib="work"/>
+        </Source>
+        <Source name="gcvideo_lite_xo2/source/i2s_decoder.vhd" type="VHDL" type_short="VHDL">
+            <Options lib="work"/>
+        </Source>
+        <Source name="gcvideo_lite_xo2/source/audio_spdif.vhd" type="VHDL" type_short="VHDL">
+            <Options lib="work"/>
+        </Source>
+        <Source name="gcvideo_lite_xo2/source/SPDIF_Encoder.vhd" type="VHDL" type_short="VHDL">
+            <Options lib="work"/>
+        </Source>
+        <Source name="gcvideo_lite_xo2/source/Deglitcher.vhd" type="VHDL" type_short="VHDL">
             <Options lib="work"/>
         </Source>
         <Source name="gcvideo_lite_xo2.lpf" type="Logic Preference" type_short="LPF"/>

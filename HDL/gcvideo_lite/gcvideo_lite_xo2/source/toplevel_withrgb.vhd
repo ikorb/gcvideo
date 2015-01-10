@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo Lite HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo Lite HDL Version 1.1
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -45,6 +45,8 @@ entity toplevel_withrgb is
     BCLK     : in std_logic;
     ADATA    : in std_logic;
 
+    RGBSelect: in  std_logic;
+
     VideoR   : out std_logic_vector(7 downto 0);
     VideoG   : out std_logic_vector(7 downto 0);
     VideoB   : out std_logic_vector(7 downto 0);
@@ -54,8 +56,7 @@ entity toplevel_withrgb is
     EXTVSYNCn: out std_logic;
     EXTCSYNCn: out std_logic;
 
-    RGBSelect: in  std_logic
-
+    SPDIF_Out: out std_logic
 );
 end toplevel_withrgb;
 
@@ -71,9 +72,15 @@ architecture Behavioral of toplevel_withrgb is
   signal pixel_clk_en_2x: boolean;
   
   signal use_rgb        : boolean;
+
+
 begin
 
   VClockI <= not VClock;
+
+  -----------
+  -- Video --
+  -----------
 
   -- read Gamecube video data
   Inst_GCVideo: GCDV_Decoder PORT MAP (
@@ -187,6 +194,19 @@ begin
 
     end if;
   end process;
-  
+
+  -----------
+  -- Audio --
+  -----------
+
+  Inst_Audio: Audio_SPDIF
+  PORT MAP (
+    Clock       => VClockI,
+    I2S_BClock  => BCLK,
+    I2S_LRClock => LRCK,
+    I2S_Data    => ADATA,
+    SPDIF_Out   => SPDIF_Out
+  );
+
 end Behavioral;
 

@@ -23,7 +23,8 @@ Gamecube casing.
     This can in some cases reduce the compatibility with certain
     displays because modes below 480p are not officially part of the
     DVI specification.
-- no audio support, although an SPDIF output is under consideration
+- no audio support, although an SPDIF output is under consideration  
+    (coming with a future update that will simplify the configuration jumpers)
 - Linedoubling of 480i/576i modes looks very ugly, if your display
     accepts these modes over DVI it is recommended to not use
     linedoubline for them.

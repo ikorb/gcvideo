@@ -12,7 +12,8 @@ Digital Video port. The 6x1 connector on the side is the JTAG
 connector which is needed to program the FPGA on the board. Signal
 outputs are on the 5x1 and 4x1 connectors. There is also a 2x2
 connector labelled "spare" next to the P1 and JTAG connectors which
-is currently unused.
+at this time is mostly unused except for one pin that outputs an SPDIF
+audio signal.
 
 The single jumper on the board is located next to the JTAG connector
 and consists of two solder pads. If these pads are bridged, the FPGA
@@ -86,6 +87,19 @@ startup and not every game supports 480p!
 While the hardware could support RGB with Sync-on-Green, this is
 currently not implemented.
 
+### Spare (2x2) ###
+
+The 2x2 pin group marked "Spare" in the corner of the group is unused
+except for the square pin next to P1. This pin is used to output an
+SPDIF audio signal. For more information on interfacing this signal to
+an SPDIF receiver, please check the [README.md of the gcvideo_lite HDL
+project](../../HDL/gcvideo_lite/README.md).
+
+Please do not connect this pin directly to a coaxial SPDIF input, the
+feature was added after the board was designed and there is no
+protection on this pin.
+
+
 ## Building ##
 
 The PCB uses four layers, so it is not suitable for etching at home,
@@ -100,13 +114,15 @@ file for the value corresponding to each of the component references.
 
 ## Audio ##
 
-Although the audio pins are connected to the FPGA, there is currently
-no audio support, so you need to use the analog AV port for audio
-signals.
-
-If anyone feels compelled to add audio support to the project (e.g. by
-implementing a sigma-delta DAC in the FPGA), feel free to send a pull
-request.
+There are currently two options for the audio signal from the Gamecube
+when GCVideo Lite is used as the video encoder. The first option is to
+use the audio signals from the analog AV port as usual. The second
+option is to use the SPDIF encoder implemented in GCVideo Lite. The
+[README.md of the gcvideo_lite HDL
+project](../../HDL/gcvideo_lite/README.md) has more information about
+connecting this signal - since it was added after the board was
+designed, no protection is present on the signal and a direct
+connection to an SPDIF input may destroy the FPGA.
 
 ## Known issues ##
 
@@ -128,9 +144,10 @@ request.
 
 ## Other Systems ##
 
-With a different program in the FPGA it may be possible to use the
-same board to provide RGB and/or Component outputs for an N64, but
-this has not been implemented yet.
+With a different program in the FPGA it is be possible to use the
+same board to provide RGB and/or Component outputs for an N64, see
+the [gcvideo_lite_n64](../gcvideo_lite_n64/README.md) directory for
+details.
 
 Measurements on a Wii board indicate that thare is an internal video
 data bus that may use the same signals as the GameCube's digital video

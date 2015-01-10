@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo Lite HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo Lite HDL Version 1.1
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -103,6 +103,61 @@ package component_defs is
 
       -- output video
       VideoOut          : out VideoRGB
+    );
+  end component;
+
+  component i2s_decoder is
+    port (
+      -- Internal clock
+      Clock      : in  std_logic;
+      ClockEnable: in  boolean;
+
+      -- I2S signals
+      I2S_BClock : in  std_logic;
+      I2S_LRClock: in  std_logic;
+      I2S_Data   : in  std_logic;
+
+      -- sample output
+      Left        : out signed(15 downto 0);
+      Right       : out signed(15 downto 0);
+      LeftEnable  : out boolean;
+      RightEnable : out boolean
+    );
+  end component;
+
+  component SPDIF_Encoder is
+    port (
+      Clock      : in  std_logic;
+      ClockEnable: in  boolean;
+      AudioLeft  : in  signed(15 downto 0);
+      AudioRight : in  signed(15 downto 0);
+      EnableLeft : in  boolean;
+      SPDIF      : out std_logic
+    );
+  end component;
+
+  component audio_spdif is
+    port (
+      Clock      : in  std_logic; -- 3*54 MHz
+
+      I2S_BClock : in  std_logic;
+      I2S_LRClock: in  std_logic;
+      I2S_Data   : in  std_logic;
+
+      SPDIF_Out  : out std_logic
+    );
+  end component;
+
+  component Deglitcher is
+    generic (
+      SyncBits   : natural range 0 to 10;
+      CompareBits: natural range 2 to 10
+    );
+    port (
+      Clock      : in  std_logic;
+      ClockEnable: in  boolean;
+      Input      : in  std_logic;
+      Output     : out std_logic
     );
   end component;
 

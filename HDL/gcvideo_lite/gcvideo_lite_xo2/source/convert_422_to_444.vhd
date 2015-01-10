@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo Lite HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo Lite HDL Version 1.1
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without

@@ -1,6 +1,6 @@
 <?xml version='1.0' encoding='utf-8' ?>
 <!DOCTYPE		ispXCF	SYSTEM	"IspXCF.dtd" >
-<ispXCF version="3.1.0">
+<ispXCF version="3.2.0">
 	<Comment></Comment>
 	<Chain>
 		<Comm>JTAG</Comm>
@@ -19,9 +19,10 @@
 				<BScanLen>1</BScanLen>
 				<BScanVal>0</BScanVal>
 			</Bypass>
-			<File>F:/pro/fpga/lattice/gcvideo_lite_xo2/gcvideo_lite_xo2_gcvideo_lite_xo2.bit</File>
-			<FileTime>08/14/14 17:54:44</FileTime>
-			<Operation>SRAM Fast Program</Operation>
+			<File>F:/pro/fpga/lattice/gcvideo_lite/gcvideo_lite_xo2/gcvideo_lite_xo2_gcvideo_lite_xo2.jed</File>
+			<FileTime>01/10/15 23:06:26</FileTime>
+			<JedecChecksum>0xE78A</JedecChecksum>
+			<Operation>FLASH Erase,Program,Verify</Operation>
 			<Option>
 				<SVFVendor>JTAG STANDARD</SVFVendor>
 				<IOState>HighZ</IOState>
@@ -31,7 +32,7 @@
 				<TCKFrequency>1.000000 MHz</TCKFrequency>
 				<SVFProcessor>ispVM</SVFProcessor>
 				<Usercode>0x00000000</Usercode>
-				<AccessMode>SRAM</AccessMode>
+				<AccessMode>FLASH</AccessMode>
 			</Option>
 		</Device>
 	</Chain>
@@ -46,6 +47,6 @@
 	<CableOptions>
 		<CableName>USB</CableName>
 		<PortAdd>EzUSB-0</PortAdd>
-		<USBID>\\?\usb#vid_1134&amp;amp;pid_8001#6&amp;amp;1e28eb7e&amp;amp;0&amp;amp;4#</USBID>
+		<USBID>\\?\usb#vid_1134&amp;amp;pid_8001#7&amp;amp;31cea8d3&amp;amp;0&amp;amp;2#</USBID>
 	</CableOptions>
 </ispXCF>
