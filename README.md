@@ -1,24 +1,33 @@
 # GCVideo #
 
-GCVideo is a small series of devices capable of converting the
+GCVideo is a small series of FPGA boards and VHDL projects
+capable of converting the
 GameCube's Digital Video port signals to standard video signals
 without using the custom chip in the original component video cable.
-There is currently just on device, GCVideo Lite, which outputs analog
-RGB or Component video signals. It has also been adapted to be used as
-an RGB DAC for the N64 since the board was already done.
+There are currently VHDL projects for multiple FPGA boards, including
+a Gamecube-to-DVI version for the KNJN Pluto IIx-HDMI and a
+Gamecube-to-Component/RGB version for a board called GCVideo Lite
+which is also documented in this repository.
+GCVideo Lite has also been adapted to be used as
+an RGB DAC for the Nintendo 64.
 
 The schematics and layout are in the [Hardware](Hardware) directory
-and the HDL project is in the [HDL](HDL) directory. Each directory
+and the HDL projects are in the [HDL](HDL) directory. Each directory
 should contain README.md files with further information.
+
 
 ## Mini-FAQ ##
 
-1. I want one, how much is it?<br>
+1. I want one, how much is it?  
     I do not sell any hardware. Since this is an open-source project,
     other people will probably offer ready-made boards or modding
     services.
 
-1. But why don't you just sell it?<br>
+    GCVideo-DVI is based on a readily-available, commercial FPGA
+    development board, so you could just buy that, flash it and
+    install it yourself (or find someone to do it for you).
+
+1. But why don't you just sell it?  
     Building hardware to be sold is a lot of work and requires much
     time that I'd rather use for something more
     interesting. Furthermore, the local laws require quite a bit of
@@ -26,31 +35,8 @@ should contain README.md files with further information.
     you build and I'd prefer not to deal with all of that.
 
 1. You said your prototype came from OSHPark, so you have at least
-    three boards. Can't you sell me one of them?<br>
+    three boards. Can't you sell me one of them?  
     No, they're all accounted for already.
-
-1. Why analog instead of HDMI?<br>
-    I had this project on my bench for a few months and the HDMI
-    version started to suffer from featuritis, so I decided to do an
-    analog-output version first to stop people from paying the insane
-    prices of the original cables. I have a version of the code that
-    runs on an Atlys board (FPGA development board with HDMI outputs)
-    that can convert the GameCube's video to HDMI (technically it's
-    just DVI), but it is currently suffering from featuritis and lack
-    of time for further development. Additionally I'm not confident
-    enough in my PCB layout skills to create a board with 135MHz
-    high-speed serial signals on it. If any small and cheap Spartan6
-    dev board with an HDMI output connector becomes available, I might
-    adapt my code to it and release it.
-
-    If you want to try to build an HDMI/DVI-output version of GCVideo
-    yourself, just ask me for the code - it needs a bit of cleanup, so
-    it's not in the repository yet. If you want to figure it out
-    yourself I'll give you the hint that via DVI the monitor can tell
-    the difference between black pixels and the blanking area and the
-    GameCube rarely outputs the full 720x480/x576 pixel image that is
-    in the specs. Some displays don't mind, others refuse to show
-    anything.
 
 1. Why did you use that weird Video-DAC, it's a non-stock part at
     Digikey!<br>
@@ -62,30 +48,30 @@ should contain README.md files with further information.
     so that syncs can be generated below the blanking level.
 
 1. Uh, it says XO2-256 in the schematic, but XO2-640 in the BOM. Which
-    is the correct one?<br>
+    is the correct one?  
     The original plan was to use an XO2-256, but adding the color
     space conversion for RGB output increased the size of the design
     too much. It was left as an XO2-256 in the schematic to ensure
     only pins available on that chip are used, so a slightly cheaper
     Component-only version can be built.
 
-1. What about linedoubling?<br>
-    The FPGA used in the design is the smallest one that could fit
-    everything, but it does not have enough BlockRAM available to store
-    everything needed to generate a linedoubled picture. There is a
-    larger, footprint-compatible FPGA (XO2-1200) available that should
-    have enough resources to add at least simple linedoubling. On my
-    HDMI prototyping system I have a working linedoubler that takes
-    240p/288p to 480p/576p, but I wasn't able to generate a working
-    output timing from interlaced input signals. Additionally, simple
-    linedoubling doesn't look very good for interlaced signals anyway,
-    so the only reason I see to include it would be to increase
-    compatibility with devices that accept 480i, but not 240p.
+1. What about line-doubling?  
+    GCVideo Lite (the analog version) uses the smallest FPGA that
+    could fit everything needed, but this chip does not have enough
+    BlockRAM available to generate a line-doubled picture. It could be
+    updated by using a larger, footprint-compatible FPGA, but since
+    480i/576i are well-supported on component inputs and 240p/288p are
+    rarely used by Gamecube titles this has not been attempted yet.
+
+    GCVideo DVI fully supports line-doubling and can also overlay
+    scanlines on the line-doubled picture if desired.
+
+
 
 # Licence #
 
 <pre>
-Copyright (C) 2014, Ingo Korb &lt;ingo@akana.de&gt;
+Copyright (C) 2014-2015, Ingo Korb &lt;ingo@akana.de&gt;
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
