@@ -215,7 +215,12 @@ returned to their default values.
 The OSD is controlled using the D-pad and the X and Y buttons. The X
 button activates a menu item, the Y button jumps back to the previous
 menu if you are in a submenu or closes the OSD completely if you use
-it on the main menu.
+it on the main menu. Please be aware that the Gamecube will still
+receive all inputs even when the OSD is active! This can be
+problematic for example on the boot screen of the Gamecube because the
+cube will rotate doe to the D-pad inputs. If you want to use the OSD
+on the Gamecube's main menu, you can do so without causing
+interference by going into the cube's option menu first.
 
 GCVideo remembers six sets of settings, one for each basic video mode
 (240p, 288p, 480i, 576i, 480p, 576p). When you enter the OSD, the
