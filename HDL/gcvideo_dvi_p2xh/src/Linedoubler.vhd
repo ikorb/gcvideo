@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo DVI HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo DVI HDL
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -30,28 +30,17 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 use work.component_defs.all;
 use work.video_defs.all;
 
--- FIXME: Rebuild to use raw YCbCr 4:2:2 input data
--- (maybe introduce a type for that)
 entity Linedoubler is
   port (
     PixelClock        : in  std_logic;
     
     -- input video
-    EnableProgressive : in  boolean;
-    EnableInterlaced  : in  boolean;
+    Enable            : in  boolean;
     VideoIn           : in  VideoY422;
     PixelClockEnable  : in  boolean;
     PixelClockEnable2x: in  boolean;
@@ -110,15 +99,13 @@ begin
   process(PixelClock)
   begin
     if rising_edge(PixelClock) then
-      -- bypass for 30kHz or if the current mode is disabled
-      if not VideoIn.Is30kHz and
-         ((EnableProgressive and     VideoIn.IsProgressive) or
-          (EnableInterlaced  and not VideoIn.IsProgressive)) then
-        VideoOut       <= video_ld;
-        PixelOutEnable <= PixelClockEnable2x;
-      else
+      -- bypass for 30kHz or if not enabled
+      if VideoIn.Is30kHz or not Enable then
         VideoOut       <= VideoIn;
         PixelOutEnable <= PixelClockEnable;
+      else
+        VideoOut       <= video_ld;
+        PixelOutEnable <= PixelClockEnable2x;
       end if;
     end if;
   end process;
@@ -135,7 +122,7 @@ begin
       prev_vsync_input <= VideoIn.VSync;
       prev_hsync_input <= VideoIn.HSync;
       input_idx        := buf_input_idx + 1;
-      use_buf1          := input_use_buf1;
+      use_buf1         := input_use_buf1;
 
       -- data conversion...
       if VideoIn.CurrentIsCb then
@@ -263,8 +250,10 @@ begin
         end if;
       end if;
 
+      video_ld.CSync         <= video_ld.HSync xor video_ld.VSync;
       video_ld.Is30kHz       <= true;
       video_ld.IsProgressive <= true;
+      video_ld.IsEvenField   <= false;
       video_ld.IsPAL         <= VideoIn.IsPAL;
     end if;
   end process;

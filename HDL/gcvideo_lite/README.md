@@ -18,7 +18,7 @@ seperating it from the other three - this pin is the FPGA pin that
 outputs the SPDIF signal. It is **not** suitable for direct connection
 to a coaxial SPDIF input.
 
-To connect that SPDIF pin to our audio device without killing the
+To connect that SPDIF pin to your audio device without killing the
 FPGA, please use either one of the buffer circuits shown
 [here](http://www.hardwarebook.info/S/PDIF_output) or use a
 3.3V-compatible optical Toslink transmitter, for example a Lite-On

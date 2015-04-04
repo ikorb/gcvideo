@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo DVI HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo DVI HDL
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -31,24 +31,19 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
---use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
 library UNISIM;
 use UNISIM.VComponents.all;
 
 
 entity ClockGen is
   PORT (
-    ClockIn  : in  std_logic;
-    Reset    : in  std_logic;
-    Clock54M : out std_logic;
-    DVIClockP: out std_logic;
-    DVIClockN: out std_logic;
-    Locked   : out std_logic
+    ClockIn   : in  std_logic;
+    Reset     : in  std_logic;
+    Clock54M  : out std_logic;
+    ClockAudio: out std_logic;
+    DVIClockP : out std_logic;
+    DVIClockN : out std_logic;
+    Locked    : out std_logic
   );
 end ClockGen;
 
@@ -56,21 +51,30 @@ architecture Behavioral of ClockGen is
 	-- Input clock buffering
   signal ClockIn_internal     : std_logic;
   signal ClockIn_internal_neg : std_logic;
+
   -- Output clock buffering
-  signal dvip_internal: std_logic;
-  signal dvin_internal: std_logic;
-  signal dcm_clkfb    : std_logic;
-  signal dcm_clk2x    : std_logic;
-  signal dcm_clkfx    : std_logic;
-  signal dcm_clkfx180 : std_logic;
-  signal dcm_clkfbout : std_logic;
-  signal dcm_locked   : std_logic;
-  signal dcm_reset    : std_logic;
-  signal dcm_status   : std_logic_vector(7 downto 0);
+  signal dvip_internal    : std_logic;
+  signal dvin_internal    : std_logic;
+  signal vdcm_clkfb       : std_logic;
+  signal vdcm_clk2x       : std_logic;
+  signal vdcm_clkfx       : std_logic;
+  signal vdcm_clkfx180    : std_logic;
+  signal vdcm_clkfbout    : std_logic;
+  signal vdcm_locked      : std_logic;
+  signal vdcm_reset       : std_logic;
+  signal vdcm_status      : std_logic_vector(7 downto 0);
   signal clock_54_internal: std_logic;
+  
+  signal adcm_clkfb          : std_logic;
+  signal adcm_clk0           : std_logic;
+  signal adcm_clkfx          : std_logic;
+  signal adcm_locked         : std_logic;
+  signal adcm_reset          : std_logic;
+  signal adcm_status         : std_logic_vector(7 downto 0);
+  signal clock_audio_internal: std_logic;
 
 begin
-  Locked <= dcm_locked;
+  Locked <= vdcm_locked and adcm_locked;
 
   -- Input buffering
   --------------------------------------
@@ -81,7 +85,7 @@ begin
 
   ClockIn_internal <= not ClockIn_internal_neg;
 
-  -- Clocking primitive 1
+  -- Clocking primitive 1 - System+Video
   --------------------------------------
   
   -- Instantiation of the DCM primitive
@@ -101,16 +105,16 @@ begin
   port map
    -- Input clock
    (CLKIN                 => ClockIn_internal,
-    CLKFB                 => dcm_clkfb,
+    CLKFB                 => vdcm_clkfb,
     -- Output clocks
     CLK0                  => open,
     CLK90                 => open,
     CLK180                => open,
     CLK270                => open,
-    CLK2X                 => dcm_clk2x,
+    CLK2X                 => vdcm_clk2x,
     CLK2X180              => open,
-    CLKFX                 => dcm_clkfx,
-    CLKFX180              => dcm_clkfx180,
+    CLKFX                 => vdcm_clkfx,
+    CLKFX180              => vdcm_clkfx180,
     CLKDV                 => open,
    -- Ports for dynamic phase shift
     PSCLK                 => '0',
@@ -118,37 +122,98 @@ begin
     PSINCDEC              => '0',
     PSDONE                => open,
    -- Other control and status signals
-    LOCKED                => dcm_locked,
-    STATUS                => dcm_status,
-    RST                   => dcm_reset,
+    LOCKED                => vdcm_locked,
+    STATUS                => vdcm_status,
+    RST                   => vdcm_reset,
    -- Unused pin, tie low
     DSSEN                 => '0');
 
   -- feedback
-  dcm_clkfb <= clock_54_internal;
+  vdcm_clkfb <= clock_54_internal;
 
   -- auto-reset on clock trouble
-  process(Reset, dcm_locked, dcm_status)
+  process(Reset, vdcm_locked, vdcm_status)
   begin
-    dcm_reset <= Reset or (dcm_status(2) and not dcm_locked);
+    vdcm_reset <= Reset or (vdcm_status(2) and not vdcm_locked);
+  end process;
+
+
+  -- Clocking primitive 2 - Audio
+  -- needs a fast clock to keep the SPDIF
+  -- clock jitter low (32/216 * 54MHz)
+  --------------------------------------
+  
+  -- Instantiation of the DCM primitive
+  --    * Unused inputs are tied off
+  --    * Unused outputs are labeled unused
+  audio_dcm_sp_inst: DCM_SP
+  generic map
+   (CLKDV_DIVIDE          => 2.0,
+    CLKFX_DIVIDE          => 1,
+    CLKFX_MULTIPLY        => 6,
+    CLKIN_DIVIDE_BY_2     => true,
+    CLKOUT_PHASE_SHIFT    => "NONE",
+    CLK_FEEDBACK          => "1X",
+    DESKEW_ADJUST         => "SYSTEM_SYNCHRONOUS",
+    PHASE_SHIFT           => 0,
+    STARTUP_WAIT          => TRUE)
+  port map
+   -- Input clock
+   (CLKIN                 => ClockIn_internal,
+    CLKFB                 => adcm_clkfb,
+    -- Output clocks
+    CLK0                  => adcm_clk0,
+    CLK90                 => open,
+    CLK180                => open,
+    CLK270                => open,
+    CLK2X                 => open,
+    CLK2X180              => open,
+    CLKFX                 => adcm_clkfx,
+    CLKFX180              => open,
+    CLKDV                 => open,
+   -- Ports for dynamic phase shift
+    PSCLK                 => '0',
+    PSEN                  => '0',
+    PSINCDEC              => '0',
+    PSDONE                => open,
+   -- Other control and status signals
+    LOCKED                => adcm_locked,
+    STATUS                => adcm_status,
+    RST                   => adcm_reset,
+   -- Unused pin, tie low
+    DSSEN                 => '0');
+
+  -- feedback
+  adcm_clkfb <= adcm_clk0;
+
+  -- auto-reset on clock trouble
+  process(Reset, adcm_locked, adcm_status)
+  begin
+    adcm_reset <= Reset or (adcm_status(2) and not adcm_locked);
   end process;
 
   -- Output buffering
   -------------------------------------
 
   clk54_buf: BUFG PORT MAP (
-    I => dcm_clk2x,
+    I => vdcm_clk2x,
     O => clock_54_internal
   );
   Clock54M <= clock_54_internal;
+  
+  clkaud_buf: BUFG PORT MAP (
+    I => adcm_clkfx,
+    O => clock_audio_internal
+  );
+  ClockAudio <= clock_audio_internal;
 
   dviclkp_buf: BUFG PORT MAP (
-    I => dcm_clkfx,
+    I => vdcm_clkfx,
     O => dvip_internal
   );
 
   dviclkn_buf: BUFG PORT MAP (
-    I => dcm_clkfx180,
+    I => vdcm_clkfx180,
     O => dvin_internal
   );
 

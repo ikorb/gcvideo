@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo DVI HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo DVI HDL
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -96,7 +96,7 @@ begin
           if in_blanking then
             current_flags <= VData;
           else
-            current_cbcr <= unsigned(VData);
+            current_cbcr  <= unsigned(VData);
           end if;
         end if;
       end if;
@@ -115,11 +115,15 @@ begin
         Video.IsEvenField   <= (current_flags(6) = '1');
         
         if in_blanking then
-          Video.PixelY    <= x"10";
+          Video.PixelY    <= x"00";
           -- color during blanking is ignored by the 422-444 interpolator
           --Video.PixelCbCr <= x"80";
         else
-          Video.PixelY    <= current_y;
+          if current_y < x"10" then -- never triggers in my tests, but let's be paranoid anyway
+            Video.PixelY <= x"00";
+          else
+            Video.PixelY    <= current_y - x"10"; -- pre-subtract the offset
+          end if;
           Video.PixelCbCr <= current_cbcr;
         end if;
         Video.CurrentIsCb <= (CSel = '1');

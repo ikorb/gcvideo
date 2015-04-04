@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo DVI HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo DVI HDL
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -61,9 +61,9 @@ architecture Behavioral of convert_422_to_444 is
   signal prev_cr   : unsigned(7 downto 0) := (others => '1');
   signal prev_cb   : unsigned(7 downto 0) := (others => '1');
 
-  -- averaging function
+  -- averaging function, also converts output to signed
   function average(a: unsigned(7 downto 0); b: unsigned(7 downto 0))
-    return unsigned is
+    return signed is
     variable a9 : unsigned(8 downto 0);
     variable b9 : unsigned(8 downto 0);
     variable res: unsigned(8 downto 0);
@@ -72,7 +72,7 @@ architecture Behavioral of convert_422_to_444 is
     b9  := "0" & b;
     res := a9 + b9;
     
-    return res(8 downto 1);
+    return signed(res(8 downto 1) xor x"80");
   end function;
 
 begin
@@ -88,8 +88,8 @@ begin
           current_cb <= VideoIn.PixelCbCr;
         end if;
 
-        prev_cr    <= current_cr;
-        prev_cb    <= current_cb;
+        prev_cr <= current_cr;
+        prev_cb <= current_cb;
 
         -- output interpolated chroma info for the delayed Y value
         VideoOut.PixelCb <= average(prev_cb, current_cb);
@@ -101,8 +101,8 @@ begin
         end if;
         
         -- output the previous "full" chroma info to coincide with the delayed Y value
-        VideoOut.PixelCr <= prev_cr;
-        VideoOut.PixelCb <= prev_cb;
+        VideoOut.PixelCr <= signed(prev_cr xor x"80");
+        VideoOut.PixelCb <= signed(prev_cb xor x"80");
       end if;
     end if;
   end process;

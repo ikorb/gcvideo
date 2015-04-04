@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo DVI HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo DVI HDL
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -54,8 +54,8 @@ package video_defs is
 
   type VideoYCbCr is record
     PixelY       : unsigned(7 downto 0);
-    PixelCb      : unsigned(7 downto 0);
-    PixelCr      : unsigned(7 downto 0);
+    PixelCb      :   signed(7 downto 0);
+    PixelCr      :   signed(7 downto 0);
 
     -- pixel-exact signals
     Blanking     : boolean;
@@ -86,6 +86,23 @@ package video_defs is
     IsProgressive: boolean;
     IsPAL        : boolean;
     Is30kHz      : boolean;
+  end record;
+
+  type OSDSettings_t is record
+    BGAlpha   : unsigned(7 downto 0);
+    BGTintCb  :   signed(7 downto 0);
+    BGTintCr  :   signed(7 downto 0);
+  end record;
+
+  type VideoSettings_t is record
+    ScanlineStrength  : unsigned(7 downto 0);
+    ScanlinesAlternate: boolean;
+    ScanlinesEven     : boolean;
+    ScanlinesEnabled  : boolean;
+    LinedoublerEnabled: boolean;
+    DisableOutput     : boolean;
+    CableDetect       : boolean;
+    LimitedRange      : boolean;
   end record;
 
 end video_defs;

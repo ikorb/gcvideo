@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo DVI HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo DVI HDL
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -29,14 +29,9 @@
 ----------------------------------------------------------------------------------
 
 library IEEE;
+
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
 library UNISIM;
 use UNISIM.VComponents.all;
 
@@ -53,19 +48,27 @@ entity toplevel_p2xh is
     CSel       : in  std_logic; -- usually named ClkSel, but it's really a color select
     CableDetect: out std_logic;
 
+    -- gamecube audio signals
+    I2S_BClock : in  std_logic;
+    I2S_LRClock: in  std_logic;
+    I2S_Data   : in  std_logic;
+
+    -- gamecube controller
+    PadData    : in  std_logic;
+
+    -- flash chip
+    Flash_MOSI   : out std_logic;
+    Flash_MISO   : in  std_logic;
+    Flash_SCK    : out std_logic;
+    Flash_SSEL   : out std_logic;
+    Flash_Hold   : out std_logic;
+
     -- board-internal
     LED1: out std_logic;
     LED2: out std_logic;
-    
-    -- selection jumpers
-    Jumper1: in std_logic_vector(2 downto 0);
-    Jumper2: in std_logic_vector(2 downto 0);
-    SLSPins: in std_logic_vector(8 downto 0);
 
-    -- test "connector" on video-side pin header
-    -- (reused for scanline strength for now)
---    TestGND: out std_logic; -- must be GND
---    Test   : out std_logic_vector(7 downto 0);
+    -- audio out
+    SPDIF_Out: out   std_logic;
 
     -- video out
     DVI_Clock: out   std_logic_vector(1 downto 0);
@@ -80,6 +83,7 @@ end toplevel_p2xh;
 architecture Behavioral of toplevel_p2xh is
   -- clocks
   signal Clock54M     : std_logic;
+  signal ClockAudio   : std_logic;
   signal DVIClockP    : std_logic;
   signal DVIClockN    : std_logic;
 
@@ -88,22 +92,15 @@ architecture Behavioral of toplevel_p2xh is
   signal video_ld        : VideoY422;
   signal video_444       : VideoYCbCr;
   signal video_444_rb    : VideoYCbCr; -- reblanked
+  signal video_444_sl    : VideoYCbCr; -- scanlined
+  signal video_444_osd   : VideoYCbCr;
   signal video_rgb       : VideoRGB;
-  --signal video_rgb_ld    : VideoRGB; -- linedoubled
-  signal video_rgb_sl    : VideoRGB; -- scanlined
   signal video_out       : VideoRGB;
 
   signal pixel_clk_en    : boolean;
   signal pixel_clk_en_2x : boolean;
   signal pixel_clk_en_ld : boolean;
   signal pixel_clk_en_27 : boolean; -- used for DVI output, automatically results in pixel-doubling for 15k modes
-
-  -- output disable logic
-  signal prev_30khz      : boolean;
-  signal prev_pal        : boolean;
-  signal prev_progressive: boolean;
-  signal prev_vsync      : boolean;
-  signal disable_output  : natural range 0 to 3; -- number of VSyncs to disable
 
   -- internal 24 bit VGA signals
   signal VGA_Red  : std_logic_vector(7 downto 0);
@@ -119,25 +116,42 @@ architecture Behavioral of toplevel_p2xh is
   signal blue_enc    : std_logic;
   signal clock_enc   : std_logic;
 
+  -- OSD
+  signal osd_ram_addr: std_logic_vector(10 downto 0);
+  signal osd_ram_data: std_logic_vector(8 downto 0);
+  signal osd_settings: OSDSettings_t;
+
   -- misc
-  signal clock_locked     : std_logic;
-  signal double_prog      : boolean;
-  signal double_int       : boolean;
-  signal jumper1_sync     : std_logic_vector(2 downto 0);
-  signal jumper2_sync     : std_logic_vector(2 downto 0);
-  signal sls_sync         : std_logic_vector(8 downto 0);
-  signal scanline_enable  : boolean;
-  signal scanline_even    : boolean;
-  signal scanline_prog    : boolean;
-  signal scanline_int     : boolean;
-  signal scanline_strength: unsigned(3 downto 0);
+  signal video_settings: VideoSettings_t;
+  signal clock_locked  : std_logic;
+  signal scanline_even : boolean;
 
 begin
 
-  -- static outputs
+  -- misc outputs
+  LED1        <= clock_locked;
+  LED2        <= '1';
+  Flash_Hold  <= '1';
   DDC_SCL     <= 'Z'; -- currently not used, but must be defined to avoid
   DDC_SDA     <= 'Z'; --   damaging the FPGA I/O drivers
-  CableDetect <= '1'; -- reserved for future OSD ;)
+  CableDetect <= '1' when video_settings.CableDetect else '0';
+
+  -- CPU subsystem
+  Inst_CPU: CPUSubsystem PORT MAP (
+    Clock            => Clock54M,
+    ExtReset         => not clock_locked,
+    RawVideo         => video_422,
+    PixelClockEnable => pixel_clk_en,
+    PadData          => PadData,
+    SPI_MOSI         => Flash_MOSI,
+    SPI_MISO         => Flash_MISO,
+    SPI_SCK          => Flash_SCK,
+    SPI_SSEL         => Flash_SSEL,
+    OSDRamAddr       => osd_ram_addr,
+    OSDRamData       => osd_ram_data,
+    OSDSettings      => osd_settings,
+    VSettings        => video_settings
+  );
 
   -- DVI output
   Inst_DVI: dvid GENERIC MAP (
@@ -166,15 +180,26 @@ begin
   OBUFDS_blue  : OBUFDS port map ( O => DVI_Blue(0),  OB => DVI_Blue(1),  I => blue_enc);
   OBUFDS_clock : OBUFDS port map ( O => DVI_Clock(0), OB => DVI_Clock(1), I => clock_enc);
 
-  -- DVI clock generator
+  -- master clock generator
   Inst_ClockGen: ClockGen
     PORT MAP (
       ClockIn       => VClockN,
       Reset         => '0',
       Clock54M      => Clock54M,
+      ClockAudio    => ClockAudio,
       DVIClockP     => DVIClockP,
       DVIClockN     => DVIClockN,
       Locked        => clock_locked
+    );
+
+  -- audio module
+  Inst_Audio: Audio_SPDIF
+    PORT MAP (
+      Clock       => ClockAudio,
+      I2S_BClock  => I2S_BClock,
+      I2S_LRClock => I2S_LRClock,
+      I2S_Data    => I2S_Data,
+      SPDIF_Out   => SPDIF_Out
     );
 
   -- read gamecube video data
@@ -183,7 +208,6 @@ begin
       VClockI            => Clock54M,
       VData              => VData,
       CSel               => CSel,
-
       PixelClockEnable   => pixel_clk_en,
       PixelClockEnable2x => pixel_clk_en_2x,
       Video              => video_422
@@ -195,8 +219,7 @@ begin
       PixelClock         => Clock54M,
       PixelClockEnable   => pixel_clk_en,
       PixelClockEnable2x => pixel_clk_en_2x,
-      EnableProgressive  => double_prog,
-      EnableInterlaced   => double_int,
+      Enable             => video_settings.LinedoublerEnabled,
       VideoIn            => video_422,
       VideoOut           => video_ld,
       PixelOutEnable     => pixel_clk_en_ld
@@ -221,45 +244,42 @@ begin
       VideoOut         => video_444_rb
     );
 
+  -- overlay scanlines
+  Inst_Scanliner: Scanline_Generator
+    PORT MAP (
+      PixelClock         => Clock54M,
+      PixelClockEnable   => pixel_clk_en_ld,
+      Enable             => video_settings.ScanlinesEnabled,
+      Strength           => video_settings.ScanlineStrength,
+      Use_Even           => scanline_even,
+      VideoIn            => video_444_rb,
+      VideoOut           => video_444_sl
+    );
+
+  scanline_even <= video_settings.ScanlinesEven xor (not video_422.IsProgressive and video_422.IsEvenField and video_settings.ScanlinesAlternate);
+
+  -- add OSD overlay
+  Inst_OSD: TextOSD
+    PORT MAP (
+      PixelClock       => Clock54M,
+      PixelClockEnable => pixel_clk_en_ld,
+      VideoIn          => video_444_sl,
+      VideoOut         => video_444_osd,
+      Settings         => osd_settings,
+      RAMAddress       => osd_ram_addr,
+      RAMData          => osd_ram_data
+    );
+
   -- convert YUV to RGB
   Inst_yuv_to_rgb: Convert_yuv_to_rgb
     PORT MAP (
       PixelClock         => Clock54M,
       PixelClockEnable   => pixel_clk_en_ld,
 
-      VideoIn            => video_444_rb,
-      Limited_Range      => false,
+      VideoIn            => video_444_osd,
+      Limited_Range      => video_settings.LimitedRange,
       VideoOut           => video_rgb
     );
-
-  -- overlay scanlines
-  Inst_Scanliner: Scanline_Generator
-    PORT MAP (
-      PixelClock         => Clock54M,
-      PixelClockEnable   => pixel_clk_en_ld,
-      Enable             => scanline_enable,
-      Strength           => scanline_strength,
-      Use_Even           => scanline_even,
-      VideoIn            => video_rgb,
-      VideoOut           => video_rgb_sl
-    );
-
-  -- figure out if scanlines should be enabled
-  scanline_enable <=
-    (not video_422.Is30kHz and     video_422.IsProgressive) or  -- 240p/288p
-    (scanline_prog         and     video_422.IsProgressive) or  -- 480p/576p
-    (scanline_int          and not video_422.IsProgressive);    -- 480i/576i
-
-  process (Clock54M)
-  begin
-    if rising_edge(Clock54M) then
-      if not video_422.IsProgressive and video_422.IsEvenField then
-        scanline_even <= false;
-      else
-        scanline_even <= true;
-      end if;
-    end if;
-  end process;
 
   -- create a fixed 27-MHz pixel clock
   process (Clock54M)
@@ -269,32 +289,6 @@ begin
         pixel_clk_en_27 <= false; -- must be false because it's delayed one cycle
       else
         pixel_clk_en_27 <= not pixel_clk_en_27;
-      end if;
-    end if;
-  end process;
-
-  -- check for format changes to disable output for a short time
-  -- avoids flickering and other issues on some displays
-  -- This checks the pre-linedoubled signal because there are still
-  -- differences between a linedoubled signal and an originally-progressive one.
-  -- (FIXME: Still necessary after LD improvements?)
-  process (Clock54M, pixel_clk_en_ld)
-  begin
-    if rising_edge(Clock54M) and pixel_clk_en then
-      prev_30khz       <= video_422.Is30kHz;
-      prev_pal         <= video_422.IsPAL;
-      prev_progressive <= video_422.IsProgressive;
-      prev_vsync       <= video_422.VSync;
-      
-      if prev_30khz       /= video_422.Is30kHz or
-         prev_pal         /= video_422.IsPAL   or
-         prev_progressive /= video_422.IsProgressive then
-        -- format changed, disable output for 3 frames or fields
-        disable_output <= 3;
-      elsif prev_vsync /= video_422.VSync and
-            video_422.VSync               and
-            disable_output /= 0 then
-        disable_output <= disable_output - 1;
       end if;
     end if;
   end process;
@@ -317,7 +311,7 @@ begin
       end if;
 
       -- output to VGA
-      if video_out.Blanking or disable_output /= 0 then
+      if video_out.Blanking or video_settings.DisableOutput then
         VGA_Red   <= (others => '0');
         VGA_Green <= (others => '0');
         VGA_Blue  <= (others => '0');
@@ -331,103 +325,8 @@ begin
     end if;
   end process;
   
-  -- read jumpers
-  process (Clock54M, pixel_clk_en)
-    variable i: natural range 0 to 8;
-    variable sls_prio: natural range 0 to 9;
-  begin
-    if rising_edge(Clock54M) and pixel_clk_en then
-      jumper1_sync <= Jumper1;
-      jumper2_sync <= Jumper2;
-      sls_sync     <= SLSPins;
-
-      -- check linedoubling jumper setting
-      case jumper1_sync is
-        when "111" =>
-          double_prog <= false;
-          double_int  <= false;
-
-        when "110" =>
-          double_prog <= true;
-          double_int  <= true;
-
-        when "101" =>
-          double_prog <= true;
-          double_int  <= false;
-
-        when "011" =>
-          double_prog <= false;
-          double_int  <= true;
-
-        when others =>
-          double_prog <= false;
-          double_int  <= false;
-      end case;
-
-      -- check scanline mode jumper settings
-      case jumper2_sync is
-        when "111" =>
-          scanline_prog <= false;
-          scanline_int  <= false;
-
-        when "110" =>
-          scanline_prog <= true;
-          scanline_int  <= true;
-
-        when "101" =>
-          scanline_prog <= true;
-          scanline_int  <= false;
-
-        when "011" =>
-          scanline_prog <= false;
-          scanline_int  <= true;
-
-        when others =>
-          scanline_prog <= false;
-          scanline_int  <= false;
-      end case;
-
-      -- check scanline strength
-      -- (should infer a priority encoder)
-      sls_prio := 9;
-      for i in 0 to 8 loop
-        if sls_sync(i) = '0' then
-          sls_prio := i;
-        end if;
-      end loop;
-
-      case sls_prio is
-        when 0 => scanline_strength <= x"0";
-        when 1 => scanline_strength <= x"2";
-        when 2 => scanline_strength <= x"4";
-        when 3 => scanline_strength <= x"6";
-        when 4 => scanline_strength <= x"9";
-        when 5 => scanline_strength <= x"b";
-        when 6 => scanline_strength <= x"c";
-        when 7 => scanline_strength <= x"d";
-        when 8 => scanline_strength <= x"e";
-        when 9 => scanline_strength <= x"f"; -- no conection -> off
-      end case;
-    end if;
-  end process;
-
-  -- output test signals
---  TestGND <= '0'; -- Rigol logic probe GND pin
---  Test(0) <= '0' when video_422.VSync       else '1';
---  Test(1) <= '0' when video_422.HSync       else '1';
---  Test(2) <= '1' when video_422.IsEvenField else '0';
---  Test(3) <= '1' when video_422.Blanking    else '0';
---  Test(4) <= '0' when video_ld.VSync        else '1';
---  Test(5) <= '0' when video_ld.HSync        else '1';
---  Test(6) <= '1' when video_ld.Blanking     else '0';
---  Test(7 downto 7) <= (others => '0');
-
-  -- show flags on LEDs
-  LED1 <= '1' when video_422.IsProgressive else '0';
-  LED2 <= '1' when video_422.IsPAL         else '0';
-  
   -- select output signal
-  video_out <= video_rgb_sl;
+  video_out <= video_rgb;
 
 end Behavioral;
 

@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo DVI HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo DVI HDL
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -29,17 +29,9 @@
 ----------------------------------------------------------------------------------
 
 library IEEE;
+
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
 use work.video_defs.all;
 
 entity scanline_generator is
@@ -48,34 +40,44 @@ entity scanline_generator is
     PixelClockEnable: in  boolean;
 
     Enable          : in  boolean;
-    Strength        : in  unsigned(3 downto 0);
+    Strength        : in  unsigned(7 downto 0);
     Use_Even        : in  boolean;
     
     -- input video
-    VideoIn         : in  VideoRGB;
+    VideoIn         : in  VideoYCbCr;
 
     -- output video
-    VideoOut        : out VideoRGB
+    VideoOut        : out VideoYCbCr
   );
 end scanline_generator;
 
 architecture Behavioral of scanline_generator is
   signal even_line : boolean;
   signal prev_hsync: boolean;
-  
-  function scale_component(val: unsigned(7 downto 0); factor: unsigned(3 downto 0))
+
+  function scale_luma(val: unsigned(7 downto 0); factor: unsigned(7 downto 0))
     return unsigned is
-    variable tmp: unsigned(12 downto 0);
-    variable factor_plus_one: unsigned(4 downto 0);
+    variable tmp: unsigned(16 downto 0);
+    variable factor_plus_one: unsigned(8 downto 0);
   begin
     factor_plus_one := ('0' & factor) + 1;
     tmp := val * factor_plus_one;
-    return tmp(11 downto 4);
+    return tmp(15 downto 8);
   end function;
-  
+
+  function scale_color(val: signed(7 downto 0); factor: unsigned(7 downto 0))
+    return signed is
+    variable tmp: signed(17 downto 0);
+    variable factor_plus_one: signed(9 downto 0);
+  begin
+    factor_plus_one := signed("00" & factor) + 1;
+    tmp := val * factor_plus_one;
+    return tmp(15 downto 8);
+  end function;
+
 begin
 
-  process(PixelCLock, PixelClockEnable)
+  process(PixelClock, PixelClockEnable)
   begin
     if rising_edge(PixelClock) and PixelClockEnable then
       -- copy everything except pixels
@@ -90,9 +92,9 @@ begin
 
       if not VideoIn.Is30kHz or not Enable then
         -- bypass for 15kHz modes
-        VideoOut.PixelR <= VideoIn.PixelR;
-        VideoOut.PixelG <= VideoIn.PixelG;
-        VideoOut.PixelB <= VideoIn.PixelB;
+        VideoOut.PixelY  <= VideoIn.PixelY;
+        VideoOut.PixelCb <= VideoIn.PixelCb;
+        VideoOut.PixelCr <= VideoIn.PixelCr;
       else
         -- determine even/odd line
         prev_hsync <= VideoIn.HSync;
@@ -105,19 +107,19 @@ begin
 
         -- reduce pixel brightness for every second line
         if not VideoIn.Blanking and even_line = use_even then
-          if strength = x"0" then
-            VideoOut.PixelR <= x"00";
-            VideoOut.PixelG <= x"00";
-            VideoOut.PixelB <= x"00";
+          if strength = x"00" then
+            VideoOut.PixelY  <= x"00";
+            VideoOut.PixelCb <= x"00";
+            VideoOut.PixelCr <= x"00";
           else
-            VideoOut.PixelR <= scale_component(VideoIn.PixelR, strength);
-            VideoOut.PixelG <= scale_component(VideoIn.PixelG, strength);
-            VideoOut.PixelB <= scale_component(VideoIn.PixelB, strength);
+            VideoOut.PixelY  <= scale_luma(VideoIn.PixelY, strength);
+            VideoOut.PixelCb <= scale_color(VideoIn.PixelCb, strength);
+            VideoOut.PixelCr <= scale_color(VideoIn.PixelCr, strength);
           end if;
         else
-          VideoOut.PixelR <= VideoIn.PixelR;
-          VideoOut.PixelG <= VideoIn.PixelG;
-          VideoOut.PixelB <= VideoIn.PixelB;
+          VideoOut.PixelY  <= VideoIn.PixelY;
+          VideoOut.PixelCb <= VideoIn.PixelCb;
+          VideoOut.PixelCr <= VideoIn.PixelCr;
         end if;
       end if;
     end if;

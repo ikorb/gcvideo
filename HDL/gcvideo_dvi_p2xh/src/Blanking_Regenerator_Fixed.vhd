@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo DVI HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo DVI HDL
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -29,17 +29,9 @@
 ----------------------------------------------------------------------------------
 
 library IEEE;
+
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
-
 use work.video_defs.all;
 
 entity Blanking_Regenerator_Fixed is
@@ -118,8 +110,8 @@ begin
       end if;
 
       ---- count non-sync pixels/lines as reference
-      -- pixels (first pixel of HSync is 0) --(first pixel after HSync end is 1)
-      if at_hsync_start then --VideoIn.HSync then
+      -- pixels (first pixel of HSync is 0)
+      if at_hsync_start then
         current_pixel   <= 0;
       else
         current_pixel <= current_pixel + 1;
@@ -138,8 +130,6 @@ begin
         seen_vsync <= false;
         
         -- update blanking ranges
-        -- FIXME: Umbau auf case erzeugt evtl. kleineres Modul
-        -- FIXME: Passen die Ranges bei Linedoubling vorher?
         if VideoIn.IsPAL then
           hor_active_start <= 131;
           hor_active_end   <= 851;
@@ -195,9 +185,9 @@ begin
         VideoOut.Blanking <= false;
         if VideoIn.Blanking then
           -- GC is blanked, generate black video
-          VideoOut.PixelY  <= x"10";
-          VideoOut.PixelCb <= x"80";
-          VideoOut.PixelCr <= x"80";
+          VideoOut.PixelY  <= x"00";
+          VideoOut.PixelCb <= x"00";
+          VideoOut.PixelCr <= x"00";
         else
           VideoOut.PixelY  <= VideoIn.PixelY;
           VideoOut.PixelCb <= VideoIn.PixelCb;
@@ -206,9 +196,9 @@ begin
       else
         -- in blanking
         VideoOut.Blanking <= true;
-        VideoOut.PixelY   <= x"10";
-        VideoOut.PixelCb  <= x"80";
-        VideoOut.PixelCr  <= x"80";
+        VideoOut.PixelY   <= x"00";
+        VideoOut.PixelCb  <= x"00";
+        VideoOut.PixelCr  <= x"00";
       end if;
 
     end if;

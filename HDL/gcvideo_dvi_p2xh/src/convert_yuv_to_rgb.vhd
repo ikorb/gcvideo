@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo DVI HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo DVI HDL
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -30,15 +30,7 @@
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
-
--- Uncomment the following library declaration if using
--- arithmetic functions with Signed or Unsigned values
 use IEEE.NUMERIC_STD.ALL;
-
--- Uncomment the following library declaration if instantiating
--- any Xilinx primitives in this code.
---library UNISIM;
---use UNISIM.VComponents.all;
 
 use work.component_defs.all;
 use work.video_defs.all;
@@ -68,7 +60,6 @@ architecture Behavioral of convert_yuv_to_rgb is
   signal gtempb: signed(18 downto 0) := (others => '0'); -- Cb for G
   signal btemp : signed(18 downto 0) := (others => '0'); -- Cb for B
 
-  -- FIXME: Do a careful value analysis to reduce the size of some of these registers?
   signal rsum    : signed(18 downto 0) := (others => '0'); -- (Y + rtemp) / 256
   signal gsum    : signed(18 downto 0) := (others => '0'); -- (Y - gtemp1 - gtemp2) / 256
   signal bsum    : signed(18 downto 0) := (others => '0'); -- (Y + btemp) / 256
@@ -83,13 +74,6 @@ architecture Behavioral of convert_yuv_to_rgb is
   signal rout   : unsigned(7 downto 0);
   signal bout   : unsigned(7 downto 0);
 
-  -- 8 bit unsigned to 8 bit signed, removing the 0x80 offset
-  function mksigned_offset(a: unsigned)
-    return signed is
-  begin
-    return signed(not a(7) & a(6 downto 0));
-  end function;
-  
   -- 8 bit unsigned to 9 bit signed, no modifications
   function mksigned(a: unsigned)
     return signed is
@@ -121,26 +105,26 @@ begin
       -- update factors for limited/full range
       if Limited_Range then
         yscale  <= to_signed(256, 11);
-        yshift  <= to_signed(  0,  6);
+        yshift  <= to_signed( 16,  6);
         rscale  <= to_signed(351, 11);
         grscale <= to_signed(179, 11);
         gbscale <= to_signed( 86, 11);
         bscale  <= to_signed(443, 11);
       else
         yscale  <= to_signed(298, 11);
-        yshift  <= to_signed( 16,  6);
+        yshift  <= to_signed(  0,  6);
         rscale  <= to_signed(409, 11);
         grscale <= to_signed(208, 11);
         gbscale <= to_signed(100, 11);
         bscale  <= to_signed(517, 11);
       end if;
     
-      -- pipeline stage 1: convert inputs to signed values and calculate the scaled color values
-      cr_s := mksigned_offset(VideoIn.PixelCr);
-      cb_s := mksigned_offset(VideoIn.PixelCb);
+      -- pipeline stage 1: calculate the scaled color values
+      cr_s := VideoIn.PixelCr;
+      cb_s := VideoIn.PixelCb;
 
         -- FIXME: Expression from S6, not optimal for S3A architecture
-      ystore <= resize((mksigned(VideoIn.PixelY) - yshift) * yscale, 19)
+      ystore <= resize((mksigned(VideoIn.PixelY) + yshift) * yscale, 19)
               + to_signed(128, 19); -- add 0.5 to get a rounded result
       rtemp  <= rscale  * cr_s;
       gtempr <= grscale * cr_s;

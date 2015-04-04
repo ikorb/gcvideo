@@ -8,17 +8,20 @@
       <ClosedNodes>
          <ClosedNodesVersion>2</ClosedNodesVersion>
          <ClosedNode>/toplevel_p2xh - Behavioral |home|ingo|projects|gcvideo_release|HDL|gcvideo_dvi_p2xh|src|toplevel_p2xh.vhd/Inst_422_to_444 - convert_422_to_444 - Behavioral</ClosedNode>
+         <ClosedNode>/toplevel_p2xh - Behavioral |home|ingo|projects|gcvideo_release|HDL|gcvideo_dvi_p2xh|src|toplevel_p2xh.vhd/Inst_Audio - audio_spdif - Behavioral</ClosedNode>
+         <ClosedNode>/toplevel_p2xh - Behavioral |home|ingo|projects|gcvideo_release|HDL|gcvideo_dvi_p2xh|src|toplevel_p2xh.vhd/Inst_CPU - CPUSubsystem - Behavioral</ClosedNode>
          <ClosedNode>/toplevel_p2xh - Behavioral |home|ingo|projects|gcvideo_release|HDL|gcvideo_dvi_p2xh|src|toplevel_p2xh.vhd/Inst_DVI - dvid - Behavioral</ClosedNode>
+         <ClosedNode>/toplevel_p2xh - Behavioral |home|ingo|projects|gcvideo_release|HDL|gcvideo_dvi_p2xh|src|toplevel_p2xh.vhd/Inst_OSD - TextOSD - Behavioral</ClosedNode>
          <ClosedNode>/toplevel_p2xh - Behavioral |home|ingo|projects|gcvideo_release|HDL|gcvideo_dvi_p2xh|src|toplevel_p2xh.vhd/Inst_yuv_to_rgb - convert_yuv_to_rgb - Behavioral</ClosedNode>
       </ClosedNodes>
       <SelectedItems>
-         <SelectedItem>toplevel_p2xh - Behavioral (/home/ingo/projects/gcvideo_release/HDL/gcvideo_dvi_p2xh/src/toplevel_p2xh.vhd)</SelectedItem>
+         <SelectedItem>Inst_CPU - CPUSubsystem - Behavioral (/home/ingo/projects/gcvideo_release/HDL/gcvideo_dvi_p2xh/src/CPUSubsystem.vhd)</SelectedItem>
       </SelectedItems>
       <ScrollbarPosition orientation="vertical" >0</ScrollbarPosition>
       <ScrollbarPosition orientation="horizontal" >0</ScrollbarPosition>
       <ViewHeaderState orientation="horizontal" >000000ff0000000000000001000000010000000000000000000000000000000002020000000100000001000000640000036b000000020000000000000000000000000200000064ffffffff0000008100000003000000020000036b0000000100000003000000000000000100000003</ViewHeaderState>
       <UserChangedColumnWidths orientation="horizontal" >true</UserChangedColumnWidths>
-      <CurrentItem>toplevel_p2xh - Behavioral (/home/ingo/projects/gcvideo_release/HDL/gcvideo_dvi_p2xh/src/toplevel_p2xh.vhd)</CurrentItem>
+      <CurrentItem>Inst_CPU - CPUSubsystem - Behavioral (/home/ingo/projects/gcvideo_release/HDL/gcvideo_dvi_p2xh/src/CPUSubsystem.vhd)</CurrentItem>
    </ItemView>
    <ItemView engineview="SynthesisOnly" sourcetype="" guiview="Process" >
       <ClosedNodes>
@@ -41,7 +44,7 @@
       <SelectedItems/>
       <ScrollbarPosition orientation="vertical" >0</ScrollbarPosition>
       <ScrollbarPosition orientation="horizontal" >0</ScrollbarPosition>
-      <ViewHeaderState orientation="horizontal" >000000ff0000000000000001000000000000000001000000000000000000000000000000000000075c000000040101000100000000000000000000000064ffffffff0000008100000000000000040000005f0000000100000000000000350000000100000000000000a900000001000000000000061f0000000100000000</ViewHeaderState>
+      <ViewHeaderState orientation="horizontal" >000000ff0000000000000001000000000000000001000000000000000000000000000000000000074c000000040101000100000000000000000000000064ffffffff0000008100000000000000040000005f0000000100000000000000350000000100000000000000a900000001000000000000060f0000000100000000</ViewHeaderState>
       <UserChangedColumnWidths orientation="horizontal" >false</UserChangedColumnWidths>
       <CurrentItem></CurrentItem>
    </ItemView>

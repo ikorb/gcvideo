@@ -1,0 +1,6 @@
+*~
+*.o
+*.elf
+*.bin
+.dep
+*.mem

@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
--- GCVideo DVI HDL Version 1.0
--- Copyright (C) 2014, Ingo Korb <ingo@akana.de>
+-- GCVideo DVI HDL
+-- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -108,8 +108,7 @@ package component_defs is
     PixelClock        : in  std_logic;
     
     -- input video
-    EnableProgressive : in  boolean;
-    EnableInterlaced  : in  boolean;
+    Enable            : in  boolean;
     VideoIn           : in  VideoY422;
     PixelClockEnable  : in  boolean;
     PixelClockEnable2x: in  boolean;
@@ -126,14 +125,14 @@ package component_defs is
       PixelClockEnable: in  boolean;
 
       Enable          : in  boolean;
-      Strength        : in  unsigned(3 downto 0);
+      Strength        : in  unsigned(7 downto 0);
       Use_Even        : in  boolean;
 
       -- input video
-      VideoIn         : in  VideoRGB;
+      VideoIn         : in  VideoYCbCr;
 
       -- output video
-      VideoOut        : out VideoRGB
+      VideoOut        : out VideoYCbCr
     );
   end component;
 
@@ -172,14 +171,129 @@ package component_defs is
 
   component ClockGen is
     PORT (
-      ClockIn  : in  std_logic;
-      Reset    : in  std_logic;
-      Clock54M : out std_logic;
-      DVIClockP: out std_logic;
-      DVIClockN: out std_logic;
-      Locked   : out std_logic
+      ClockIn   : in  std_logic;
+      Reset     : in  std_logic;
+      Clock54M  : out std_logic;
+      ClockAudio: out std_logic;
+      DVIClockP : out std_logic;
+      DVIClockN : out std_logic;
+      Locked    : out std_logic
     );
   end component;
+
+  component i2s_decoder is
+    port (
+      -- Internal clock
+      Clock      : in  std_logic;
+      ClockEnable: in  boolean;
+
+      -- I2S signals
+      I2S_BClock : in  std_logic;
+      I2S_LRClock: in  std_logic;
+      I2S_Data   : in  std_logic;
+
+      -- sample output
+      Left        : out signed(15 downto 0);
+      Right       : out signed(15 downto 0);
+      LeftEnable  : out boolean;
+      RightEnable : out boolean
+    );
+  end component;
+  
+  component SPDIF_Encoder is
+    port (
+      Clock      : in  std_logic;
+      ClockEnable: in  boolean;
+      AudioLeft  : in  signed(15 downto 0);
+      AudioRight : in  signed(15 downto 0);
+      EnableLeft : in  boolean;
+      SPDIF      : out std_logic
+    );
+  end component;
+
+  component audio_spdif is
+    port (
+      Clock      : in  std_logic; -- 3*54 MHz
+
+      I2S_BClock : in  std_logic;
+      I2S_LRClock: in  std_logic;
+      I2S_Data   : in  std_logic;
+
+      SPDIF_Out  : out std_logic
+    );
+  end component;
+
+  component Deglitcher is
+    generic (
+      SyncBits   : natural range 0 to 10;
+      CompareBits: natural range 2 to 10
+    );
+    port (
+      Clock      : in  std_logic;
+      ClockEnable: in  boolean;
+      Input      : in  std_logic;
+      Output     : out std_logic
+    );
+  end component;
+
+  component debouncer is
+    Generic (
+      BounceTicks: Integer := 10000;
+      DebounceLTH: Boolean := true;
+      DebounceHTL: Boolean := true
+    );
+    Port (
+      clock   : in  std_logic;
+      btn_in  : in  std_logic;
+      btn_out : out std_logic
+    );
+  end component;
+
+  component CPUSubsystem is
+    port (
+      Clock            : in  std_logic;
+      ExtReset         : in  std_logic;
+      RawVideo         : in  VideoY422;
+      PixelClockEnable : in  boolean;
+      PadData          : in  std_logic;
+      SPI_MOSI         : out std_logic;
+      SPI_MISO         : in  std_logic;
+      SPI_SCK          : out std_logic;
+      SPI_SSEL         : out std_logic;
+      OSDRamAddr       : in  std_logic_vector(10 downto 0);
+      OSDRamData       : out std_logic_vector(8 downto 0);
+      OSDSettings      : out OSDSettings_t;
+      VSettings        : out VideoSettings_t
+    );
+  end component;
+
+  component TextOSD is
+    port (
+      PixelClock      : in  std_logic;
+      PixelClockEnable: in  boolean;
+      VideoIn         : in  VideoYCbCr;
+      VideoOut        : out VideoYCbCr;
+      Settings        : in  OSDSettings_t;
+
+      RAMAddress      : out std_logic_vector(10 downto 0);
+      RAMData         : in  std_logic_vector(8 downto 0)
+    );
+  end component;
+
+  component SimpleROM is
+    generic (
+      AddressBits: natural range 1 to 32;
+      DataBits   : natural range 1 to 32;
+      Datafile   : string
+    );
+    port (
+      Clock      : in  std_logic;
+      ClockEnable: in  boolean;
+      Address    : in  std_logic_vector(AddressBits-1 downto 0);
+      Data       : out std_logic_vector(DataBits-1 downto 0)
+    );
+  end component;
+
 
 end component_defs;
 
