@@ -51,6 +51,7 @@ architecture Behavioral of PadReader is
   -- SD Media Loader sometimes retriggers controller poll after 13us, so this timeout must be smaller
   -- TODO: Maybe increase again (was 2047) and stop after 90 bits instead?
   constant TimeoutLength: natural := 700;
+  constant SamplePoint  : natural := 100; -- was 128, but that fils with one unofficial NES adapter
 
   signal data_deglitched: std_logic;
   signal prev_data      : std_logic;
@@ -96,7 +97,7 @@ begin
         if pulselength < TimeoutLength then
           pulselength <= pulselength + 1;
           
-          if pulselength = 128 then
+          if pulselength = SamplePoint then
             -- sample bit
             bits       <= bits + 1;
             bitshifter <= bitshifter(94 downto 0) & data_deglitched;

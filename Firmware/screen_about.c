@@ -47,7 +47,7 @@ void screen_about(void) {
   osd_fillbox(12, 10, 20, 9, ' ' | ATTRIB_DIM_BG);
   osd_drawborder(12, 10, 20, 9);
   osd_setattr(true, false);
-  osd_putsat(14, 11, "GCVideo DVI v1.1");
+  osd_putsat(14, 11, "GCVideo DVI v" VERSION);
   osd_putsat(14, 13, "Copyright \013 2015");
   osd_putsat(16, 14, "by Ingo Korb");
   osd_putsat(15, 15, "ingo@akana.de");

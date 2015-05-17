@@ -1,0 +1,11 @@
+# PROMGEN: Xilinx Prom Generator P.58f
+# Copyright (c) 1995-2012 Xilinx, Inc.  All rights reserved.
+
+SOFTWARE_VERSION P.58f
+DATE            05/17/2015 - 22:18
+SOURCE          \\crystal\ingo\projects\tmp.mcs
+DEVICE          512K
+DATA_WIDTH      1
+FILL_DATA       0xFF
+SIGNATURE       0x05F2BBA6
+START_ADDRESS   0x00000000 END_ADDRESS 0x00024831 DIRECTION_UP   "S:/projects/gcvideo_release/HDL/gcvideo_dvi_p2xh/src/p2xh_output.bit" 3s200avq100

@@ -1,4 +1,4 @@
-# GCVideo DVI Firmware version 1.1
+# GCVideo DVI Firmware
 #
 # Copyright (C) 2015, Ingo Korb <ingo@akana.de>
 # All rights reserved.
@@ -28,12 +28,14 @@
 # Makefile: program construction rules
 #
 
+VERSION := 1.2
+
 PERL := perl
 CROSS_PREFIX=zpu-elf-
 CC := $(CROSS_PREFIX)gcc
 LD := $(CROSS_PREFIX)ld
 AS := $(CROSS_PREFIX)as
-CFLAGS = -Wall -Os -g -std=gnu99 -ffunction-sections -fdata-sections -I.
+CFLAGS = -Wall -Os -g -std=gnu99 -ffunction-sections -fdata-sections -I. -DVERSION=\"$(VERSION)\"
 LDFLAGS := -Tstandalone-bsd.ld -Wl,--gc-sections -Wl,--relax -nostartfiles
 
 DATA2MEM := data2mem

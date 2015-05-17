@@ -1,0 +1,7 @@
+2015-05-17: GCVideo-DVI version 1.2:
+- Modify pad snoop timing to support certain NES-to-Gamecube adapters
+
+2015-04-04: GCVideo-DVI version 1.1
+- Add OSD and SPDIF audio output
+
+FIXME: Add older entries based on git log
