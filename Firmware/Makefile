@@ -28,7 +28,7 @@
 # Makefile: program construction rules
 #
 
-VERSION := 1.2
+VERSION := 1.3
 
 PERL := perl
 CROSS_PREFIX=zpu-elf-
