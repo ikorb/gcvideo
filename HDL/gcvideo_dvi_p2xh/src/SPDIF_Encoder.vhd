@@ -124,7 +124,8 @@ begin
               
             when SHIFT_STATUS =>
               shift_state  <= SHIFT_PARITY;
-              shifter      <= (0 => parity, others => '0');
+              -- hack: this happens while the channel status is shifted out, so parity hasn't updated yet
+              shifter      <= (0 => parity xor channel_status, others => '0');
               shifter_bits <= 1 -1;
               
             when SHIFT_PARITY =>
@@ -140,6 +141,12 @@ begin
                 current_channel <= CHAN_LEFT;
                 if subcode_bit /= 0 then
                   -- new block
+                  if subcode_bit = 190 then
+                    -- set "copy allowed" bit
+                    channel_status <= '1';
+                  else
+                    channel_status <= '0';
+                  end if;
                   subcode_bit <= subcode_bit - 1;
                   shifter <= x"00" & PREAMBLE_Z;
                 else

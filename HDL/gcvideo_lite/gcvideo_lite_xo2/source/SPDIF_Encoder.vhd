@@ -1,5 +1,5 @@
 ----------------------------------------------------------------------------------
--- GCVideo Lite HDL Version 1.1
+-- GCVideo Lite HDL
 -- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
@@ -56,7 +56,7 @@ architecture Behavioral of SPDIF_Encoder is
   type bitphase_t   is (PHASE_FIRST, PHASE_SECOND);
 
   signal subcode_bit    : natural range 0 to 191 := 0;
-  signal channel_status : std_logic := '0';  -- FIXME: Currently unused
+  signal channel_status : std_logic := '0';
 
   signal current_channel: channel_t    := CHAN_LEFT;
   signal shift_state    : shiftstate_t := SHIFT_PREAMBLE;
@@ -124,7 +124,8 @@ begin
               
             when SHIFT_STATUS =>
               shift_state  <= SHIFT_PARITY;
-              shifter      <= (0 => parity, others => '0');
+              -- hack: this happens while the channel status is shifted out, so parity hasn't updated yet
+              shifter      <= (0 => parity xor channel_status, others => '0');
               shifter_bits <= 1 -1;
               
             when SHIFT_PARITY =>
@@ -140,8 +141,12 @@ begin
                 current_channel <= CHAN_LEFT;
                 if subcode_bit /= 0 then
                   -- new block
-                  -- FIXME: Set the "copy allowed" subcode bit
-                  --        and retest with multiple receivers
+                  if subcode_bit = 190 then
+                    -- set "copy allowed" bit
+                    channel_status <= '1';
+                  else
+                    channel_status <= '0';
+                  end if;
                   subcode_bit <= subcode_bit - 1;
                   shifter     <= x"00" & PREAMBLE_Z;
                 else
