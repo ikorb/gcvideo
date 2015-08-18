@@ -60,19 +60,26 @@ architecture Behavioral of gcdv_decoder is
 
   signal input_30khz: boolean := false;
   signal modecounter: natural range 0 to 3 := 0;
+
+  signal vdata_buf: std_logic_vector(7 downto 0);
+  signal csel_buf : std_logic;
 begin
 
   process (VClockI)
   begin
     if rising_edge(VClockI) then
-      prev_csel <= CSel;
+      -- buffer incoming data to relax timing
+      vdata_buf <= VData;
+      csel_buf  <= CSel;
 
       -- read cube signals
-      if prev_csel /= CSel then
-        -- csel has changed, current value is Y
-        current_y <= unsigned(VData);
+      prev_csel <= csel_buf;
 
-        if VData = x"00" then
+      if prev_csel /= csel_buf then
+        -- csel_buf has changed, current value is Y
+        current_y <= unsigned(vdata_buf);
+
+        if vdata_buf = x"00" then
           -- in blanking, next color is flags
           in_blanking <= true;
         else
@@ -94,15 +101,15 @@ begin
         -- read color just once in 15kHz mode
         if (not input_30khz and modecounter = 1) or input_30khz then
           if in_blanking then
-            current_flags <= VData;
+            current_flags <= vdata_buf;
           else
-            current_cbcr  <= unsigned(VData);
+            current_cbcr  <= unsigned(vdata_buf);
           end if;
         end if;
       end if;
 
       -- generate output signals
-      if prev_csel /= CSel then
+      if prev_csel /= csel_buf then
         -- output pixel data when the next Y value is received
         PixelClockEnable    <= true;
         PixelClockEnable2x  <= true;
@@ -126,7 +133,7 @@ begin
           end if;
           Video.PixelCbCr <= current_cbcr;
         end if;
-        Video.CurrentIsCb <= (CSel = '1');
+        Video.CurrentIsCb <= (csel_buf = '1');
 
         Video.Is30kHz <= input_30kHz;
 
