@@ -58,7 +58,7 @@ architecture Behavioral of Blanking_Regenerator_Fixed is
   signal hor_active_end   : natural range 841 to 851 := 841;
   signal vert_active_start: natural range  18 to  41 :=  18;
   signal vert_active_end  : natural range 258 to 617 := 258;
-  
+
 begin
 
   -- generate a new blanking signal according to CEA timing
@@ -125,10 +125,10 @@ begin
       elsif at_hsync_start then
         current_line <= current_line + 1;
       end if;
-      
+
       if at_vsync_end then
         seen_vsync <= false;
-        
+
         -- update blanking ranges
         if VideoIn.IsPAL then
           hor_active_start <= 131;
@@ -137,7 +137,7 @@ begin
           hor_active_start <= 121;
           hor_active_end   <= 841;
         end if;
-        
+
         if VideoIn.Is30kHz then
           if VideoIn.IsPAL then
             vert_active_start <= 41;

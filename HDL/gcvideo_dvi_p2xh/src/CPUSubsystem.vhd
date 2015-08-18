@@ -57,7 +57,7 @@ end CPUSubsystem;
 architecture Behavioral of CPUSubsystem is
 
   constant ZPUBRAMSize: natural := 13;
-  
+
   -- number of devices on the I/O bus
   constant DeviceCount: Natural := 5;
 
@@ -109,7 +109,7 @@ begin
     IMPL_EQBRANCH       => true,  -- Include eqbranch and neqbranch
     IMPL_STOREBH        => false, -- Include halfword and byte writes [external RAM only!]
     IMPL_LOADBH         => false, -- Include halfword and byte reads  [external RAM only!]
-	  IMPL_CALL           => true,  -- Include call 
+	  IMPL_CALL           => true,  -- Include call
     IMPL_SHIFT          => true,  -- Include lshiftright, ashiftright and ashiftleft
     IMPL_XOR            => true,  -- include xor instruction
     EXECUTE_RAM         => false, -- Map the stack / Boot ROM to 0x40000000, to allow pushsp, store to work.
@@ -258,7 +258,7 @@ begin
       end case;
     end if;
   end process;
-  
+
   -- device mux
   DeviceSels <= (
     0 => IRQControllerSel,

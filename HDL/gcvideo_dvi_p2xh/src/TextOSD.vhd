@@ -59,7 +59,7 @@ architecture Behavioral of TextOSD is
 
   signal video_addr    : unsigned(10 downto 0) := (others => '0');
   signal linestart_addr: unsigned(10 downto 0) := (others => '0');
-  
+
   signal font_addr     : std_logic_vector(9 downto 0) := (others => '0');
   signal font_data     : std_logic_vector(7 downto 0) := (others => '0');
 
@@ -96,7 +96,7 @@ begin
         linestart_addr <= (others => '0');
         line_toggle    <= not VideoIn.Is30kHz;
         pixel_toggle   <= false;
-      
+
       elsif VideoIn.HSync then
         -- fetch character data
         shifter    <= font_data;
@@ -117,7 +117,7 @@ begin
             linestart_addr <= linestart_addr + 45;
           end if;
         end if;
-        
+
         -- show lines twice in 30kHz modes
         if VideoIn.Is30kHz then
           line_toggle <= not line_toggle;
@@ -146,7 +146,7 @@ begin
 
       -- calculate dimmed pixel values
       DimmedY := resize((VideoIn.PixelY * Settings.BGAlpha) / 256, 8);
-      
+
       -- output the pixel
       case shifter(7) & attributes is
         when "001" | "011" |  -- dimmed background (char on dimmed bg)

@@ -80,7 +80,7 @@ package component_defs is
     port (
       PixelClock      : in  std_logic;
       PixelClockEnable: in  boolean;
-      
+
       -- input video
       VideoIn         : in  VideoY422;
 
@@ -106,7 +106,7 @@ package component_defs is
   component Linedoubler is
   port (
     PixelClock        : in  std_logic;
-    
+
     -- input video
     Enable            : in  boolean;
     VideoIn           : in  VideoY422;
@@ -161,7 +161,7 @@ package component_defs is
       blue_p      : IN std_logic_vector(7 downto 0);
       blank       : IN std_logic;
       hsync       : IN std_logic;
-      vsync       : IN std_logic;          
+      vsync       : IN std_logic;
       red_s       : OUT std_logic;
       green_s     : OUT std_logic;
       blue_s      : OUT std_logic;
@@ -199,7 +199,7 @@ package component_defs is
       RightEnable : out boolean
     );
   end component;
-  
+
   component SPDIF_Encoder is
     port (
       Clock      : in  std_logic;

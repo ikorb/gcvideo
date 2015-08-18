@@ -1,7 +1,7 @@
 -- ZPU (flex variant)
 --
 -- Copyright 2004-2008 oharboe - �yvind Harboe - oyvind.harboe@zylin.com
--- 
+--
 -- Changes by Alastair M. Robinson, 2013
 -- to allow the core to run from external RAM, and to balance performance and area.
 -- The goal is to make the ZPU a useful support CPU for such tasks as loading
@@ -10,18 +10,18 @@
 -- speed / area balance.
 --
 -- The FreeBSD license
--- 
+--
 -- Redistribution and use in source and binary forms, with or without
 -- modification, are permitted provided that the following conditions
 -- are met:
--- 
+--
 -- 1. Redistributions of source code must retain the above copyright
 --    notice, this list of conditions and the following disclaimer.
 -- 2. Redistributions in binary form must reproduce the above
 --    copyright notice, this list of conditions and the following
 --    disclaimer in the documentation and/or other materials
 --    provided with the distribution.
--- 
+--
 -- THIS SOFTWARE IS PROVIDED BY THE ZPU PROJECT ``AS IS'' AND ANY
 -- EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 -- THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -34,7 +34,7 @@
 -- STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 -- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--- 
+--
 -- The views and conclusions contained in the software and documentation
 -- are those of the authors and should not be interpreted as representing
 -- official policies, either expressed or implied, of the ZPU Project.
@@ -71,7 +71,7 @@ entity zpu_core_flex is
 	maxAddrBitExternalRAM : integer; -- Max bit for Program Counter when EXECUTE_RAM is true
 	maxAddrBitBRAM : integer -- Specify significant bits of BRAM.
   );
-  port ( 
+  port (
 		clk                 : in std_logic;
 		-- asynchronous reset signal
 		reset               : in std_logic;
@@ -102,7 +102,7 @@ end zpu_core_flex;
 
 architecture behave of zpu_core_flex is
 
-  -- start byte address of stack. 
+  -- start byte address of stack.
   -- point to top of RAM - 2*words
   constant spStart : std_logic_vector(MaxAddrBit downto 0) :=
     std_logic_vector(to_unsigned((2**(maxAddrBitBRAM+1))-8, MaxAddrBit+1));
@@ -231,7 +231,7 @@ architecture behave of zpu_core_flex is
   signal comparison_eq : std_logic;
 
   signal eqbranch_zero : std_logic;
-  
+
   signal shift_done : std_logic;
   signal shift_sign : std_logic;
   signal shift_count : unsigned(5 downto 0);
@@ -252,13 +252,13 @@ architecture behave of zpu_core_flex is
             return int2;
          end if;
       end function selectconstant;
-		
+
 	constant pcmaxbit : integer := selectconstant(REMAP_STACK,stackbit-1,
 				selectconstant(EXECUTE_RAM,maxAddrBitExternalRAM,maxAddrBitBRAM));
-		
+
 	constant pcmaxbitincstack : integer := selectconstant(REMAP_STACK,stackbit,
 				selectconstant(EXECUTE_RAM,maxAddrBitExternalRAM,maxAddrBitBRAM));
-  
+
 begin
 
 
@@ -268,7 +268,7 @@ begin
 	memBWrite_stdlogic <= std_logic_vector(memBWrite);
 
 	-- Wire up the ROM
-	
+
 	memARead_stdlogic <= from_rom.memARead;
 	memBRead_stdlogic <= from_rom.memBRead;
 
@@ -282,9 +282,9 @@ begin
 	memARead <= unsigned(memARead_stdlogic);
 	memBRead <= unsigned(memBRead_stdlogic);
 
-	
+
   tOpcode_sel <= to_integer(pc(minAddrBit-1 downto 0));
-  
+
 	CodeFromRAM: if EXECUTE_RAM=true generate
 		inrom <='1' when pc(stackBit)='1' else '0';
 		programword <= memBRead_stdlogic when inrom='1' else mem_read;
@@ -422,10 +422,10 @@ begin
 
 		if IMPL_SHIFT=true and shift_count="000000" then
 			shift_done<='1';
-		else 
+		else
 			shift_done<='0';
 		end if;
-		
+
 
 -- Needs to happen outside the clock edge
 	eqbranch_zero<='0';
@@ -433,7 +433,7 @@ begin
 		eqbranch_zero <='1';
 	end if;
 
- 
+
     if reset = '1' then
       state               <= State_Resync;
       break               <= '0';
@@ -468,11 +468,11 @@ begin
 --    out_mem_addr    <= (others => DontCareValue);
 --    mem_write       <= (others => DontCareValue);
       spOffset        := (others => DontCareValue);
-		
+
 		-- We want memAAddr to remain stable since the length of the fetch depends on external RAM.
 --      memAAddr        <= (others => DontCareValue);
 --      memBAddr(AddrBitBRAM_range) <= (others => DontCareValue);
-		
+
       out_mem_writeEnable <= '0';
 --      out_mem_bEnable <= '0';
 --      out_mem_hEnable <= '0';
@@ -487,7 +487,7 @@ begin
 		if interrupt = '0' then
 			inInterrupt <= '0';             -- no longer in an interrupt
 		end if;
-		
+
 		-- Handle shift instructions
 		IF IMPL_SHIFT=true then
 			if shift_done='0' then
@@ -522,10 +522,10 @@ begin
           -- memARead contains top of stack
           pc(pcmaxbitincstack downto 0)    <= pc(pcmaxbitincstack downto 0) + 1;
 			 if pc(1 downto 0)="11" then -- We fetch four bytes at a time.
-				fetchneeded<='1'; 
+				fetchneeded<='1';
 			 end if;
 
-          -- during the next cycle we'll be reading the next opcode       
+          -- during the next cycle we'll be reading the next opcode
           spOffset(4)          := not opcode(4);
           spOffset(3 downto 0) := unsigned(opcode(3 downto 0));
 
@@ -540,7 +540,7 @@ begin
               memAWrite                      <= (others => DontCareValue);
               memAWrite(pcmaxbitincstack downto 0) <= pc(pcmaxbitincstack downto 0);
 				  pc(pcmaxbit downto 0)	<= (others => '0');
-					
+
               pc(5 downto 0) <= to_unsigned(32, 6);  -- interrupt address
 				  fetchneeded<='1'; -- Need to set this any time PC changes.
               report "ZPU jumped to interrupt!" severity note;
@@ -621,7 +621,7 @@ begin
 						end if;
 						state <= State_IncSP;
 					end if;
-					
+
 				when Decoded_Comparison =>
 					if IMPL_COMPARISON_SUB=true then
 						sp    <= sp + 1;
@@ -666,7 +666,7 @@ begin
                 out_mem_readEnable <= '1';
                 state              <= State_ReadIO;
              end if;
-				 
+
 				 when Decoded_LoadBH =>
 					if REMAP_STACK=true and memARead(stackbit-1)='0' and memARead(stackBit) = '1' then
 					-- We don't try and cope with half or byte reads from Stack RAM so fall back to emulation...
@@ -780,7 +780,7 @@ begin
 				end if;
 				fetchneeded<='1'; -- Need to set this any time out_mem_addr changes.
 
-				
+
         when State_ReadIOBH =>
 				if IMPL_LOADBH=true then
 					out_mem_bEnable <= opcode_saved(0); -- Loadb is opcode 51, %00110011
@@ -943,7 +943,7 @@ begin
 				memAWrite       <= (others =>'0');
 				memAWrite(0) <= comparison_eq xor opcode_saved(4); -- eq is 46, neq is 48.
 				state <= State_Fetch;
-				
+
 			when State_Comparison =>
 				memAAddr(AddrBitBRAM_range) <= sp;
 				memAWriteEnable <= '1';
@@ -970,7 +970,7 @@ begin
           null;
 
       end case;  -- state
-      
+
     end if;  -- reset, enable
   end process;
 

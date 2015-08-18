@@ -49,7 +49,7 @@ entity ZPUBusMux is
     mem_busy_out   : out std_logic;
     mem_read_out   : out std_logic_vector(31 downto 0)
   );
-end ZPUBusMux;    
+end ZPUBusMux;
 
 architecture Behavioral of ZPUBusMux is
   signal current_device: integer range Devices-1 downto -1 := 0;

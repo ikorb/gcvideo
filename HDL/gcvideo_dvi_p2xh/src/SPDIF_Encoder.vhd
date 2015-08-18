@@ -107,7 +107,7 @@ begin
               shift_state  <= SHIFT_PREFIX;
               shifter      <= (others => '0');
               shifter_bits <= 8 -1;
-              
+
             when SHIFT_PREFIX =>
               shift_state  <= SHIFT_SAMPLE;
               if current_channel = CHAN_LEFT then
@@ -116,18 +116,18 @@ begin
                 shifter <= std_logic_vector(AudioRight);
               end if;
               shifter_bits <= 16 -1;
-              
+
             when SHIFT_SAMPLE =>
               shift_state  <= SHIFT_STATUS;
               shifter      <= (2 => channel_status, others => '0');
               shifter_bits <= 3 -1;
-              
+
             when SHIFT_STATUS =>
               shift_state  <= SHIFT_PARITY;
               -- hack: this happens while the channel status is shifted out, so parity hasn't updated yet
               shifter      <= (0 => parity xor channel_status, others => '0');
               shifter_bits <= 1 -1;
-              
+
             when SHIFT_PARITY =>
               -- new subframe
               shift_state  <= SHIFT_PREAMBLE;

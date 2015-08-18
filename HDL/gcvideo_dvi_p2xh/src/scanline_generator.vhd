@@ -42,7 +42,7 @@ entity scanline_generator is
     Enable          : in  boolean;
     Strength        : in  unsigned(7 downto 0);
     Use_Even        : in  boolean;
-    
+
     -- input video
     VideoIn         : in  VideoYCbCr;
 

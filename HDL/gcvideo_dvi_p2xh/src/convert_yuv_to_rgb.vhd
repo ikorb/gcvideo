@@ -95,7 +95,7 @@ architecture Behavioral of convert_yuv_to_rgb is
   end function;
 
 begin
-  
+
   -- capture and interpolate colors
   process (PixelClock, PixelClockEnable)
     variable cr_s: signed(7 downto 0);
@@ -118,7 +118,7 @@ begin
         gbscale <= to_signed(100, 11);
         bscale  <= to_signed(517, 11);
       end if;
-    
+
       -- pipeline stage 1: calculate the scaled color values
       cr_s := VideoIn.PixelCr;
       cb_s := VideoIn.PixelCb;
@@ -130,7 +130,7 @@ begin
       gtempr <= grscale * cr_s;
       gtempb <= gbscale * cb_s;
       btemp  <= bscale  * cb_s;
-      
+
       -- pipeline stage 2: add/subtract
       rsum     <= (ystore + rtemp) / 256;
       gsumtemp <= ystore - gtempr;
@@ -140,7 +140,7 @@ begin
       rout <= clip(rsum);
       gsum <= (gsumtemp - gtempb) / 256;
       bout <= clip(bsum);
-      
+
       -- pipeline stage 4: clip g, output
       VideoOut.PixelR <= rout;
       VideoOut.PixelG <= clip(gsum);

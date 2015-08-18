@@ -64,7 +64,7 @@ architecture Behavioral of ClockGen is
   signal vdcm_reset       : std_logic;
   signal vdcm_status      : std_logic_vector(7 downto 0);
   signal clock_54_internal: std_logic;
-  
+
   signal adcm_clkfb          : std_logic;
   signal adcm_clk0           : std_logic;
   signal adcm_clkfx          : std_logic;
@@ -87,7 +87,7 @@ begin
 
   -- Clocking primitive 1 - System+Video
   --------------------------------------
-  
+
   -- Instantiation of the DCM primitive
   --    * Unused inputs are tied off
   --    * Unused outputs are labeled unused
@@ -142,7 +142,7 @@ begin
   -- needs a fast clock to keep the SPDIF
   -- clock jitter low (32/216 * 54MHz)
   --------------------------------------
-  
+
   -- Instantiation of the DCM primitive
   --    * Unused inputs are tied off
   --    * Unused outputs are labeled unused
@@ -200,7 +200,7 @@ begin
     O => clock_54_internal
   );
   Clock54M <= clock_54_internal;
-  
+
   clkaud_buf: BUFG PORT MAP (
     I => adcm_clkfx,
     O => clock_audio_internal
@@ -219,5 +219,5 @@ begin
 
   DVIClockP  <= dvip_internal;
   DVIClockN  <= dvin_internal;
-  
+
 end Behavioral;

@@ -42,7 +42,7 @@ entity toplevel_p2xh is
   port (
     -- clocks
     VClockN  : in  std_logic;
-    
+
     -- gamecube video signals
     VData      : in  std_logic_vector(7 downto 0);
     CSel       : in  std_logic; -- usually named ClkSel, but it's really a color select
@@ -110,7 +110,7 @@ architecture Behavioral of toplevel_p2xh is
   signal VGA_VSync: std_logic;
   signal VGA_Blank: std_logic;
 
-  -- encoded DVI signals  
+  -- encoded DVI signals
   signal red_enc     : std_logic;
   signal green_enc   : std_logic;
   signal blue_enc    : std_logic;
@@ -174,7 +174,7 @@ begin
     blue_s       => blue_enc,
     clock_s      => clock_enc
   );
-  
+
   OBUFDS_red   : OBUFDS port map ( O => DVI_Red(0),   OB => DVI_Red(1),   I => red_enc);
   OBUFDS_green : OBUFDS port map ( O => DVI_Green(0), OB => DVI_Green(1), I => green_enc);
   OBUFDS_blue  : OBUFDS port map ( O => DVI_Blue(0),  OB => DVI_Blue(1),  I => blue_enc);
@@ -324,7 +324,7 @@ begin
       end if;
     end if;
   end process;
-  
+
   -- select output signal
   video_out <= video_rgb;
 

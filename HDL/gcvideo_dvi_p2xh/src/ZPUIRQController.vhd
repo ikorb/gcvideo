@@ -45,7 +45,7 @@ entity ZPUIRQController is
 
     DevIRQs  : in  ZPUIRQSignals;
     IRQOut   : out std_logic
-  );    
+  );
 end ZPUIRQController;
 
 architecture Behavioral of ZPUIRQController is
@@ -99,7 +99,7 @@ begin
               -- read temp-disable bit
               ZPUBusOut.mem_read <= (0 => temp_disable, others => '0');
             end if;
-              
+
           end if;
         end if;
 

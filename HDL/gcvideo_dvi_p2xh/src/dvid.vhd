@@ -4,7 +4,7 @@
 --
 --                'clk' and 'clk_n' should be 5x clk_pixel.
 --
---                'blank' should be asserted during the non-display 
+--                'blank' should be asserted during the non-display
 --                portions of the frame
 --
 -- Minor modifications by Ingo Korb:
@@ -46,7 +46,7 @@ architecture Behavioral of dvid is
       clk_en  : IN  boolean;
       data    : IN  std_logic_vector(7 downto 0);
       c       : IN  std_logic_vector(1 downto 0);
-      blank   : IN  std_logic;          
+      blank   : IN  std_logic;
       encoded : OUT std_logic_vector(9 downto 0)
       );
    END COMPONENT;
@@ -59,28 +59,28 @@ architecture Behavioral of dvid is
 
    signal shift_clock   : std_logic_vector(9 downto 0) := "0000011111";
 
-   
+
    constant c_red       : std_logic_vector(1 downto 0) := (others => '0');
    constant c_green     : std_logic_vector(1 downto 0) := (others => '0');
    signal   c_blue      : std_logic_vector(1 downto 0);
 
-begin   
+begin
    c_blue <= vsync & hsync;
-   
+
    TDMS_encoder_red:   TDMS_encoder PORT MAP(clk => clk_pixel, clk_en => clk_pixel_en, data => red_p,   c => c_red,   blank => blank, encoded => encoded_red);
    TDMS_encoder_green: TDMS_encoder PORT MAP(clk => clk_pixel, clk_en => clk_pixel_en, data => green_p, c => c_green, blank => blank, encoded => encoded_green);
    TDMS_encoder_blue:  TDMS_encoder PORT MAP(clk => clk_pixel, clk_en => clk_pixel_en, data => blue_p,  c => c_blue,  blank => blank, encoded => encoded_blue);
 
-   ODDR2_red   : ODDR2 generic map( DDR_ALIGNMENT => "C0", INIT => '0', SRTYPE => "ASYNC") 
+   ODDR2_red   : ODDR2 generic map( DDR_ALIGNMENT => "C0", INIT => '0', SRTYPE => "ASYNC")
       port map (Q => red_s,   D0 => out_red(0),   D1 => out_red(1),   C0 => clk, C1 => clk_n, CE => '1', R => '0', S => '0');
 
-   ODDR2_green : ODDR2 generic map( DDR_ALIGNMENT => "C0", INIT => '0', SRTYPE => "ASYNC") 
+   ODDR2_green : ODDR2 generic map( DDR_ALIGNMENT => "C0", INIT => '0', SRTYPE => "ASYNC")
       port map (Q => green_s, D0 => out_green(0), D1 => out_green(1), C0 => clk, C1 => clk_n, CE => '1', R => '0', S => '0');
 
-   ODDR2_blue  : ODDR2 generic map( DDR_ALIGNMENT => "C0", INIT => '0', SRTYPE => "ASYNC") 
+   ODDR2_blue  : ODDR2 generic map( DDR_ALIGNMENT => "C0", INIT => '0', SRTYPE => "ASYNC")
       port map (Q => blue_s,  D0 => out_blue(0),  D1 => out_blue(1),  C0 => clk, C1 => clk_n, CE => '1', R => '0', S => '0');
 
-   ODDR2_clock : ODDR2 generic map( DDR_ALIGNMENT => "C0", INIT => '0', SRTYPE => "ASYNC") 
+   ODDR2_clock : ODDR2 generic map( DDR_ALIGNMENT => "C0", INIT => '0', SRTYPE => "ASYNC")
       port map (Q => clock_s, D0 => shift_clock(0), D1 => shift_clock(1), C0 => clk, C1 => clk_n, CE => '1', R => '0', S => '0');
 
    -- add optional inversion of the output bits
@@ -90,7 +90,7 @@ begin
 
    process(clk_pixel, clk_pixel_en)
    begin
-      if rising_edge(clk_pixel) and clk_pixel_en then 
+      if rising_edge(clk_pixel) and clk_pixel_en then
             latched_red   <= encoded_red;
             latched_green <= encoded_green;
             latched_blue  <= encoded_blue;
@@ -99,7 +99,7 @@ begin
 
    process(clk)
    begin
-      if rising_edge(clk) then 
+      if rising_edge(clk) then
          if shift_clock = "0000011111" then
             shift_red   <= latched_red;
             shift_green <= latched_green;
@@ -112,5 +112,5 @@ begin
          shift_clock <= shift_clock(1 downto 0) & shift_clock(9 downto 2);
       end if;
    end process;
-   
+
 end Behavioral;

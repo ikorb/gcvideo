@@ -57,7 +57,7 @@ architecture Behavioral of gcdv_decoder is
 
   signal prev_csel  : std_logic;
   signal in_blanking: boolean;
-  
+
   signal input_30khz: boolean := false;
   signal modecounter: natural range 0 to 3 := 0;
 begin
@@ -86,11 +86,11 @@ begin
         else
           input_30khz <= false;
         end if;
-          
+
       else
         -- current value is color or flags
         modecounter <= modecounter + 1;
-        
+
         -- read color just once in 15kHz mode
         if (not input_30khz and modecounter = 1) or input_30khz then
           if in_blanking then
@@ -100,7 +100,7 @@ begin
           end if;
         end if;
       end if;
- 
+
       -- generate output signals
       if prev_csel /= CSel then
         -- output pixel data when the next Y value is received
@@ -113,7 +113,7 @@ begin
         Video.IsProgressive <= (current_flags(0) = '1');
         Video.IsPAL         <= (current_flags(1) = '1');
         Video.IsEvenField   <= (current_flags(6) = '1');
-        
+
         if in_blanking then
           Video.PixelY    <= x"00";
           -- color during blanking is ignored by the 422-444 interpolator

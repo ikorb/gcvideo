@@ -1,20 +1,20 @@
 -- ZPU
 --
 -- Copyright 2004-2008 oharboe - �yvind Harboe - oyvind.harboe@zylin.com
--- 
+--
 -- The FreeBSD license
--- 
+--
 -- Redistribution and use in source and binary forms, with or without
 -- modification, are permitted provided that the following conditions
 -- are met:
--- 
+--
 -- 1. Redistributions of source code must retain the above copyright
 --    notice, this list of conditions and the following disclaimer.
 -- 2. Redistributions in binary form must reproduce the above
 --    copyright notice, this list of conditions and the following
 --    disclaimer in the documentation and/or other materials
 --    provided with the distribution.
--- 
+--
 -- THIS SOFTWARE IS PROVIDED BY THE ZPU PROJECT ``AS IS'' AND ANY
 -- EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
 -- THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A
@@ -27,7 +27,7 @@
 -- STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
 -- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 -- ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
--- 
+--
 -- The views and conclusions contained in the software and documentation
 -- are those of the authors and should not be interpreted as representing
 -- official policies, either expressed or implied, of the ZPU Project.
@@ -44,9 +44,9 @@ package zpupkg is
   -- to make the address of IO independent of amount of memory
   -- reserved for CPU. Requires trivial tweaks in toolchain/runtime
   -- libraries.
-  
+
   constant wordPower       : integer                      := 5;
-  -- during simulation, set this to '0' to get matching trace.txt 
+  -- during simulation, set this to '0' to get matching trace.txt
   constant DontCareValue   : std_logic                    := 'X';
   constant maxAddrBitBRAMLimit : integer := 13; -- Address up to 64K of program ROM.  Note, this is a maximum size and the actual size will be specified in generics.
 
@@ -56,7 +56,7 @@ package zpupkg is
   constant minAddrBit : integer := byteBits;
 
 
-  ------------------------------------------------------------ 
+  ------------------------------------------------------------
   -- components
 
   component dualport_ram is
@@ -119,10 +119,10 @@ package zpupkg is
 	maxAddrBitExternalRAM : integer := 30; -- Max bit for Program Counter when EXECUTE_RAM is true
 	maxAddrBitBRAM : integer := maxAddrBitBRAMLimit -- Specify significant bits of BRAM.
   );
-    port ( 
+    port (
       clk                 : in  std_logic;
       reset               : in  std_logic;
-      enable              : in  std_logic := '1'; 
+      enable              : in  std_logic := '1';
       in_mem_busy         : in  std_logic;
       mem_read            : in  std_logic_vector(wordSize-1 downto 0);
       mem_write           : out std_logic_vector(wordSize-1 downto 0);
@@ -140,7 +140,7 @@ package zpupkg is
   end component zpu_core_flex;
 
 
-  ------------------------------------------------------------ 
+  ------------------------------------------------------------
   -- constants
 
   -- opcode decode constants
@@ -209,5 +209,5 @@ package zpupkg is
   constant OpCode_Size             : integer                      := 8;
 
 
-  
+
 end zpupkg;

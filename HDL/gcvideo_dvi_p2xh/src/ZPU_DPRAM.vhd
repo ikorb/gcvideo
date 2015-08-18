@@ -51,9 +51,9 @@ end ZPU_DPRAM;
 
 architecture Behavioral of ZPU_DPRAM is
   type ram_type is array(0 to 2**AddressBits - 1) of std_logic_vector(DataBits-1 downto 0);
-  
+
   signal dpram: ram_type := (others => (others => '0'));
-  
+
   signal write_delay: std_logic := '0';
   signal addr_a     : std_logic_vector(AddressBits-1 downto 0) := (others => '0');
   signal addr_b     : std_logic_vector(AddressBits-1 downto 0) := (others => '0');

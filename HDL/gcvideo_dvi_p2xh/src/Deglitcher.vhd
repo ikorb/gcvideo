@@ -46,7 +46,7 @@ end Deglitcher;
 
 architecture Behavioral of Deglitcher is
   constant syncer_bits: natural := SyncBits + CompareBits;
-  
+
   signal syncer: std_logic_vector(syncer_bits - 1 downto 0);
 begin
 

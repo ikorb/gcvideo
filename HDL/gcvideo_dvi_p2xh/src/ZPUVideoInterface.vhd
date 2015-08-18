@@ -61,7 +61,7 @@ architecture Behavioral of ZPUVideoInterface is
   signal active_line_count : natural range 0 to 7;
   signal vid_settings      : std_logic_vector(15 downto 0) := x"2000"; -- cable detect active
   signal osd_bgsettings    : std_logic_vector(23 downto 0);
-  
+
   signal stored_flags      : std_logic_vector(2 downto 0);
 begin
 

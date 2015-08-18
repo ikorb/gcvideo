@@ -1,7 +1,7 @@
 ----------------------------------------------------------------------------------
 -- Engineer: Mike Field <hamster@snap.net.nz>
--- 
--- Description: TDMS Encoder 
+--
+-- Description: TDMS Encoder
 --     8 bits colour, 2 control bits and one blanking bits in
 --       10 bits of TDMS encoded data out
 --     Clocked at the pixel clock
@@ -25,7 +25,7 @@ end TDMS_encoder;
 architecture Behavioral of TDMS_encoder is
    signal xored  : STD_LOGIC_VECTOR (8 downto 0);
    signal xnored : STD_LOGIC_VECTOR (8 downto 0);
-   
+
    signal ones                : STD_LOGIC_VECTOR (3 downto 0);
    signal data_word           : STD_LOGIC_VECTOR (8 downto 0);
    signal data_word_inv       : STD_LOGIC_VECTOR (8 downto 0);
@@ -52,11 +52,11 @@ begin
    xnored(6) <= data(6) xnor xnored(5);
    xnored(7) <= data(7) xnor xnored(6);
    xnored(8) <= '0';
-   
+
    -- Count how many ones are set in data
    ones <= "0000" + data(0) + data(1) + data(2) + data(3)
                    + data(4) + data(5) + data(6) + data(7);
- 
+
    -- Decide which encoding to use
    process(ones, data(0), xnored, xored)
    begin
@@ -67,19 +67,19 @@ begin
          data_word     <= xored;
          data_word_inv <= NOT(xored);
       end if;
-   end process;                                          
+   end process;
 
    -- Work out the DC bias of the dataword;
-   data_word_disparity  <= "1100" + data_word(0) + data_word(1) + data_word(2) + data_word(3) 
+   data_word_disparity  <= "1100" + data_word(0) + data_word(1) + data_word(2) + data_word(3)
                                     + data_word(4) + data_word(5) + data_word(6) + data_word(7);
-   
+
    -- Now work out what the output should be
    process(clk, clk_en)
    begin
       if rising_edge(clk) and clk_en then
-         if blank = '1' then 
+         if blank = '1' then
             -- In the control periods, all values have and have balanced bit count
-            case c is            
+            case c is
                when "00"   => encoded <= "1101010100";
                when "01"   => encoded <= "0010101011";
                when "10"   => encoded <= "0101010100";
@@ -96,7 +96,7 @@ begin
                   encoded <= "10" & data_word_inv(7 downto 0);
                   dc_bias <= dc_bias - data_word_disparity;
                end if;
-            elsif (dc_bias(3) = '0' and data_word_disparity(3) = '0') or 
+            elsif (dc_bias(3) = '0' and data_word_disparity(3) = '0') or
                   (dc_bias(3) = '1' and data_word_disparity(3) = '1') then
                encoded <= '1' & data_word(8) & data_word_inv(7 downto 0);
                dc_bias <= dc_bias + data_word(8) - data_word_disparity;
@@ -106,5 +106,5 @@ begin
             end if;
          end if;
       end if;
-   end process;      
+   end process;
 end Behavioral;

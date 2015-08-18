@@ -38,7 +38,7 @@ use work.video_defs.all;
 entity Linedoubler is
   port (
     PixelClock        : in  std_logic;
-    
+
     -- input video
     Enable            : in  boolean;
     VideoIn           : in  VideoY422;
@@ -57,7 +57,7 @@ architecture Behavioral of Linedoubler is
 
   -- linedoubled video signal
   signal video_ld: VideoY422;
-  
+
   -- line buffers
   constant linedata_size: natural := 8+8+2;
   type linebuffer_t is array(0 to 900) of unsigned(linedata_size-1 downto 0);
@@ -71,7 +71,7 @@ architecture Behavioral of Linedoubler is
 
   signal buf_output_idx: natural range 0 to linebuffer_t'high := 1;
   signal buf_input_idx : natural range 0 to linebuffer_t'high := 3; -- contains index that was written to last
-  
+
   -- input signal measurements
   signal measured_linelength: natural range 0 to linebuffer_t'high;
   signal prev_vsync_input   : boolean;
@@ -88,11 +88,11 @@ architecture Behavioral of Linedoubler is
   signal vsync_out_active   : boolean;
   signal vsync_on_next      : boolean;
   signal vsync_lines        : natural range 0 to 17;
-  
+
   -- intermediate output signals as RAM output registers
   signal output1: unsigned(linedata_size-1 downto 0);
   signal output2: unsigned(linedata_size-1 downto 0);
-  
+
 begin
 
   -- pass signals to output
@@ -130,7 +130,7 @@ begin
       else
         cicb_unsigned := to_unsigned(0, 1);
       end if;
-      
+
       if VideoIn.Blanking then
         blank_unsigned := to_unsigned(1, 1);
       else
@@ -163,7 +163,7 @@ begin
       else
         linebuf2(input_idx) <= linedata;
       end if;
-        
+
       buf_input_idx  <= input_idx;
       input_use_buf1 <= use_buf1;
     end if;

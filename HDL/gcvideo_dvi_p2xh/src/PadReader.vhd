@@ -96,7 +96,7 @@ begin
         -- measure pulse length
         if pulselength < TimeoutLength then
           pulselength <= pulselength + 1;
-          
+
           if pulselength = SamplePoint then
             -- sample bit
             bits       <= bits + 1;

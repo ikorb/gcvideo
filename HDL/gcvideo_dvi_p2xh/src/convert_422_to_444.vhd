@@ -41,7 +41,7 @@ entity convert_422_to_444 is
   port (
     PixelClock      : in  std_logic;
     PixelClockEnable: in  boolean;
-    
+
     -- input video
     VideoIn         : in  VideoY422;
 
@@ -54,7 +54,7 @@ architecture Behavioral of convert_422_to_444 is
 
   -- delay in (enabled) clock cycles for untouched signals
   constant Delayticks: Natural := 3;
-  
+
   -- stored color signals
   signal current_cr: unsigned(7 downto 0) := (others => '1');
   signal current_cb: unsigned(7 downto 0) := (others => '1');
@@ -71,12 +71,12 @@ architecture Behavioral of convert_422_to_444 is
     a9  := "0" & a;
     b9  := "0" & b;
     res := a9 + b9;
-    
+
     return signed(res(8 downto 1) xor x"80");
   end function;
 
 begin
-  
+
   -- capture and interpolate colors
   process (PixelClock, PixelClockEnable)
   begin
@@ -99,7 +99,7 @@ begin
         if not VideoIn.Blanking then
           current_cr <= VideoIn.PixelCbCr;
         end if;
-        
+
         -- output the previous "full" chroma info to coincide with the delayed Y value
         VideoOut.PixelCr <= signed(prev_cr xor x"80");
         VideoOut.PixelCb <= signed(prev_cb xor x"80");

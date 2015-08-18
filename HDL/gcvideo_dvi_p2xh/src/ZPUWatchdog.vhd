@@ -62,7 +62,7 @@ begin
         vsync_count <= TriggerLimit;
       end if;
 
-      -- count frames      
+      -- count frames
       if Video.VSync and not prev_vsync then
         Reset <= '0';
 
@@ -73,7 +73,7 @@ begin
         else
           vsync_count <= vsync_count - 1;
         end if;
-        
+
       end if;
     end if;
   end process;

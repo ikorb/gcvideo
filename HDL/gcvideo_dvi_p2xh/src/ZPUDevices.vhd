@@ -45,7 +45,7 @@ package ZPUDevices is
     mem_hEnable    : std_logic;
     mem_readEnable : std_logic;
   end record;
-  
+
   type ZPUDeviceOut is record
     mem_busy: std_logic;
     mem_read: std_logic_vector(wordSize-1 downto 0);
@@ -69,7 +69,7 @@ package ZPUDevices is
       mem_busy_out   : out std_logic;
       mem_read_out   : out std_logic_vector(31 downto 0)
     );
-  end component;    
+  end component;
 
   component zpu_rom is
     generic (
@@ -94,7 +94,7 @@ package ZPUDevices is
       ZPUBusOut: out ZPUDeviceOut;
       OutPort  : out std_logic_vector(31 downto 0);
       InPort   : in  std_logic_vector(31 downto 0)
-    );    
+    );
   end component;
 
   component PadReader is
@@ -107,7 +107,7 @@ package ZPUDevices is
       PadData  : in  std_logic
     );
   end component;
-  
+
   component ZPU_DPRAM is
     generic (
       AddressBits: natural range 1 to 32;
@@ -151,7 +151,7 @@ package ZPUDevices is
 
       DevIRQs  : in  ZPUIRQSignals;
       IRQOut   : out std_logic
-    );    
+    );
   end component;
 
   component ZPU_SPI is

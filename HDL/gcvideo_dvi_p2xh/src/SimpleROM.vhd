@@ -51,7 +51,7 @@ end SimpleROM;
 architecture Behavioral of SimpleROM is
 
   type rom_type is array(0 to 2**AddressBits-1) of std_logic_vector(DataBits-1 downto 0);
-  
+
   -- initialize contents from data file
   -- (doesn't work with Quartus)
   impure function init_mem return rom_type is
