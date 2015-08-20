@@ -4,3 +4,4 @@
 *.bin
 .dep
 *.mem
+*.mif
