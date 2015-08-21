@@ -108,6 +108,16 @@ package ZPUDevices is
     );
   end component;
 
+  component PadAnalyzer is
+    port (
+      Clock    : in  std_logic;
+      ZSelect  : in  std_logic;
+      ZPUBusIn : in  ZPUDeviceIn;
+      ZPUBusOut: out ZPUDeviceOut;
+      PadData  : in  std_logic
+    );
+  end component;
+
   component ZPU_DPRAM is
     generic (
       AddressBits: natural range 1 to 32;

@@ -56,6 +56,8 @@ end CPUSubsystem;
 
 architecture Behavioral of CPUSubsystem is
 
+  constant AnalyzePadTiming: boolean := false;
+
   constant ZPUBRAMSize: natural := 13;
 
   -- number of devices on the I/O bus
@@ -169,15 +171,30 @@ begin
     IRQOut    => cpu_interrupt
   );
 
-  -- Gamepad reader
-  Inst_Padreader: PadReader PORT MAP (
-    Clock     => Clock,
-    ZSelect   => PadSel,
-    ZPUBusIn  => ZPUIn,
-    ZPUBusOut => PadOut,
-    IRQ       => PadIRQ,
-    PadData   => PadData
-  );
+  PadAnGen: if AnalyzePadTiming generate
+    -- Gamepad analyzer
+    Inst_Padanalyzer: PadAnalyzer PORT MAP (
+      Clock     => Clock,
+      ZSelect   => PadSel,
+      ZPUBusIn  => ZPUIn,
+      ZPUBusOut => PadOut,
+      PadData   => PadData
+    );
+
+    PadIRQ <= '0';
+  end generate;
+
+  PadReadGen: if not AnalyzePadTiming generate
+    -- Gamepad reader
+    Inst_Padreader: PadReader PORT MAP (
+      Clock     => Clock,
+      ZSelect   => PadSel,
+      ZPUBusIn  => ZPUIn,
+      ZPUBusOut => PadOut,
+      IRQ       => PadIRQ,
+      PadData   => PadData
+    );
+  end generate;
 
   -- Video Interface device
   Inst_VideoInterface: ZPUVideoInterface PORT MAP (
@@ -241,7 +258,10 @@ begin
        cpu_mem_readEnable  = '1' then
       case cpu_mem_addr(31 downto 28) is
         when x"f" => -- peripheral space
-          if cpu_mem_addr(13) = '0' then
+          if AnalyzePadTiming and cpu_mem_addr(15 downto 13) = "000" then
+            -- Put the pad analyzer RAM at 0xffff0000-1fff
+            PadSel <= '1';
+          elsif cpu_mem_addr(13) = '0' then
             -- OSD RAM needs 8k: 0xffffc000-dfff
             OSDRAMSel <= '1';
           else -- 0xffff f_00

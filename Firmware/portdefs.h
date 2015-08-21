@@ -79,6 +79,8 @@ typedef struct {
 #define VIDEOIF_SET_DISABLE_OUTPUT   (1<<12)
 #define VIDEOIF_SET_CABLEDETECT      (1<<13)
 #define VIDEOIF_SET_RGBLIMITED       (1<<14)
+#define VIDEOIF_SET_DVIENHANCED      (1<<15)
+#define VIDEOIF_SET_169              (1<<16)
 
 #define VIDEOIF_OSDBG_ALPHA_MASK     0xff0000
 #define VIDEOIF_OSDBG_ALPHA_SHIFT    16

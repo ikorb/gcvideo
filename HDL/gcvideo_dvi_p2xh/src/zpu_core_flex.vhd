@@ -433,7 +433,6 @@ begin
 		eqbranch_zero <='1';
 	end if;
 
-
     if reset = '1' then
       state               <= State_Resync;
       break               <= '0';

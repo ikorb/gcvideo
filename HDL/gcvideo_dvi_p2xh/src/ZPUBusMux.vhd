@@ -78,7 +78,7 @@ begin
     if mem_readEnable  = '1' or
        mem_writeEnable = '1' then
       -- first cycle of device access, signal busy
-      mem_read_out <= (others => '0');  -- x"deadbeef";
+      mem_read_out <= (others => '-');  -- don't care, saves FPGA resources
       mem_busy_out <= '1';
     elsif current_device = -1 then
       -- default device

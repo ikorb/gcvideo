@@ -31,6 +31,7 @@
 
 #include "pad.h"
 #include "portdefs.h"
+#include "settings.h"
 #include "vsync.h"
 
 volatile tick_t tick_counter;
@@ -38,6 +39,8 @@ volatile tick_t tick_counter;
 static uint32_t prev_xres;
 static uint32_t prev_yres;
 static uint32_t prev_flags;
+
+static int disable_frames;
 
 void vsync_handler(void) {
   /* read current input video mode*/
@@ -53,9 +56,35 @@ void vsync_handler(void) {
   }
 
   /* check if input video mode has changed */
+  bool mode_changed = false;
+
   if (cur_xres  != prev_xres ||
       cur_yres  != prev_yres ||
       cur_flags != prev_flags) {
+    if (mode_switch_delay) {
+      // FIXME: Technically wrong since we care about the output res, not the input
+      //        close enough for now - maybe add it for LD toggle too?
+      if (disable_frames == 0) {
+        /* if delay is enabled, disable output and start counting */
+        disable_frames = mode_switch_delay;
+        VIDEOIF->settings |= VIDEOIF_SET_DISABLE_OUTPUT;
+      } else {
+        /* count down */
+        disable_frames--;
+
+        if (disable_frames == 0) {
+          /* timer expired, re-enable and signal change */
+          VIDEOIF->settings &= ~VIDEOIF_SET_DISABLE_OUTPUT;
+          mode_changed = true;
+        }
+      }
+    } else {
+      /* if delay is not enabled, change immediately */
+      mode_changed = true;
+    }
+  }
+
+  if (mode_changed) {
     pad_set_irq(PAD_VIDEOCHANGE);
 
     prev_xres  = cur_xres;

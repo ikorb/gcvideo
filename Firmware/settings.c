@@ -50,13 +50,13 @@ const char *mode_names[VIDMODE_COUNT] = {
 
 uint32_t     video_settings[VIDMODE_COUNT];
 uint32_t     osdbg_settings;
-bool        resbox_enabled;
+uint32_t     mode_switch_delay;
+bool         resbox_enabled;
 video_mode_t current_videomode;
 
 video_mode_t detect_inputmode(void) {
   uint32_t cur_flags = VIDEOIF->flags & (VIDEOIF_FLAG_PROGRESSIVE | VIDEOIF_FLAG_PAL | VIDEOIF_FLAG_31KHZ);
 
-  
   switch (cur_flags) {
   case VIDEOIF_FLAG_PAL | VIDEOIF_FLAG_31KHZ:
   case VIDEOIF_FLAG_PAL | VIDEOIF_FLAG_31KHZ | VIDEOIF_FLAG_PROGRESSIVE:
@@ -106,6 +106,7 @@ void settings_init(void) {
   video_settings[VIDMODE_576p] = VIDEOIF_SET_CABLEDETECT | 0x80;
   osdbg_settings = 0x501bf8;  // partially transparent, blue tinted background
 
+  mode_switch_delay = 0;
   current_videomode = detect_inputmode();
   VIDEOIF->settings = video_settings[current_videomode];
   VIDEOIF->osd_bg   = osdbg_settings;

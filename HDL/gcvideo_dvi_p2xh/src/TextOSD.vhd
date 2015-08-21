@@ -91,7 +91,7 @@ begin
       if VideoIn.VSync then
         -- start of frame
         char_line      <= "000";
-        char_pixel     <= 0;
+        char_pixel     <= 7;
         video_addr     <= (others => '0');
         linestart_addr <= (others => '0');
         line_toggle    <= not VideoIn.Is30kHz;
@@ -104,7 +104,7 @@ begin
 
       elsif not prev_blanking and VideoIn.Blanking then
         -- end of active area
-        char_pixel   <= 0;
+        char_pixel   <= 7;
         pixel_toggle <= false;
         video_addr   <= linestart_addr;
 

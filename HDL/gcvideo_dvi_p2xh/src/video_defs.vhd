@@ -88,6 +88,13 @@ package video_defs is
     Is30kHz      : boolean;
   end record;
 
+  type AudioData is record
+    Left       : signed(15 downto 0);
+    Right      : signed(15 downto 0);
+    LeftEnable : boolean;
+    RightEnable: boolean;
+  end record;
+
   type OSDSettings_t is record
     BGAlpha   : unsigned(7 downto 0);
     BGTintCb  :   signed(7 downto 0);
@@ -103,6 +110,8 @@ package video_defs is
     DisableOutput     : boolean;
     CableDetect       : boolean;
     LimitedRange      : boolean;
+    EnhancedMode      : boolean;
+    Widescreen        : boolean;
   end record;
 
 end video_defs;

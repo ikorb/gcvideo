@@ -1,4 +1,4 @@
-/* GCVideo DVI Firmware version 1.1
+/* GCVideo DVI Firmware
 
    Copyright (C) 2015, Ingo Korb <ingo@akana.de>
    All rights reserved.

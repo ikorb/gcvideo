@@ -49,7 +49,7 @@
 #define STATUSREG_WIP      (1<<0)
 
 #define SETTINGS_OFFSET  0x70000
-#define SETTINGS_VERSION 1
+#define SETTINGS_VERSION 2
 
 uint8_t flash_chip_id[4];
 
@@ -62,10 +62,10 @@ typedef struct {
   uint8_t  reserved;
   uint32_t video_settings[VIDMODE_COUNT];
   uint32_t osdbg_settings;
+  uint32_t mode_switch_delay;
 } storedsettings_t;
 
 #define SET_FLAG_RESBOX (1<<0)
-  
 
 static void set_cs(bool state) {
   if (state)
@@ -151,6 +151,7 @@ static void write_settings(unsigned int num, storedsettings_t *set) {
 void spiflash_read_settings(void) {
   storedsettings_t set;
   unsigned int i;
+  bool valid = false;
 
   /* scan for the first valid settings record */
   for (i = 0; i < 256; i++) {
@@ -163,18 +164,28 @@ void spiflash_read_settings(void) {
       for (unsigned int j = 1; j < sizeof(storedsettings_t); j++)
         sum += byteset[j];
 
-      if (sum == set.checksum)
+      if (sum == set.checksum) {
         /* found a valid setting record */
+        valid = true;
         break;
+      }
+    }
+
+    if (set.version  != 0xff ||
+        set.checksum != 0xff) {
+      /* found an invalid, but non-empty record */
+      /* stop here because we can only write to empty records */
+      break;
     }
   }
 
   current_setid = i;
-  if (i < 256) {
+  if (valid) {
     /* valid settings found, copy to main vars */
     for (i = 0; i < VIDMODE_COUNT; i++)
       video_settings[i] = set.video_settings[i];
-    osdbg_settings = set.osdbg_settings;
+    osdbg_settings    = set.osdbg_settings;
+    mode_switch_delay = set.mode_switch_delay;
     if (set.flags & SET_FLAG_RESBOX)
       resbox_enabled = true;
     else
@@ -192,7 +203,8 @@ void spiflash_write_settings(void) {
   set.version = SETTINGS_VERSION;
   for (unsigned int i = 0; i < VIDMODE_COUNT; i++)
     set.video_settings[i] = video_settings[i];
-  set.osdbg_settings = osdbg_settings;
+  set.osdbg_settings    = osdbg_settings;
+  set.mode_switch_delay = mode_switch_delay;
   if (resbox_enabled)
     set.flags |= SET_FLAG_RESBOX;
 

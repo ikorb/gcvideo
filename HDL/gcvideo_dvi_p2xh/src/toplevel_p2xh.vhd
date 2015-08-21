@@ -121,20 +121,58 @@ architecture Behavioral of toplevel_p2xh is
   signal osd_ram_data: std_logic_vector(8 downto 0);
   signal osd_settings: OSDSettings_t;
 
+  -- audio
+  signal audio: AudioData;
+
   -- misc
   signal video_settings: VideoSettings_t;
   signal clock_locked  : std_logic;
   signal scanline_even : boolean;
 
+  signal led1_counter   : natural range 0 to 24 := 0;
+  signal led2_counter   : natural range 0 to 375000 := 0;
+  signal heartbeat_led1 : std_logic := '0';
+  signal heartbeat_led2 : std_logic := '0';
+  signal heartbeat_vsync: std_logic := '0';
+  signal heartbeat_hsync: std_logic := '0';
+
+  signal obuf_oe        : std_logic;
+
 begin
 
   -- misc outputs
-  LED1        <= clock_locked;
-  LED2        <= '1';
+  LED1        <= heartbeat_led1; --clock_locked;
+  LED2        <= heartbeat_led2;
   Flash_Hold  <= '1';
   DDC_SCL     <= 'Z'; -- currently not used, but must be defined to avoid
   DDC_SDA     <= 'Z'; --   damaging the FPGA I/O drivers
   CableDetect <= '1' when video_settings.CableDetect else '0';
+
+  -- heartbeat on LEDs
+  process (Clock54M)
+  begin
+    if rising_edge(Clock54M) then
+      if heartbeat_vsync /= VGA_VSync then
+        if led1_counter /= 0 then
+          led1_counter <= led1_counter - 1;
+        else
+          led1_counter   <= 24;
+          heartbeat_led1 <= not heartbeat_led1;
+        end if;
+      end if;
+      heartbeat_vsync <= VGA_VSync;
+
+      if heartbeat_hsync /= VGA_HSync then
+        if led2_counter  /= 0 then
+          led2_counter   <= led2_counter - 1;
+        else
+          led2_counter   <= 7500;
+          heartbeat_led2 <= not heartbeat_led2;
+        end if;
+      end if;
+      heartbeat_hsync <= VGA_HSync;
+    end if;
+  end process;
 
   -- CPU subsystem
   Inst_CPU: CPUSubsystem PORT MAP (
@@ -158,27 +196,36 @@ begin
     Invert_Green => true,
     Invert_Blue  => true
   ) PORT MAP (
-    clk          => DVIClockP,
-    clk_n        => DVIClockN,
-    clk_pixel    => Clock54M,
-    clk_pixel_en => pixel_clk_en_27,
-    red_p        => VGA_Red,
-    green_p      => VGA_Green,
-    blue_p       => VGA_Blue,
-    blank        => VGA_Blank,
-    hsync        => VGA_HSync,
-    vsync        => VGA_VSync,
+    clk           => DVIClockP,
+    clk_n         => DVIClockN,
+    clk_pixel     => Clock54M,
+    clk_pixel_en  => pixel_clk_en_27,
+    red_p         => VGA_Red,
+    green_p       => VGA_Green,
+    blue_p        => VGA_Blue,
+    blank         => VGA_Blank,
+    hsync         => VGA_HSync,
+    vsync         => VGA_VSync,
+    EnhancedMode  => video_settings.EnhancedMode,
+    IsProgressive => video_out.IsProgressive,
+    IsPAL         => video_out.IsPAL,
+    Is30kHz       => video_out.Is30kHz,
+    Limited_Range => video_settings.LimitedRange,
+    Widescreen    => video_settings.Widescreen,
+    Audio         => audio,
     -- outputs
-    red_s        => red_enc,
-    green_s      => green_enc,
-    blue_s       => blue_enc,
-    clock_s      => clock_enc
+    red_s         => red_enc,
+    green_s       => green_enc,
+    blue_s        => blue_enc,
+    clock_s       => clock_enc
   );
 
-  OBUFDS_red   : OBUFDS port map ( O => DVI_Red(0),   OB => DVI_Red(1),   I => red_enc);
-  OBUFDS_green : OBUFDS port map ( O => DVI_Green(0), OB => DVI_Green(1), I => green_enc);
-  OBUFDS_blue  : OBUFDS port map ( O => DVI_Blue(0),  OB => DVI_Blue(1),  I => blue_enc);
-  OBUFDS_clock : OBUFDS port map ( O => DVI_Clock(0), OB => DVI_Clock(1), I => clock_enc);
+  OBUFDS_red   : OBUFTDS port map ( O => DVI_Red(0),   OB => DVI_Red(1),   I => red_enc,   T => obuf_oe);
+  OBUFDS_green : OBUFTDS port map ( O => DVI_Green(0), OB => DVI_Green(1), I => green_enc, T => obuf_oe);
+  OBUFDS_blue  : OBUFTDS port map ( O => DVI_Blue(0),  OB => DVI_Blue(1),  I => blue_enc,  T => obuf_oe);
+  OBUFDS_clock : OBUFTDS port map ( O => DVI_Clock(0), OB => DVI_Clock(1), I => clock_enc, T => obuf_oe);
+
+  obuf_oe <= '1' when video_settings.DisableOutput else '0';
 
   -- master clock generator
   Inst_ClockGen: ClockGen
@@ -199,6 +246,7 @@ begin
       I2S_BClock  => I2S_BClock,
       I2S_LRClock => I2S_LRClock,
       I2S_Data    => I2S_Data,
+      Audio       => audio,
       SPDIF_Out   => SPDIF_Out
     );
 
@@ -311,7 +359,7 @@ begin
       end if;
 
       -- output to VGA
-      if video_out.Blanking or video_settings.DisableOutput then
+      if video_out.Blanking then
         VGA_Red   <= (others => '0');
         VGA_Green <= (others => '0');
         VGA_Blue  <= (others => '0');

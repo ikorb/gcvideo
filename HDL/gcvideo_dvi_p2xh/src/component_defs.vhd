@@ -152,20 +152,30 @@ package component_defs is
     Invert_Blue : Boolean := false
   );
   PORT(
-      clk         : IN std_logic;
-      clk_n       : IN std_logic;
-      clk_pixel   : IN std_logic;
-      clk_pixel_en: IN boolean;
-      red_p       : IN std_logic_vector(7 downto 0);
-      green_p     : IN std_logic_vector(7 downto 0);
-      blue_p      : IN std_logic_vector(7 downto 0);
-      blank       : IN std_logic;
-      hsync       : IN std_logic;
-      vsync       : IN std_logic;
-      red_s       : OUT std_logic;
-      green_s     : OUT std_logic;
-      blue_s      : OUT std_logic;
-      clock_s     : OUT std_logic
+      clk           : in  std_logic;
+      clk_n         : in  std_logic;
+      clk_pixel     : in  std_logic;
+      clk_pixel_en  : in  boolean;
+      red_p         : in  std_logic_vector(7 downto 0);
+      green_p       : in  std_logic_vector(7 downto 0);
+      blue_p        : in  std_logic_vector(7 downto 0);
+      blank         : in  std_logic;
+      hsync         : in  std_logic;
+      vsync         : in  std_logic;
+      EnhancedMode  : in  boolean;
+      IsProgressive : in  boolean;
+      IsPAL         : in  boolean;
+      Is30kHz       : in  boolean;
+      Limited_Range : in  boolean;
+      Widescreen    : in  boolean;
+      Audio         : in  AudioData;
+      TMDSWord_Red  : out std_logic_vector(9 downto 0);
+      TMDSWord_Green: out std_logic_vector(9 downto 0);
+      TMDSWord_Blue : out std_logic_vector(9 downto 0);
+      red_s         : out std_logic;
+      green_s       : out std_logic;
+      blue_s        : out std_logic;
+      clock_s       : out std_logic
     );
   END COMPONENT;
 
@@ -218,6 +228,8 @@ package component_defs is
       I2S_BClock : in  std_logic;
       I2S_LRClock: in  std_logic;
       I2S_Data   : in  std_logic;
+
+      Audio      : out AudioData;
 
       SPDIF_Out  : out std_logic
     );
@@ -293,7 +305,6 @@ package component_defs is
       Data       : out std_logic_vector(DataBits-1 downto 0)
     );
   end component;
-
 
 end component_defs;
 

@@ -51,94 +51,20 @@
 
 static menuitem_t mainmenu_items[];
 
-/* --- getters and setters --- */
-
-static int get_scanlines(void)   { return video_settings[current_videomode] & VIDEOIF_SET_SL_ENABLE;        }
-static int get_slstrength(void)  { return video_settings[current_videomode] & VIDEOIF_SET_SL_STRENGTH_MASK; }
-static int get_sleven(void)      { return video_settings[current_videomode] & VIDEOIF_SET_SL_EVEN;          }
-static int get_slalt(void)       { return video_settings[current_videomode] & VIDEOIF_SET_SL_ALTERNATE;     }
-static int get_linedoubler(void) { return video_settings[current_videomode] & VIDEOIF_SET_LD_ENABLE;        }
-
-static bool set_scanlines(int value) {
-  if (value)
-    video_settings[current_videomode] |= VIDEOIF_SET_SL_ENABLE;
-  else
-    video_settings[current_videomode] &= ~VIDEOIF_SET_SL_ENABLE;
-
-  VIDEOIF->settings = video_settings[current_videomode];
-  return true;
-}
-
-static bool set_slstrength(int value) {
-  video_settings[current_videomode] = (video_settings[current_videomode] & ~VIDEOIF_SET_SL_STRENGTH_MASK) | value;
-  VIDEOIF->settings = video_settings[current_videomode];
-  return false;
-}
-
-static bool set_sleven(int value) {
-  if (value)
-    video_settings[current_videomode] |=  VIDEOIF_SET_SL_EVEN;
-  else
-    video_settings[current_videomode] &= ~VIDEOIF_SET_SL_EVEN;
-
-  VIDEOIF->settings = video_settings[current_videomode];
-  return false;
-}
-
-static bool set_slalt(int value) {
-  if (value)
-    video_settings[current_videomode] |=  VIDEOIF_SET_SL_ALTERNATE;
-  else
-    video_settings[current_videomode] &= ~VIDEOIF_SET_SL_ALTERNATE;
-
-  VIDEOIF->settings = video_settings[current_videomode];
-  return false;
-}
-
-static bool set_linedoubler(int value) {
-  if (value)
-    video_settings[current_videomode] |= VIDEOIF_SET_LD_ENABLE;
-  else
-    video_settings[current_videomode] &= ~VIDEOIF_SET_LD_ENABLE;
-
-  VIDEOIF->settings = video_settings[current_videomode];
-  return true;
-}
-
-static valueitem_t value_scanlines = {
-  get_scanlines, set_scanlines, VALTYPE_BOOL
-};
-
-static valueitem_t value_slstrength = {
-  get_slstrength, set_slstrength, VALTYPE_BYTE
-};
-
-static valueitem_t value_sleven = {
-  get_sleven, set_sleven, VALTYPE_EVENODD
-};
-
-static valueitem_t value_slalt = {
-  get_slalt, set_slalt, VALTYPE_BOOL
-};
-
-static valueitem_t value_linedoubler = {
-  get_linedoubler, set_linedoubler, VALTYPE_BOOL
-};
-
 /* --- menu items --- */
 
 static menuitem_t mainmenu_items[] = {
-  { "Linedoubler",            &value_linedoubler, 1, 0 }, // 0
-  { "Scanlines",              &value_scanlines,   2, 0 }, // 1
-  { " Scanline strength",     &value_slstrength,  3, 0 }, // 2
-  { " Scanlines on",          &value_sleven,      4, 0 }, // 3
-  { " Alternating scanlines", &value_slalt,       5, 0 }, // 4
-  { "OSD settings...",        NULL,               7, 0 }, // 5
-  { "Other settings...",      NULL,               8, 0 }, // 6
-  { "View all modes...",      NULL,               9, 0 }, // 7
-  { "Store settings",         NULL,              11, 0 }, // 8
-  { "About...",               NULL,              12, 0 }, // 9
-  { "Exit",                   NULL,              13, 0 }, // 10
+  { "Linedoubler",            &modeset_value_linedoubler, 1, 0 }, // 0
+  { "Scanlines",              &modeset_value_scanlines,   2, 0 }, // 1
+  { " Scanline strength",     &modeset_value_slstrength,  3, 0 }, // 2
+  { " Scanlines on",          &modeset_value_sleven,      4, 0 }, // 3
+  { " Alternating scanlines", &modeset_value_slalt,       5, 0 }, // 4
+  { "OSD settings...",        NULL,                       7, 0 }, // 5
+  { "Other settings...",      NULL,                       8, 0 }, // 6
+  { "View all modes...",      NULL,                       9, 0 }, // 7
+  { "Store settings",         NULL,                      11, 0 }, // 8
+  { "About...",               NULL,                      12, 0 }, // 9
+  { "Exit",                   NULL,                      13, 0 }, // 10
 };
 
 static void mainmenu_draw(menu_t *menu);
@@ -154,44 +80,7 @@ static menu_t mainmenu = {
 /* --- menu functions --- */
 
 static void mainmenu_draw(menu_t *menu) {
-  /* update the item-enable flags based on current settings */
-  if (current_videomode <= VIDMODE_576i && !(video_settings[current_videomode] & VIDEOIF_SET_LD_ENABLE)) {
-    mainmenu_items[MENUITEM_SCANLINES ].flags = MENU_FLAG_DISABLED;
-    mainmenu_items[MENUITEM_SLSTRENGTH].flags = MENU_FLAG_DISABLED;
-    mainmenu_items[MENUITEM_SLEVEN    ].flags = MENU_FLAG_DISABLED;
-    mainmenu_items[MENUITEM_SLALT     ].flags = MENU_FLAG_DISABLED;
-  } else {
-    mainmenu_items[MENUITEM_SCANLINES ].flags = 0;
-    mainmenu_items[MENUITEM_SLSTRENGTH].flags = 0;
-    mainmenu_items[MENUITEM_SLEVEN    ].flags = 0;
-    mainmenu_items[MENUITEM_SLALT     ].flags = 0;
-
-    if (video_settings[current_videomode] & VIDEOIF_SET_SL_ENABLE) {
-      mainmenu_items[MENUITEM_SLSTRENGTH].flags = 0;
-      mainmenu_items[MENUITEM_SLEVEN    ].flags = 0;
-      mainmenu_items[MENUITEM_SLALT     ].flags = 0;
-    } else {
-      mainmenu_items[MENUITEM_SLSTRENGTH].flags = MENU_FLAG_DISABLED;
-      mainmenu_items[MENUITEM_SLEVEN    ].flags = MENU_FLAG_DISABLED;
-      mainmenu_items[MENUITEM_SLALT     ].flags = MENU_FLAG_DISABLED;
-    }
-  }
-
-  if (current_videomode != VIDMODE_480i &&
-      current_videomode != VIDMODE_576i &&
-      mainmenu_items[MENUITEM_SLALT].flags == 0)
-    /* alternating needs a valid field flag and thus works only in interlaced modes */
-    mainmenu_items[MENUITEM_SLALT].flags = MENU_FLAG_DISABLED;
-
-  if (current_videomode >= VIDMODE_480p)
-    mainmenu_items[MENUITEM_LINEDOUBLER].flags = MENU_FLAG_DISABLED;
-  else
-    mainmenu_items[MENUITEM_LINEDOUBLER].flags = 0;
-
-  /* header */
-  osd_gotoxy(menu->xpos + 9, menu->ypos + 1);
-  osd_setattr(true, false);
-  printf("%s settings", mode_names[current_videomode]);
+  modeset_draw(menu);
 
   /* draw the two video mode lines */
   osd_gotoxy(menu->xpos + menu->xsize - 20, menu->ypos + menu->ysize - 3);
@@ -221,6 +110,8 @@ void screen_mainmenu(void) {
   int current_item = 0;
 
   while (1) {
+    modeset_mode = current_videomode;
+
     /* (re)draw */
     osd_clrscr();
     menu_draw(&mainmenu);

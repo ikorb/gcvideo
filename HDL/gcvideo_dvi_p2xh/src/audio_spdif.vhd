@@ -43,6 +43,7 @@ use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
 
 use work.Component_Defs.all;
+use work.video_defs.all;
 
 entity audio_spdif is
   port (
@@ -51,6 +52,8 @@ entity audio_spdif is
     I2S_BClock : in  std_logic;
     I2S_LRClock: in  std_logic;
     I2S_Data   : in  std_logic;
+
+    Audio      : out AudioData;
 
     SPDIF_Out  : out std_logic
   );
@@ -69,6 +72,9 @@ architecture Behavioral of audio_spdif is
   signal clock_counter: integer range -clockdiv_num to clockdiv_den := 0;
   signal clocken_spdif: boolean;
 
+  attribute keep: string;
+  attribute keep of clocken_spdif:signal is "TRUE";
+
   -- audio samples
   signal audio_left : signed(15 downto 0);
   signal audio_right: signed(15 downto 0);
@@ -76,6 +82,11 @@ architecture Behavioral of audio_spdif is
   signal enable_r   : boolean;
 
 begin
+
+  Audio.Left        <= audio_left;
+  Audio.Right       <= audio_right;
+  Audio.LeftEnable  <= enable_l;
+  Audio.RightEnable <= enable_r;
 
   -- deglitch I2S signals
   Deglitch_BClock: Deglitcher GENERIC MAP (

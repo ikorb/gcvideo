@@ -65,12 +65,12 @@ architecture Behavioral of convert_yuv_to_rgb is
   signal bsum    : signed(18 downto 0) := (others => '0'); -- (Y + btemp) / 256
   signal gsumtemp: signed(18 downto 0) := (others => '0');
 
-  signal yscale : signed(10 downto 0);
-  signal yshift : signed( 5 downto 0);
-  signal rscale : signed(10 downto 0);
-  signal grscale: signed(10 downto 0);
-  signal gbscale: signed(10 downto 0);
-  signal bscale : signed(10 downto 0);
+  signal yscale : signed(10 downto 0) := to_signed(298, 11);
+  signal yshift : signed( 5 downto 0) := to_signed(  0,  6);
+  signal rscale : signed(10 downto 0) := to_signed(409, 11);
+  signal grscale: signed(10 downto 0) := to_signed(208, 11);
+  signal gbscale: signed(10 downto 0) := to_signed(100, 11);
+  signal bscale : signed(10 downto 0) := to_signed(517, 11);
   signal rout   : unsigned(7 downto 0);
   signal bout   : unsigned(7 downto 0);
 

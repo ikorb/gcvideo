@@ -59,7 +59,7 @@ architecture Behavioral of ZPUVideoInterface is
   signal prev_vsync        : boolean;
   signal active_line       : boolean;
   signal active_line_count : natural range 0 to 7;
-  signal vid_settings      : std_logic_vector(15 downto 0) := x"2000"; -- cable detect active
+  signal vid_settings      : std_logic_vector(16 downto 0) := "0" & x"2000"; -- cable detect active
   signal osd_bgsettings    : std_logic_vector(23 downto 0);
 
   signal stored_flags      : std_logic_vector(2 downto 0);
@@ -69,13 +69,15 @@ begin
 
   -- forward stored videosettings to output
   VSettings.ScanlineStrength   <= unsigned(vid_settings(7 downto 0));
-  VSettings.ScanlinesEnabled   <= (vid_settings(8) = '1');
-  VSettings.ScanlinesEven      <= (vid_settings(9) = '1');
+  VSettings.ScanlinesEnabled   <= (vid_settings(8)  = '1');
+  VSettings.ScanlinesEven      <= (vid_settings(9)  = '1');
   VSettings.ScanlinesAlternate <= (vid_settings(10) = '1');
   VSettings.LinedoublerEnabled <= (vid_settings(11) = '1');
   VSettings.DisableOutput      <= (vid_settings(12) = '1');
   VSettings.CableDetect        <= (vid_settings(13) = '1');
   VSettings.LimitedRange       <= (vid_settings(14) = '1');
+  VSettings.EnhancedMode       <= (vid_settings(15) = '1');
+  VSettings.Widescreen         <= (vid_settings(16) = '1');
 
   -- forward OSD settings to output
   OSDSettings.BGAlpha    <= unsigned(osd_bgsettings(23 downto 16));
@@ -104,15 +106,15 @@ begin
         when "000"  => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(pixel_counter, 32));
         when "001"  => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(line_counter,  32));
         when "010"  => ZPUBusOut.mem_read <= x"0000000" & "0" & stored_flags;
-        when "011"  => ZPUBusOut.mem_read <= x"0000"    & vid_settings;
-        when "100"  => ZPUBusOut.mem_read <= x"00"      & osd_bgsettings;
+        when "011"  => ZPUBusOut.mem_read <= x"000" & "000"   & vid_settings;
+        when "100"  => ZPUBusOut.mem_read <= x"00"            & osd_bgsettings;
         when others => ZPUBusOut.mem_read <= (others => '-');  -- undefined
       end case;
 
       -- write path
       if ZSelect = '1' and ZPUBusIn.mem_writeEnable = '1' then
         case ZPUBusIn.mem_addr(4 downto 2) is
-          when "011"  => vid_settings    <= ZPUBusIn.mem_write(15 downto 0);
+          when "011"  => vid_settings    <= ZPUBusIn.mem_write(16 downto 0);
           when "100"  => osd_bgsettings  <= ZPUBusIn.mem_write(23 downto 0);
           when others => null;
         end case;

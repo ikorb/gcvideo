@@ -1,0 +1,35 @@
+// BMM LOC annotation file.
+//
+// Release 14.5 -  P.58f, build 3.0.7 Mar 3, 2013
+// Copyright (c) 1995-2015 Xilinx, Inc.  All rights reserved.
+
+
+///////////////////////////////////////////////////////////////////////////////
+//
+// Processor 'softcore_top', ID 0, memory map.
+//
+///////////////////////////////////////////////////////////////////////////////
+
+ADDRESS_MAP softcore_top PPC405 0
+
+    ///////////////////////////////////////////////////////////////////////////////
+    //
+    // Processor 'softcore_top' address space 'memory1' 0x00000000:0x00003FFF (16 KBytes).
+    //
+    ///////////////////////////////////////////////////////////////////////////////
+
+    ADDRESS_SPACE memory1 RAMB16 [0x00000000:0x00003FFF]
+        BUS_BLOCK
+            Inst_CPU/Inst_BootRAM/Mram_ram8 RAMB16 [31:28] [0:4095] PLACED = X1Y7;
+            Inst_CPU/Inst_BootRAM/Mram_ram7 RAMB16 [27:24] [0:4095] PLACED = X1Y6;
+            Inst_CPU/Inst_BootRAM/Mram_ram6 RAMB16 [23:20] [0:4095] PLACED = X1Y5;
+            Inst_CPU/Inst_BootRAM/Mram_ram5 RAMB16 [19:16] [0:4095] PLACED = X1Y4;
+            Inst_CPU/Inst_BootRAM/Mram_ram4 RAMB16 [15:12] [0:4095] PLACED = X1Y1;
+            Inst_CPU/Inst_BootRAM/Mram_ram3 RAMB16 [11:8] [0:4095] PLACED = X1Y0;
+            Inst_CPU/Inst_BootRAM/Mram_ram2 RAMB16 [7:4] [0:4095] PLACED = X1Y2;
+            Inst_CPU/Inst_BootRAM/Mram_ram1 RAMB16 [3:0] [0:4095] PLACED = X1Y3;
+        END_BUS_BLOCK;
+    END_ADDRESS_SPACE;
+
+END_ADDRESS_MAP;
+

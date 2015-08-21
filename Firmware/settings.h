@@ -51,6 +51,7 @@ extern const char    *mode_names[VIDMODE_COUNT];
 
 extern uint32_t     video_settings[VIDMODE_COUNT];
 extern uint32_t     osdbg_settings;
+extern uint32_t     mode_switch_delay;
 extern bool         resbox_enabled;
 extern video_mode_t current_videomode;
 

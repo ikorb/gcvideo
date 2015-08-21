@@ -6,7 +6,7 @@
 --       10 bits of TDMS encoded data out
 --     Clocked at the pixel clock
 --
--- Minor modifications to add a clock enable by Ingo Korb
+-- Minor modifications to add a clock enable and reduce FPGA resources by Ingo Korb
 -- Original source from http://hamsterworks.co.nz/mediawiki/index.php/Dvid_test
 ----------------------------------------------------------------------------------
 library IEEE;
@@ -28,7 +28,6 @@ architecture Behavioral of TDMS_encoder is
 
    signal ones                : STD_LOGIC_VECTOR (3 downto 0);
    signal data_word           : STD_LOGIC_VECTOR (8 downto 0);
-   signal data_word_inv       : STD_LOGIC_VECTOR (8 downto 0);
    signal data_word_disparity : STD_LOGIC_VECTOR (3 downto 0);
    signal dc_bias             : STD_LOGIC_VECTOR (3 downto 0) := (others => '0');
 begin
@@ -55,28 +54,28 @@ begin
 
    -- Count how many ones are set in data
    ones <= "0000" + data(0) + data(1) + data(2) + data(3)
-                   + data(4) + data(5) + data(6) + data(7);
+                  + data(4) + data(5) + data(6) + data(7);
 
    -- Decide which encoding to use
    process(ones, data(0), xnored, xored)
    begin
       if ones > 4 or (ones = 4 and data(0) = '0') then
          data_word     <= xnored;
-         data_word_inv <= NOT(xnored);
       else
          data_word     <= xored;
-         data_word_inv <= NOT(xored);
       end if;
    end process;
 
    -- Work out the DC bias of the dataword;
    data_word_disparity  <= "1100" + data_word(0) + data_word(1) + data_word(2) + data_word(3)
-                                    + data_word(4) + data_word(5) + data_word(6) + data_word(7);
+                                  + data_word(4) + data_word(5) + data_word(6) + data_word(7);
 
    -- Now work out what the output should be
    process(clk, clk_en)
+     variable data_word_inv: std_logic_vector(8 downto 0);
    begin
       if rising_edge(clk) and clk_en then
+         data_word_inv := NOT(data_word);
          if blank = '1' then
             -- In the control periods, all values have and have balanced bit count
             case c is

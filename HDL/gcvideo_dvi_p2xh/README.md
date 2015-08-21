@@ -20,13 +20,8 @@ Gamecube casing.
 
 ## Limitations ##
 
-- DVI only, even though the FPGA board has "HDMI" in its name because
-    the HDMI specification is not available to the public.
-    This can in some cases reduce the compatibility with certain
-    displays because modes below 480p are not officially part of the
-    DVI specification.
 - Linedoubling of 480i/576i modes looks very ugly, if your display
-    accepts these modes over DVI it is recommended to not use
+    accepts these modes directly, it is recommended to not use
     linedoubling for them.
 - Only works on DOL-001 Gamecubes, which are the ones that still have
     the digital video port. It may or may not be possible to adapt the
@@ -43,11 +38,12 @@ Gamecube casing.
 
 ## Directory structure ##
 
-There are three subdirectories:
+There are four subdirectories:
 
 - `src` contains the VHDL sources and Xilinx ISE project files
 - `bin` contains the synthesized bit stream in various formats
 - `doc` contains a few images showing the necessary connections
+- `codegens` contains two code generators that generate VHDL source for two ROMs in the enhanced DVI encoder
 
 ## Programming the board ##
 
@@ -125,6 +121,13 @@ Without this resistor, most of my monitors and other devices with an
 HDMI input claimed that they were receiving no signal from the Pluto
 board, even though it was actually generating a valid video signal.
 
+Some people have reported that most of their TVs did not recognize the
+signal from the Pluto board with the 100 ohm resistor installed. If
+you also suffer from this problem, first check that the resistor you
+installed is really a 100 ohm resistor and not a 100 kiloohm
+resistor. You can also try to use a direct wire connection from VUNREG
+to DDV +5V instead of a resistor, but this is not recommended.
+
 ### Gamecube digital port ###
 
 Most of the connections from the Gamecube's digital video port are
@@ -167,6 +170,7 @@ Please note that the last signal in that table is not on the same edge
 of the Pluto board as the others. It is a rather fast clock signal and
 it is strongly recommended to route it separately from the other wires
 as bundling them up can lead to flickering pixels.
+
 
 ### Controller ###
 
@@ -244,8 +248,12 @@ stored, make sure to use the "Store settings" menu item.
 
 ### Other settings submenu ###
 
-In the "Other settings" submenu, you can enable or disable two
-rarely-used settings. The first one selects whether GCVideo should
+In the "Other settings" submenu, you can enable or disable a few
+additional settings. All of these settings are independent of the
+current video mode and can be stored permanently using the "Store
+settings" menu item in the main menu.
+
+The first setting selects whether GCVideo should
 tell the Gamecube that a 480p-capable cable is connected. By default
 it is enabled and unless you know what you are doing, there is little
 reason to disable it.
@@ -256,23 +264,67 @@ associated with computer graphics and limited-range with TV
 signals. The default is full-range as GCVideo outputs a DVI signal
 where full-range RGB is more common.
 
+The third option enables enhanced DVI mode. Since this mode may not be
+acceptable to all displays, it is disabled by default. If it is on,
+GCVideo transmits additional data to the display to signal the current
+video mode. Enabling this option may increase compatibility with some
+displays, especially in non-linedoubled 480i/576i modes.
+
+When enhanced DVI mode is enabled, the `Display as 16:9` option
+becomes available. If it is turned on, GCVideo tells the monitor that
+it should display the image in widescreen format (16:9 aspect ratio),
+if it is off then the display is told that standard format (4:3 aspect
+ratio) is preferred. The default setting is 4:3, since most Gamecube
+games assume this as standard, but some have an option to switch to
+widescreen. Please note that this setting may not do anything as some
+displays ignore the aspect ratio information sent by GCVideo.
+
+The final option in this submenu is `Mode switch delay`. If it is set
+to zero (the default value), it is inactive. Otherwise, the number set
+in this option controls for how many frames GCVideo should completely
+disable its output when the Gamecube changes to a different
+resolution. This has been found useful for a small number of displays
+which did not correctly recognize a change in resolution, for example
+when a game switches to progressive mode while it boots. If your
+display has such problems, you could try to set this option to 10 or
+50 - higher values disable the output for a longer time and a value of
+50 or 60 (PAL or NTSC) corresponds to one second. Trying every single
+number in this option will generally be useless - instead try a
+relatively high value and work your way back to zero to find a setting
+that is high enough so your display recognizes the mode change, but
+that also blanks your screen for as short a time as possible. It is
+expected that few to no displays that can accept enhanced DVI mode
+will need a setting other than 0 for the mode switch delay, but this
+has not yet been comprehensively tested.
+
+(TLDR: Set `Mode switch delay` to 255 for a Framemeister-like
+experience during video mode changes ;) )
+
+
 ## Possible issues ##
 
-GCVideo DVI only generates a DVI signal, not an HDMI signal. This has
-two important consequences:
-
-1. There is no audio embedded in the video signal, a seperate
-    connection is required to get sound. Currently the only option is
-    to use the analog audio produced by the Gamecube, although adding
-    an SPDIF output to GCVideo DVI is currently under consideration.
+1. The enhanced DVI mode may not be compatible with all displays,
+    especially if they expect pure DVI signals.
 
 2. Some displays do not expect to receive consumer video-style timings
     (as opposed to computer-style timings)
-    as a DVI signal, which may result in various display problems. You
-    may be able to reduce these problems by enabling the line-doubler
-    for any modes that your display refuses to accept, although even
-    then the signal timing is still not completely identical to a
-    computer video signal.
+    as a DVI signal, which may result in various display problems.
+    Enabling enhanced DVI mode may or may not help. Alternatively, you
+    can try enabling the line-doubler for any modes that your display
+    refuses to accept, although the signal timing is still not
+    completely identical to a computer video signal.
+
+3. If your display completely refuses to accept the signal generated
+    on the Pluto IIx board, you may have a problem with the 100 ohm
+    DDC resistor (see section "DDC resistor" above). In some cases
+    this can be fixed by using a wire instead of a resistor, although
+    this is not recommended unless absolutely neccessary.
+
+If everything is wired correctly, the two LEDs on the Pluto board
+should blink at slightly different, but regular rates. If only one of
+them is blinking, you probably swapped some of the video data
+lines. If neither of them is blinking, check all the wiring and also
+make sure that the board is actually programmed.
 
 ### XRGB Mini ###
 
@@ -287,7 +339,7 @@ the game boots causes the XRGB Mini to misdetect the new video mode,
 halving the horizontal resolution (360x480 instead of
 720x480). Switching to a different input and back should trigger a
 re-detection of the input video mode and usually results in the
-correct resolution.
+correct resolution. Enabling enhanced DVI mode may also fix this issue.
 
 ### Elgato Game Capture HD ###
 
@@ -308,6 +360,25 @@ The firmware sources can be found in the [Firmware](../../Firmware)
 directory at the top level of the repository.
 
 
+## Alternative target boards ##
+
+GCVideo-DVI should be easily portable to other FPGA boards that have a
+DVI or HDMI connector directly connected to the FPGA's pins and use a
+Spartan 3A-200 (or larger) or a Spartan 6 (necessary size unknown,
+probably a 9 minimum). Ports to FPGAs from other vendors should be
+possible, only the clock generator and DDR outputs use Xilinx-specific
+components.
+
+At least one alternative board has been designed, the [Shuriken
+Video](http://www.staffs2.webspace.virginmedia.com/shuriken%20video.htm). It
+features a smaller footprint which is optimized for mounting it so
+that it sticks out of the original digital video connector hole of the
+Gamecube. The developer has used a smaller FPGA to keep the costs
+down, but it should be possible to use a Spartan 3A-200 and port the
+current version of GCVideo-DVI by just changing the pin assignments
+and re-synthesizing.
+
+
 ## Credits ##
 
 Thanks to:
@@ -318,8 +389,17 @@ Thanks to:
     useful for quickly switching between modes during development
 - Nintendo for filing such a detailed patent for their console
 - Alastair M. Robinson for the ZPUFlex core
+- meneerbeer on the gc-video forums for suggesting a simple fix that reduces occasional image corruption and the 16:9 option
+- Antti Siponen for his hdmi_proto project, which was really useful
+    for figuring out many details about data transmission during blanking
+- Andrew "bunnie" Huang for releasing the NeTV code, which was a
+    very helpful code base for hacking a simple DVI signal analyzer
+- Alexios Chouchoulas for [mcasm](http://www.bedroomlan.org/projects/mcasm)
 
 ## Changes ##
 
 Version 1.0 - initial release
-Versoin 1.1 - added OSD and SPDIF output
+Version 1.1 - added OSD and SPDIF output
+Version 1.2 - improved pad snoop timing
+Version 1.3 - improved SPDIF compatibility
+Version 2.0 - Enhanced DVI mode
