@@ -26,7 +26,8 @@ entity dvid is
     Generic ( -- allow inversion of each differential pair to account for pin swaps
       Invert_Red  : Boolean := false;
       Invert_Green: Boolean := false;
-      Invert_Blue : Boolean := false
+      Invert_Blue : Boolean := false;
+      Invert_Clock: Boolean := false
     );
     Port ( clk           : in  STD_LOGIC;
            clk_n         : in  STD_LOGIC;
@@ -88,7 +89,7 @@ architecture Behavioral of dvid is
   signal latched_red, latched_green, latched_blue: std_logic_vector(9 downto 0) := (others => '0');
   signal shift_red,   shift_green,   shift_blue  : std_logic_vector(9 downto 0) := (others => '0');
 
-  signal out_red, out_green, out_blue: std_logic_vector(1 downto 0);
+  signal out_red, out_green, out_blue, out_clock: std_logic_vector(1 downto 0);
   signal shift_clock: std_logic_vector(9 downto 0) := "0000011111";
 
   -- input delays
@@ -225,7 +226,7 @@ begin
 
   TDMS_encoder_red:   TDMS_encoder PORT MAP(clk => clk_pixel, clk_en => clk_pixel_en, data => red_d,   c => c3c0(3 downto 2), blank => blank_d, encoded => tmds_red);
   TDMS_encoder_green: TDMS_encoder PORT MAP(clk => clk_pixel, clk_en => clk_pixel_en, data => green_d, c => c3c0(1 downto 0), blank => blank_d, encoded => tmds_green);
-  TDMS_encoder_blue:  TDMS_encoder PORT MAP(clk => clk_pixel, clk_en => clk_pixel_en, data => blue_d,  c => c_blue,               blank => blank_d, encoded => tmds_blue);
+  TDMS_encoder_blue:  TDMS_encoder PORT MAP(clk => clk_pixel, clk_en => clk_pixel_en, data => blue_d,  c => c_blue,           blank => blank_d, encoded => tmds_blue);
 
   AUX_encoder_red:    aux_encoder PORT MAP (Clock => clk_pixel, ClockEnable => clk_pixel_en, Data => aux_red,   EncData => auxenc_red);
   AUX_encoder_green:  aux_encoder PORT MAP (Clock => clk_pixel, ClockEnable => clk_pixel_en, Data => aux_green, EncData => auxenc_green);
@@ -254,12 +255,13 @@ begin
     port map (Q => blue_s,  D0 => out_blue(0),  D1 => out_blue(1),  C0 => clk, C1 => clk_n, CE => '1', R => '0', S => '0');
 
   ODDR2_clock : ODDR2 generic map( DDR_ALIGNMENT => "C0", INIT => '0', SRTYPE => "ASYNC")
-    port map (Q => clock_s, D0 => shift_clock(0), D1 => shift_clock(1), C0 => clk, C1 => clk_n, CE => '1', R => '0', S => '0');
+    port map (Q => clock_s, D0 => out_clock(0), D1 => out_clock(1), C0 => clk, C1 => clk_n, CE => '1', R => '0', S => '0');
 
   -- add optional inversion of the output bits
   out_red   <= not shift_red(1 downto 0)   when Invert_Red   else shift_red(1 downto 0);
   out_green <= not shift_green(1 downto 0) when Invert_Green else shift_green(1 downto 0);
   out_blue  <= not shift_blue(1 downto 0)  when Invert_Blue  else shift_blue(1 downto 0);
+  out_clock <= not shift_clock(1 downto 0) when Invert_Clock else shift_clock(1 downto 0);
 
   -- select between the output of the various encoders
   process(clk_pixel, clk_pixel_en)
@@ -287,8 +289,7 @@ begin
   end process;
 
   -- always send vsync+hsync on blue channel if in aux mode
-  -- (one pixel early to compensate for ECC delay)
-  aux_blue(1 downto 0) <= (vsync_delay(0), hsync_delay(0));
+  aux_blue(1 downto 0) <= (vsync_d, hsync_d);
   aux_blue(2) <= '1' when seq_bt4mux = BT4_Send_1 else header_eccbit;
   aux_blue(3) <= '1' when seq_nfirstpkt           else '0';
 
@@ -464,7 +465,7 @@ begin
 
             if audio_needs_acr then
               -- restore previous once-per-frame group
-              ifr_select      <= ifr_prevselect;
+              ifr_select <= ifr_prevselect;
 
             elsif per_frame_packets /= 0 then
               ifr_frame <= ifr_frame + 1;
