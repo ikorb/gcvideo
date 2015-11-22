@@ -1,3 +1,7 @@
+2015-11-22: GCVideo-DVI version 2.1
+- audio volume option
+- Sync timing fix for enhanced DVI mode
+
 2015-08-21: GCVideo-DVI version 2.0
 - Enhanced DVI mode
 - optional output disable on mode switch
