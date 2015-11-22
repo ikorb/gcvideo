@@ -54,6 +54,8 @@ extern uint32_t     osdbg_settings;
 extern uint32_t     mode_switch_delay;
 extern bool         resbox_enabled;
 extern video_mode_t current_videomode;
+extern uint8_t      audio_volume;
+extern bool         audio_mute;
 
 video_mode_t detect_inputmode(void);
 void print_resolution(void);

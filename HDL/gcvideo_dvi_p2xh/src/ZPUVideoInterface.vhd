@@ -59,6 +59,7 @@ architecture Behavioral of ZPUVideoInterface is
   signal prev_vsync        : boolean;
   signal active_line       : boolean;
   signal active_line_count : natural range 0 to 7;
+  signal volume_setting    : std_logic_vector(7 downto 0) := x"ff";
   signal vid_settings      : std_logic_vector(16 downto 0) := "0" & x"2000"; -- cable detect active
   signal osd_bgsettings    : std_logic_vector(23 downto 0);
 
@@ -78,6 +79,7 @@ begin
   VSettings.LimitedRange       <= (vid_settings(14) = '1');
   VSettings.EnhancedMode       <= (vid_settings(15) = '1');
   VSettings.Widescreen         <= (vid_settings(16) = '1');
+  VSettings.Volume             <= unsigned(volume_setting);
 
   -- forward OSD settings to output
   OSDSettings.BGAlpha    <= unsigned(osd_bgsettings(23 downto 16));
@@ -94,6 +96,7 @@ begin
         IRQ             <= '0';
         vid_settings    <= (13 => '1', others => '0');
         osd_bgsettings  <= (others => '0');
+        volume_setting  <= x"ff";
       end if;
 
       -- reset interrupt flag on any write
@@ -108,6 +111,7 @@ begin
         when "010"  => ZPUBusOut.mem_read <= x"0000000" & "0" & stored_flags;
         when "011"  => ZPUBusOut.mem_read <= x"000" & "000"   & vid_settings;
         when "100"  => ZPUBusOut.mem_read <= x"00"            & osd_bgsettings;
+        when "101"  => ZPUBusOut.mem_read <= x"000000"        & volume_setting;
         when others => ZPUBusOut.mem_read <= (others => '-');  -- undefined
       end case;
 
@@ -116,6 +120,7 @@ begin
         case ZPUBusIn.mem_addr(4 downto 2) is
           when "011"  => vid_settings    <= ZPUBusIn.mem_write(16 downto 0);
           when "100"  => osd_bgsettings  <= ZPUBusIn.mem_write(23 downto 0);
+          when "101"  => volume_setting  <= ZPUBusIn.mem_write(7 downto 0);
           when others => null;
         end case;
       end if;

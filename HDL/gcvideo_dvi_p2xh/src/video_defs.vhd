@@ -112,6 +112,7 @@ package video_defs is
     LimitedRange      : boolean;
     EnhancedMode      : boolean;
     Widescreen        : boolean;
+    Volume            : unsigned(7 downto 0);
   end record;
 
 end video_defs;

@@ -228,6 +228,7 @@ package component_defs is
       I2S_BClock : in  std_logic;
       I2S_LRClock: in  std_logic;
       I2S_Data   : in  std_logic;
+      Volume     : in  unsigned(7 downto 0);
 
       Audio      : out AudioData;
 

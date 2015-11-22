@@ -279,7 +279,7 @@ games assume this as standard, but some have an option to switch to
 widescreen. Please note that this setting may not do anything as some
 displays ignore the aspect ratio information sent by GCVideo.
 
-The final option in this submenu is `Mode switch delay`. If it is set
+Another option in this submenu is `Mode switch delay`. If it is set
 to zero (the default value), it is inactive. Otherwise, the number set
 in this option controls for how many frames GCVideo should completely
 disable its output when the Gamecube changes to a different
@@ -299,6 +299,15 @@ has not yet been comprehensively tested.
 
 (TLDR: Set `Mode switch delay` to 255 for a Framemeister-like
 experience during video mode changes ;) )
+
+Finally, the audio volume can be lowered in this menu. The option
+`Volume` can be set between 0 (silent) and 255 (original volume) and
+the `Mute` option can be used to turn off the sound completely without
+changing the current Volume setting. Please note that this setting
+uses a simple multiplication of sample values to lower the volume
+which means that any setting except 255 reduces audio quality
+slightly. Also, it only changes ony the volume of the audio outputs of
+GCVideo, but not the volume at the Gamecube's Analog AV output.
 
 
 ## Possible issues ##

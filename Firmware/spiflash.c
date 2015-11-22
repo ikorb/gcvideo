@@ -49,7 +49,7 @@
 #define STATUSREG_WIP      (1<<0)
 
 #define SETTINGS_OFFSET  0x70000
-#define SETTINGS_VERSION 2
+#define SETTINGS_VERSION 3
 
 uint8_t flash_chip_id[4];
 
@@ -59,13 +59,14 @@ typedef struct {
   uint8_t  checksum;
   uint8_t  version;
   uint8_t  flags;
-  uint8_t  reserved;
+  uint8_t  volume;
   uint32_t video_settings[VIDMODE_COUNT];
   uint32_t osdbg_settings;
   uint32_t mode_switch_delay;
 } storedsettings_t;
 
 #define SET_FLAG_RESBOX (1<<0)
+#define SET_FLAG_MUTE   (1<<1)
 
 static void set_cs(bool state) {
   if (state)
@@ -184,12 +185,20 @@ void spiflash_read_settings(void) {
     /* valid settings found, copy to main vars */
     for (i = 0; i < VIDMODE_COUNT; i++)
       video_settings[i] = set.video_settings[i];
+
     osdbg_settings    = set.osdbg_settings;
     mode_switch_delay = set.mode_switch_delay;
+
     if (set.flags & SET_FLAG_RESBOX)
       resbox_enabled = true;
     else
       resbox_enabled = false;
+
+    audio_volume = set.volume & 0xff;
+    if (set.flags & SET_FLAG_MUTE)
+      audio_mute = true;
+    else
+      audio_mute = false;
   }
 }
 
@@ -201,13 +210,21 @@ void spiflash_write_settings(void) {
   /* create settings record */
   memset(&set, 0, sizeof(storedsettings_t));
   set.version = SETTINGS_VERSION;
+
   for (unsigned int i = 0; i < VIDMODE_COUNT; i++)
     set.video_settings[i] = video_settings[i];
+
   set.osdbg_settings    = osdbg_settings;
   set.mode_switch_delay = mode_switch_delay;
+
   if (resbox_enabled)
     set.flags |= SET_FLAG_RESBOX;
 
+  set.volume = audio_volume;
+  if (audio_mute)
+    set.flags |= SET_FLAG_MUTE;
+
+  /* calculate checksum */
   for (unsigned int i = 1; i < sizeof(storedsettings_t); i++)
     sum += byteset[i];
 

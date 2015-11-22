@@ -53,6 +53,8 @@ entity audio_spdif is
     I2S_LRClock: in  std_logic;
     I2S_Data   : in  std_logic;
 
+    Volume     : in  unsigned(7 downto 0);
+
     Audio      : out AudioData;
 
     SPDIF_Out  : out std_logic
@@ -78,15 +80,32 @@ architecture Behavioral of audio_spdif is
   -- audio samples
   signal audio_left : signed(15 downto 0);
   signal audio_right: signed(15 downto 0);
+  signal audio_left_unscaled: signed(15 downto 0);
+  signal audio_right_unscaled: signed(15 downto 0);
   signal enable_l   : boolean;
   signal enable_r   : boolean;
+  signal enable_l_dly: boolean;
+  signal enable_r_dly: boolean;
+
+  signal volume_sync1: unsigned(7 downto 0);
+  signal volume_sync2: unsigned(7 downto 0);
+
+  function scale_audio(val: signed(15 downto 0); factor: unsigned(7 downto 0))
+    return signed is
+    variable tmp: signed(25 downto 0);
+    variable factor_plus_one: signed(9 downto 0);
+  begin
+    factor_plus_one := signed("00" & factor) + 1;
+    tmp := val * factor_plus_one;
+    return tmp(25 downto 10);
+  end function;
 
 begin
 
   Audio.Left        <= audio_left;
   Audio.Right       <= audio_right;
-  Audio.LeftEnable  <= enable_l;
-  Audio.RightEnable <= enable_r;
+  Audio.LeftEnable  <= enable_l_dly;
+  Audio.RightEnable <= enable_r_dly;
 
   -- deglitch I2S signals
   Deglitch_BClock: Deglitcher GENERIC MAP (
@@ -141,11 +160,38 @@ begin
       I2S_BClock  => bclock,
       I2S_LRClock => lrclock,
       I2S_Data    => adata,
-      Left        => audio_left,
-      Right       => audio_right,
+      Left        => audio_left_unscaled,
+      Right       => audio_right_unscaled,
       LeftEnable  => enable_l,
       RightEnable => enable_r
     );
+
+  process(Clock, clocken_spdif)
+  begin
+    if rising_edge(Clock) and clocken_spdif then
+      enable_l_dly <= enable_l;
+      enable_r_dly <= enable_r;
+
+      volume_sync2 <= volume_sync1;
+      volume_sync1 <= Volume;
+
+      if enable_l then
+        if volume_sync2 = x"00" then
+          audio_left <= (others => '0');
+        else
+          audio_left <= scale_audio(audio_left_unscaled, volume_sync2);
+        end if;
+      end if;
+
+      if enable_r then
+        if volume_sync2 = x"00" then
+          audio_right <= (others => '0');
+        else
+          audio_right <= scale_audio(audio_right_unscaled, volume_sync2);
+        end if;
+      end if;
+    end if;
+  end process;
 
   -- encode audio as SPDIF
   Inst_SPDIFEnc: SPDIF_Encoder

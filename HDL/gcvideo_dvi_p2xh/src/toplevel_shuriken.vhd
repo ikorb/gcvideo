@@ -202,6 +202,7 @@ begin
       I2S_BClock  => I2S_BClock,
       I2S_LRClock => I2S_LRClock,
       I2S_Data    => I2S_Data,
+      Volume      => video_settings.Volume,
       Audio       => audio,
       SPDIF_Out   => SPDIF_Out
     );

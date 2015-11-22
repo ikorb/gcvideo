@@ -43,7 +43,9 @@
 #define MENUITEM_DVIENHANCED 2
 #define MENUITEM_169         3
 #define MENUITEM_SWITCHDELAY 4
-#define MENUITEM_EXIT        5
+#define MENUITEM_VOLUME      5
+#define MENUITEM_MUTE        6
+#define MENUITEM_EXIT        7
 
 /* --- getters and setters --- */
 
@@ -52,6 +54,8 @@ static int get_rgblimited(void)  { return video_settings[current_videomode] & VI
 static int get_dvienhanced(void) { return video_settings[current_videomode] & VIDEOIF_SET_DVIENHANCED; }
 static int get_169(void)         { return video_settings[current_videomode] & VIDEOIF_SET_169;         }
 static int get_switchdelay(void) { return mode_switch_delay;                                           }
+static int get_volume(void)      { return audio_volume;                                                }
+static int get_mute(void)        { return audio_mute;                                                  }
 
 static void set_all_modes(uint32_t flag, bool state) {
   for (unsigned int i = 0; i < VIDMODE_COUNT; i++) {
@@ -91,11 +95,29 @@ static bool set_switchdelay(int value) {
   return false;
 }
 
+static bool set_volume(int value) {
+  audio_volume = value;
+  if (!audio_mute)
+    VIDEOIF->audio_volume = value;
+  return false;
+}
+
+static bool set_mute(int value) {
+  audio_mute = value;
+  if (audio_mute)
+    VIDEOIF->audio_volume = 0;
+  else
+    VIDEOIF->audio_volume = audio_volume;
+  return false;
+}
+
 static valueitem_t value_cabledetect = { get_cabledetect, set_cabledetect, VALTYPE_BOOL };
 static valueitem_t value_rgblimited  = { get_rgblimited,  set_rgblimited,  VALTYPE_BOOL };
 static valueitem_t value_dvienhanced = { get_dvienhanced, set_dvienhanced, VALTYPE_BOOL };
 static valueitem_t value_169         = { get_169,         set_169,         VALTYPE_BOOL };
 static valueitem_t value_switchdelay = { get_switchdelay, set_switchdelay, VALTYPE_BYTE };
+static valueitem_t value_volume      = { get_volume,      set_volume,      VALTYPE_BYTE };
+static valueitem_t value_mute        = { get_mute,        set_mute,        VALTYPE_BOOL };
 
 /* --- menu definition --- */
 
@@ -107,12 +129,14 @@ static menuitem_t otherset_items[] = {
   { "Enhanced DVI mode", &value_dvienhanced, 2, 0 }, // 2
   { "  Display as 16:9", &value_169,         3, 0 }, // 3
   { "Mode switch delay", &value_switchdelay, 4, 0 }, // 4
-  { "Exit",              NULL,               6, 0 }, // 5
+  { "Volume",            &value_volume,      5, 0 }, // 5
+  { "Mute",              &value_mute,        6, 0 }, // 6
+  { "Exit",              NULL,               8, 0 }, // 7
 };
 
 static menu_t otherset_menu = {
-  9, 10,
-  26, 9,
+  9, 9,
+  26, 11,
   otherset_draw,
   sizeof(otherset_items) / sizeof(*otherset_items),
   otherset_items

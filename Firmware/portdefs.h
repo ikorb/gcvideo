@@ -65,6 +65,7 @@ typedef struct {
   __IO uint32_t flags;
   __IO uint32_t settings;
   __IO uint32_t osd_bg;
+  __IO uint32_t audio_volume;
 } VideoInterface_TypeDef;
 
 #define VIDEOIF_FLAG_PROGRESSIVE (1<<0)
