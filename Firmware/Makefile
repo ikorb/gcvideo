@@ -46,10 +46,10 @@ OBJFILES    := $(CRT0) main.o osd.o printf.o pad.o vsync.o menu.o \
 	modeset_common.o screen_about.o screen_allmodes.o \
 	screen_idle.o screen_mainmenu.o screen_osdsettings.o screen_othersettings.o \
 	settings.o spiflash.o
-BITFILE_IN  := ../HDL/gcvideo_dvi_p2xh/src/toplevel_p2xh.bit
-BITFILE_OUT := ../HDL/gcvideo_dvi_p2xh/src/p2xh_output.bit
-MIFFILE_OUT := ../HDL/gcvideo_dvi_p2xh/src/zpu_bootrom.mif
-BMMFILE     := ../HDL/gcvideo_dvi_p2xh/src/zpu_bootram_bd.bmm
+BITFILE_IN  := ../HDL/gcvideo_dvi/src/toplevel_p2xh.bit
+BITFILE_OUT := ../HDL/gcvideo_dvi/src/p2xh_output.bit
+MIFFILE_OUT := ../HDL/gcvideo_dvi/src/zpu_bootrom.mif
+BMMFILE     := ../HDL/gcvideo_dvi/src/zpu_bootram_bd.bmm
 
 BRAM_SIZE   := 16384
 

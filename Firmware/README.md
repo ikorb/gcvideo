@@ -3,7 +3,7 @@
 This directory contains the firmware sources for GCVideo DVI.
 
 For instructions on using the firmware, please check the
-[README.md](../HDL/gcvideo_dvi_p2xh/README.md) in the HDL directory.
+[README.md](../HDL/gcvideo_dvi/README.md) in the HDL directory.
 
 ## Building ##
 
