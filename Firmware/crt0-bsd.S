@@ -299,7 +299,6 @@ _emulate_mod:
 
 
         ;; -- poppcrel --
-        ;; setPc(popIntStack()+getPc());
         ;; [ret offset] -> []
         .section ".emulate_poppcrel", "ax"
 _emulate_poppcrel:
@@ -322,11 +321,6 @@ _emulate_pushpc:
 
         ;; -- pushspadd --
         ;; [ret offset] -> [offset*4 + sp]
-        ;int a;
-        ;int b;
-        ;a = sp;
-        ;b = popIntStack() * 4;
-        ;pushIntStack(a+b);
         .section ".emulate_pushspadd", "ax"
 _emilate_pushspadd:
         pushsp                  ; [sp-4 ret offset]
