@@ -58,16 +58,25 @@ PAR_OPTS := -ol high -xe n -t 1
 SRC = $(SRC_COMMON)
 
 ifeq ($(TARGET),p2xh)
-  SRC += $(SRC_P2XH)
-  UCF := src/pindefs-p2xh.ucf
+  SRC      += $(SRC_P2XH)
+  UCF      := src/pindefs-p2xh.ucf
+  TOPLEVEL := toplevel_p2xh
 else ifeq ($(TARGET),shuriken)
-  SRC += $(SRC_SHURIKEN)
-  UCF := src/pindefs-shuriken.ucf
+  SRC      += $(SRC_SHURIKEN)
+  UCF      := src/pindefs-shuriken.ucf
+  TOPLEVEL := toplevel_shuriken
+else ifeq ($(TARGET),shuriken-v3)
+  SRC      += $(SRC_SHURIKEN)
+  UCF      := src/pindefs-shurikenv3.ucf
+  TOPLEVEL := toplevel_shuriken
 else
 dummy:
 	@echo "TARGET variable not specified"
-	@echo "Please select a build target using"
-	@echo "make TARGET=p2xh or make TARGET=shuriken"
+	@echo "Please select a build target using \"make TARGET=...\""
+	@echo "Valid targets:"
+	@echo "  - p2xh"
+	@echo "  - shuriken"
+	@echo "  - shuriken-v3"
 	@false
 endif
 
@@ -80,7 +89,6 @@ else
  E := @echo
 endif
 
-TOPLEVEL := toplevel_$(TARGET)
 
 all: build/$(XSVFFILE)
 
