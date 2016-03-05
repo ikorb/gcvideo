@@ -1,7 +1,7 @@
 -- auto-generated from edvi_ucode.mcout and template-ucode.vhd on Tue Aug 18 12:21:19 2015
 ----------------------------------------------------------------------------------
 -- GCVideo DVI HDL
--- Copyright (C) 2014-2015, Ingo Korb <ingo@akana.de>
+-- Copyright (C) 2014-2016, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
