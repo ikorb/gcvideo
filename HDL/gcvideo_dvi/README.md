@@ -363,6 +363,17 @@ the maximum scanline strength is used.
 Notes about other issues will be added as time permits.
 
 
+## Running synthesis ##
+
+There is a Xilinx ISE project file in the `src` subdirectory if you
+want to use Project Navigator. Alternatively, you can run the full
+synthesis and bitstream generation steps using the `Makefile` in this
+directory. It has only been tested on Linux and assumes that the
+Xilinx synthesis tools are reachable via the `PATH` environment
+variable. The output as well as all temporary files will be stored in
+the subdirectory `build`.
+
+
 ## Firmware sources ##
 
 The firmware sources can be found in the [Firmware](../../Firmware)
