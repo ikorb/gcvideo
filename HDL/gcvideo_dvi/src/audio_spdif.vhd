@@ -78,17 +78,17 @@ architecture Behavioral of audio_spdif is
   attribute keep of clocken_spdif:signal is "TRUE";
 
   -- audio samples
-  signal audio_left : signed(15 downto 0);
-  signal audio_right: signed(15 downto 0);
-  signal audio_left_unscaled: signed(15 downto 0);
+  signal audio_left          : signed(15 downto 0);
+  signal audio_right         : signed(15 downto 0);
+  signal audio_left_unscaled : signed(15 downto 0);
   signal audio_right_unscaled: signed(15 downto 0);
-  signal enable_l   : boolean;
-  signal enable_r   : boolean;
-  signal enable_l_dly: boolean;
-  signal enable_r_dly: boolean;
+  signal enable_l            : boolean;
+  signal enable_r            : boolean;
+  signal enable_l_dly        : boolean;
+  signal enable_r_dly        : boolean;
 
-  signal volume_sync1: unsigned(7 downto 0);
-  signal volume_sync2: unsigned(7 downto 0);
+  signal volume_sync1        : unsigned(7 downto 0);
+  signal volume_sync2        : unsigned(7 downto 0);
 
   function scale_audio(val: signed(15 downto 0); factor: unsigned(7 downto 0))
     return signed is
@@ -154,7 +154,7 @@ begin
 
   -- read I2S audio data
   Inst_I2SDec: I2S_Decoder
-    PORT MAP (
+    port map (
       Clock       => Clock,
       ClockEnable => clocken_spdif,
       I2S_BClock  => bclock,
@@ -166,6 +166,7 @@ begin
       RightEnable => enable_r
     );
 
+  -- adjust volume
   process(Clock, clocken_spdif)
   begin
     if rising_edge(Clock) and clocken_spdif then
@@ -195,7 +196,7 @@ begin
 
   -- encode audio as SPDIF
   Inst_SPDIFEnc: SPDIF_Encoder
-    PORT MAP (
+    port map (
       Clock       => Clock,
       ClockEnable => clocken_spdif,
       AudioLeft   => audio_left,
@@ -205,4 +206,3 @@ begin
     );
 
 end Behavioral;
-

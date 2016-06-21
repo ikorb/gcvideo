@@ -41,7 +41,7 @@ use work.video_defs.all;
 entity toplevel_shuriken is
   port (
     -- clocks
-    VClockN  : in  std_logic;
+    VClockN    : in  std_logic;
 
     -- gamecube video signals
     VData      : in  std_logic_vector(7 downto 0);
@@ -57,70 +57,70 @@ entity toplevel_shuriken is
     PadData    : in  std_logic;
 
     -- flash chip
-    Flash_MOSI   : out std_logic;
-    Flash_MISO   : in  std_logic;
-    Flash_SCK    : out std_logic;
-    Flash_SSEL   : out std_logic;
+    Flash_MOSI : out std_logic;
+    Flash_MISO : in  std_logic;
+    Flash_SCK  : out std_logic;
+    Flash_SSEL : out std_logic;
 
     -- audio out
-    SPDIF_Out: out   std_logic;
+    SPDIF_Out  : out   std_logic;
 
     -- video out
-    DVI_Clock: out   std_logic_vector(1 downto 0);
-    DVI_Red  : out   std_logic_vector(1 downto 0);
-    DVI_Green: out   std_logic_vector(1 downto 0);
-    DVI_Blue : out   std_logic_vector(1 downto 0)
+    DVI_Clock  : out   std_logic_vector(1 downto 0);
+    DVI_Red    : out   std_logic_vector(1 downto 0);
+    DVI_Green  : out   std_logic_vector(1 downto 0);
+    DVI_Blue   : out   std_logic_vector(1 downto 0)
   );
 end toplevel_shuriken;
 
 architecture Behavioral of toplevel_shuriken is
   -- clocks
-  signal Clock54M     : std_logic;
-  signal ClockAudio   : std_logic;
-  signal DVIClockP    : std_logic;
-  signal DVIClockN    : std_logic;
+  signal Clock54M       : std_logic;
+  signal ClockAudio     : std_logic;
+  signal DVIClockP      : std_logic;
+  signal DVIClockN      : std_logic;
 
   -- video pipeline signals
-  signal video_422       : VideoY422;
-  signal video_ld        : VideoY422;
-  signal video_444       : VideoYCbCr;
-  signal video_444_rb    : VideoYCbCr; -- reblanked
-  signal video_444_sl    : VideoYCbCr; -- scanlined
-  signal video_444_osd   : VideoYCbCr;
-  signal video_rgb       : VideoRGB;
-  signal video_out       : VideoRGB;
+  signal video_422      : VideoY422;
+  signal video_ld       : VideoY422;
+  signal video_444      : VideoYCbCr;
+  signal video_444_rb   : VideoYCbCr; -- reblanked
+  signal video_444_sl   : VideoYCbCr; -- scanlined
+  signal video_444_osd  : VideoYCbCr;
+  signal video_rgb      : VideoRGB;
+  signal video_out      : VideoRGB;
 
-  signal pixel_clk_en    : boolean;
-  signal pixel_clk_en_2x : boolean;
-  signal pixel_clk_en_ld : boolean;
-  signal pixel_clk_en_27 : boolean; -- used for DVI output, automatically results in pixel-doubling for 15k modes
+  signal pixel_clk_en   : boolean;
+  signal pixel_clk_en_2x: boolean;
+  signal pixel_clk_en_ld: boolean;
+  signal pixel_clk_en_27: boolean; -- used for DVI output, automatically results in pixel-doubling for 15k modes
 
   -- internal 24 bit VGA signals
-  signal VGA_Red  : std_logic_vector(7 downto 0);
-  signal VGA_Green: std_logic_vector(7 downto 0);
-  signal VGA_Blue : std_logic_vector(7 downto 0);
-  signal VGA_HSync: std_logic;
-  signal VGA_VSync: std_logic;
-  signal VGA_Blank: std_logic;
+  signal VGA_Red        : std_logic_vector(7 downto 0);
+  signal VGA_Green      : std_logic_vector(7 downto 0);
+  signal VGA_Blue       : std_logic_vector(7 downto 0);
+  signal VGA_HSync      : std_logic;
+  signal VGA_VSync      : std_logic;
+  signal VGA_Blank      : std_logic;
 
   -- encoded DVI signals
-  signal red_enc     : std_logic;
-  signal green_enc   : std_logic;
-  signal blue_enc    : std_logic;
-  signal clock_enc   : std_logic;
+  signal red_enc        : std_logic;
+  signal green_enc      : std_logic;
+  signal blue_enc       : std_logic;
+  signal clock_enc      : std_logic;
 
   -- OSD
-  signal osd_ram_addr: std_logic_vector(10 downto 0);
-  signal osd_ram_data: std_logic_vector(8 downto 0);
-  signal osd_settings: OSDSettings_t;
+  signal osd_ram_addr   : std_logic_vector(10 downto 0);
+  signal osd_ram_data   : std_logic_vector(8 downto 0);
+  signal osd_settings   : OSDSettings_t;
 
   -- audio
-  signal audio: AudioData;
+  signal audio          : AudioData;
 
   -- misc
-  signal video_settings: VideoSettings_t;
-  signal clock_locked  : std_logic;
-  signal scanline_even : boolean;
+  signal video_settings : VideoSettings_t;
+  signal clock_locked   : std_logic;
+  signal scanline_even  : boolean;
 
   signal obuf_oe        : std_logic;
 
@@ -186,13 +186,13 @@ begin
   -- master clock generator
   Inst_ClockGen: ClockGen
     PORT MAP (
-      ClockIn       => VClockN,
-      Reset         => '0',
-      Clock54M      => Clock54M,
-      ClockAudio    => ClockAudio,
-      DVIClockP     => DVIClockP,
-      DVIClockN     => DVIClockN,
-      Locked        => clock_locked
+      ClockIn    => VClockN,
+      Reset      => '0',
+      Clock54M   => Clock54M,
+      ClockAudio => ClockAudio,
+      DVIClockP  => DVIClockP,
+      DVIClockN  => DVIClockN,
+      Locked     => clock_locked
     );
 
   -- audio module
@@ -252,13 +252,13 @@ begin
   -- overlay scanlines
   Inst_Scanliner: Scanline_Generator
     PORT MAP (
-      PixelClock         => Clock54M,
-      PixelClockEnable   => pixel_clk_en_ld,
-      Enable             => video_settings.ScanlinesEnabled,
-      Strength           => video_settings.ScanlineStrength,
-      Use_Even           => scanline_even,
-      VideoIn            => video_444_rb,
-      VideoOut           => video_444_sl
+      PixelClock       => Clock54M,
+      PixelClockEnable => pixel_clk_en_ld,
+      Enable           => video_settings.ScanlinesEnabled,
+      Strength         => video_settings.ScanlineStrength,
+      Use_Even         => scanline_even,
+      VideoIn          => video_444_rb,
+      VideoOut         => video_444_sl
     );
 
   scanline_even <= video_settings.ScanlinesEven xor (not video_422.IsProgressive and video_422.IsEvenField and video_settings.ScanlinesAlternate);
@@ -278,12 +278,12 @@ begin
   -- convert YUV to RGB
   Inst_yuv_to_rgb: Convert_yuv_to_rgb
     PORT MAP (
-      PixelClock         => Clock54M,
-      PixelClockEnable   => pixel_clk_en_ld,
+      PixelClock       => Clock54M,
+      PixelClockEnable => pixel_clk_en_ld,
 
-      VideoIn            => video_444_osd,
-      Limited_Range      => video_settings.LimitedRange,
-      VideoOut           => video_rgb
+      VideoIn          => video_444_osd,
+      Limited_Range    => video_settings.LimitedRange,
+      VideoOut         => video_rgb
     );
 
   -- create a fixed 27-MHz pixel clock

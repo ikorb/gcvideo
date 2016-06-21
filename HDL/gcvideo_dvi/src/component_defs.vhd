@@ -149,7 +149,8 @@ package component_defs is
   GENERIC (
     Invert_Red  : Boolean := false;
     Invert_Green: Boolean := false;
-    Invert_Blue : Boolean := false
+    Invert_Blue : Boolean := false;
+    Invert_Clock: Boolean := false
   );
   PORT(
       clk           : in  std_logic;
@@ -203,10 +204,10 @@ package component_defs is
       I2S_Data   : in  std_logic;
 
       -- sample output
-      Left        : out signed(15 downto 0);
-      Right       : out signed(15 downto 0);
-      LeftEnable  : out boolean;
-      RightEnable : out boolean
+      Left       : out signed(15 downto 0);
+      Right      : out signed(15 downto 0);
+      LeftEnable : out boolean;
+      RightEnable: out boolean
     );
   end component;
 
@@ -256,27 +257,27 @@ package component_defs is
       DebounceHTL: Boolean := true
     );
     Port (
-      clock   : in  std_logic;
-      btn_in  : in  std_logic;
-      btn_out : out std_logic
+      clock  : in  std_logic;
+      btn_in : in  std_logic;
+      btn_out: out std_logic
     );
   end component;
 
   component CPUSubsystem is
     port (
-      Clock            : in  std_logic;
-      ExtReset         : in  std_logic;
-      RawVideo         : in  VideoY422;
-      PixelClockEnable : in  boolean;
-      PadData          : in  std_logic;
-      SPI_MOSI         : out std_logic;
-      SPI_MISO         : in  std_logic;
-      SPI_SCK          : out std_logic;
-      SPI_SSEL         : out std_logic;
-      OSDRamAddr       : in  std_logic_vector(10 downto 0);
-      OSDRamData       : out std_logic_vector(8 downto 0);
-      OSDSettings      : out OSDSettings_t;
-      VSettings        : out VideoSettings_t
+      Clock           : in  std_logic;
+      ExtReset        : in  std_logic;
+      RawVideo        : in  VideoY422;
+      PixelClockEnable: in  boolean;
+      PadData         : in  std_logic;
+      SPI_MOSI        : out std_logic;
+      SPI_MISO        : in  std_logic;
+      SPI_SCK         : out std_logic;
+      SPI_SSEL        : out std_logic;
+      OSDRamAddr      : in  std_logic_vector(10 downto 0);
+      OSDRamData      : out std_logic_vector(8 downto 0);
+      OSDSettings     : out OSDSettings_t;
+      VSettings       : out VideoSettings_t
     );
   end component;
 

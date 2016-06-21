@@ -120,7 +120,7 @@ begin
         case ZPUBusIn.mem_addr(4 downto 2) is
           when "011"  => vid_settings    <= ZPUBusIn.mem_write(16 downto 0);
           when "100"  => osd_bgsettings  <= ZPUBusIn.mem_write(23 downto 0);
-          when "101"  => volume_setting  <= ZPUBusIn.mem_write(7 downto 0);
+          when "101"  => volume_setting  <= ZPUBusIn.mem_write( 7 downto 0);
           when others => null;
         end case;
       end if;
