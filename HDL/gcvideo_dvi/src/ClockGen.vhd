@@ -36,7 +36,7 @@ use UNISIM.VComponents.all;
 
 
 entity ClockGen is
-  PORT (
+  port (
     ClockIn   : in  std_logic;
     Reset     : in  std_logic;
     Clock54M  : out std_logic;
@@ -56,25 +56,34 @@ architecture Behavioral of ClockGen is
   signal dvip_internal    : std_logic;
   signal dvin_internal    : std_logic;
   signal vdcm_clkfb       : std_logic;
+  signal vdcm_clk0        : std_logic;
   signal vdcm_clk2x       : std_logic;
   signal vdcm_clkfx       : std_logic;
   signal vdcm_clkfx180    : std_logic;
   signal vdcm_clkfbout    : std_logic;
   signal vdcm_locked      : std_logic;
+  signal vdcm_locked_sync : std_logic_vector(2 downto 0) := (others => '0');
   signal vdcm_reset       : std_logic;
   signal vdcm_status      : std_logic_vector(7 downto 0);
+  signal vdcm_status_sync1: std_logic_vector(7 downto 0);
+  signal vdcm_status_sync2: std_logic_vector(7 downto 0);
+  signal vdcm_reset_count : natural range 0 to 7 := 0;
   signal clock_54_internal: std_logic;
 
   signal adcm_clkfb          : std_logic;
   signal adcm_clk0           : std_logic;
   signal adcm_clkfx          : std_logic;
   signal adcm_locked         : std_logic;
+  signal adcm_locked_sync    : std_logic_vector(2 downto 0) := (others => '0');
   signal adcm_reset          : std_logic;
   signal adcm_status         : std_logic_vector(7 downto 0);
+  signal adcm_status_sync1   : std_logic_vector(7 downto 0);
+  signal adcm_status_sync2   : std_logic_vector(7 downto 0);
+  signal adcm_reset_count    : natural range 0 to 7 := 0;
   signal clock_audio_internal: std_logic;
 
 begin
-  Locked <= vdcm_locked and adcm_locked;
+  Locked <= vdcm_locked; --and adcm_locked;
 
   -- Input buffering
   --------------------------------------
@@ -88,17 +97,14 @@ begin
   -- Clocking primitive 1 - System+Video
   --------------------------------------
 
-  -- Instantiation of the DCM primitive
-  --    * Unused inputs are tied off
-  --    * Unused outputs are labeled unused
   video_dcm_sp_inst: DCM_SP
   generic map
    (CLKDV_DIVIDE          => 2.0,
-    CLKFX_DIVIDE          => 1,
+    CLKFX_DIVIDE          => 2,
     CLKFX_MULTIPLY        => 5,
-    CLKIN_DIVIDE_BY_2     => true,
+    CLKIN_DIVIDE_BY_2     => false,
     CLKOUT_PHASE_SHIFT    => "NONE",
-    CLK_FEEDBACK          => "2X",
+    CLK_FEEDBACK          => "1X",
     DESKEW_ADJUST         => "SYSTEM_SYNCHRONOUS",
     PHASE_SHIFT           => 0,
     STARTUP_WAIT          => TRUE)
@@ -107,7 +113,7 @@ begin
    (CLKIN                 => ClockIn_internal,
     CLKFB                 => vdcm_clkfb,
     -- Output clocks
-    CLK0                  => open,
+    CLK0                  => vdcm_clk0,
     CLK90                 => open,
     CLK180                => open,
     CLK270                => open,
@@ -132,20 +138,35 @@ begin
   vdcm_clkfb <= clock_54_internal;
 
   -- auto-reset on clock trouble
-  process(Reset, vdcm_locked, vdcm_status)
+  process(ClockIn_internal)
   begin
-    vdcm_reset <= Reset or (vdcm_status(2) and not vdcm_locked);
+    if rising_edge(ClockIn_internal) then
+      -- sync DCM signals
+      vdcm_locked_sync  <= vdcm_locked_sync(1 downto 0) & vdcm_locked;
+      vdcm_status_sync2 <= vdcm_status_sync1;
+      vdcm_status_sync1 <= vdcm_status;
+
+      -- ensure reset is held for a few clocks
+      vdcm_reset <= '0';
+      if vdcm_reset_count > 0 then
+        vdcm_reset_count <= vdcm_reset_count - 1;
+        vdcm_reset       <= '1';
+      else
+        -- check failure indicators
+        if Reset = '1' or
+           vdcm_status_sync2(1) = '1' or -- CLKIN not toggling
+           vdcm_status_sync2(2) = '1' or -- CLKFX not toggling
+          (vdcm_locked_sync(2) = '1' and vdcm_locked_sync(1) = '0') then
+          vdcm_reset_count <= 7;
+        end if;
+      end if;
+    end if;
   end process;
 
-
   -- Clocking primitive 2 - Audio
-  -- needs a fast clock to keep the SPDIF
-  -- clock jitter low (32/216 * 54MHz)
+  --   needs a fast clock to keep the SPDIF
+  --   clock jitter low (32/216 * 54MHz)
   --------------------------------------
-
-  -- Instantiation of the DCM primitive
-  --    * Unused inputs are tied off
-  --    * Unused outputs are labeled unused
   audio_dcm_sp_inst: DCM_SP
   generic map
    (CLKDV_DIVIDE          => 2.0,
@@ -187,25 +208,40 @@ begin
   adcm_clkfb <= adcm_clk0;
 
   -- auto-reset on clock trouble
-  process(Reset, adcm_locked, adcm_status)
+  -- (same as VDCM above)
+  process(ClockIn_internal)
   begin
-    adcm_reset <= Reset or (adcm_status(2) and not adcm_locked);
+    if rising_edge(ClockIn_internal) then
+      -- sync DCM signals
+      adcm_locked_sync  <= adcm_locked_sync(1 downto 0) & adcm_locked;
+      adcm_status_sync2 <= adcm_status_sync1;
+      adcm_status_sync1 <= adcm_status;
+
+      -- ensure reset is held for a few clocks
+      adcm_reset <= '0';
+      if adcm_reset_count > 0 then
+        adcm_reset_count <= adcm_reset_count - 1;
+        adcm_reset       <= '1';
+      else
+        -- check failure indicators
+        if Reset = '1' or
+           adcm_status_sync2(1) = '1' or -- CLKIN not toggling
+           adcm_status_sync2(2) = '1' or -- CLKFX not toggling
+          (adcm_locked_sync(2) = '1' and adcm_locked_sync(1) = '0') then
+          adcm_reset_count <= 7;
+        end if;
+      end if;
+    end if;
   end process;
 
   -- Output buffering
   -------------------------------------
 
   clk54_buf: BUFG PORT MAP (
-    I => vdcm_clk2x,
+    I => vdcm_clk0,
     O => clock_54_internal
   );
   Clock54M <= clock_54_internal;
-
-  clkaud_buf: BUFG PORT MAP (
-    I => adcm_clkfx,
-    O => clock_audio_internal
-  );
-  ClockAudio <= clock_audio_internal;
 
   dviclkp_buf: BUFG PORT MAP (
     I => vdcm_clkfx,
@@ -219,5 +255,13 @@ begin
 
   DVIClockP  <= dvip_internal;
   DVIClockN  <= dvin_internal;
+
+  -- buffer clkfx output of DCM
+  clkaud_gc_buf: BUFG PORT MAP (
+    I => adcm_clkfx,
+    O => clock_audio_internal
+  );
+
+  ClockAudio <= clock_audio_internal;
 
 end Behavioral;
