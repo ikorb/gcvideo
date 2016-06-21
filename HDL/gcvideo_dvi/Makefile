@@ -22,6 +22,7 @@ SRC_COMMON := \
 	src/ZPU_DPRAM.vhd                  \
 	src/ZPU_SPI.vhd                    \
 	src/audio_spdif.vhd                \
+	src/ConsoleModeDetect.vhd          \
 	src/aux_ecc1.vhd                   \
 	src/aux_ecc2.vhd                   \
 	src/aux_encoder.vhd                \

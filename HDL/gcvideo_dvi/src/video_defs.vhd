@@ -34,6 +34,8 @@ use IEEE.NUMERIC_STD.ALL;
 
 package video_defs is
 
+  type console_mode_t is (MODE_GC, MODE_WII);
+
   type VideoY422 is record
     PixelY       : unsigned(7 downto 0);
     PixelCbCr    : unsigned(7 downto 0);

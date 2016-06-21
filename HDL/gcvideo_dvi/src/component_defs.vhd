@@ -308,6 +308,14 @@ package component_defs is
     );
   end component;
 
+  component ConsoleModeDetect is
+    port (
+      Clock      : in  std_logic;
+      I2S_LRClock: in  std_logic;
+      ConsoleMode: out console_mode_t
+    );
+  end component;
+
 end component_defs;
 
 package body component_defs is

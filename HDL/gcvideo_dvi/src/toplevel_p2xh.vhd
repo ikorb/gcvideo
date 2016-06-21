@@ -51,7 +51,7 @@ entity toplevel_p2xh is
     CSel       : in  std_logic; -- usually named ClkSel, but it's really a color select
     CableDetect: out std_logic;
 
-    -- gamecube audio signals
+    -- console audio signals
     I2S_BClock : in  std_logic;
     I2S_LRClock: in  std_logic;
     I2S_Data   : in  std_logic;
@@ -71,7 +71,7 @@ entity toplevel_p2xh is
     LED2       : out std_logic;
 
     -- audio out
-    SPDIF_Out  : out   std_logic;
+    SPDIF_Out  : out std_logic;
 
     -- video out
     DVI_Clock  : out   std_logic_vector(1 downto 0);
@@ -127,6 +127,9 @@ architecture Behavioral of toplevel_p2xh is
   -- audio
   signal audio          : AudioData;
 
+  -- console mode detection
+  signal console_mode   : console_mode_t := MODE_GC;
+
   -- misc
   signal video_settings : VideoSettings_t;
   signal clock_locked   : std_logic;
@@ -143,8 +146,25 @@ architecture Behavioral of toplevel_p2xh is
 
 begin
 
+  mode_detect: if TargetConsole = "WII" generate
+    Inst_CMD: ConsoleModeDetect port map (
+      Clock       => Clock54M,
+      I2S_LRClock => I2S_LRClock,
+      ConsoleMode => console_mode
+    );
+
+    -- (note: console_mode is initialized to MODE_GC)
+  end generate;
+
   -- misc outputs
-  LED1        <= heartbeat_led1; --clock_locked;
+  l1_gc: if TargetConsole = "GC" generate
+    LED1 <= heartbeat_led1;
+  end generate;
+
+  l1_wii: if TargetConsole = "WII" generate
+    LED1 <= '1' when console_mode = MODE_WII else '0';
+  end generate;
+
   LED2        <= heartbeat_led2;
   Flash_Hold  <= '1';
   DDC_SCL     <= 'Z'; -- currently not used, but must be defined to avoid
