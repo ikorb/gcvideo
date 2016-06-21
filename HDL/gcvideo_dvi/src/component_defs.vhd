@@ -157,6 +157,7 @@ package component_defs is
       clk_n         : in  std_logic;
       clk_pixel     : in  std_logic;
       clk_pixel_en  : in  boolean;
+      ConsoleMode   : in  console_mode_t;
       red_p         : in  std_logic_vector(7 downto 0);
       green_p       : in  std_logic_vector(7 downto 0);
       blue_p        : in  std_logic_vector(7 downto 0);

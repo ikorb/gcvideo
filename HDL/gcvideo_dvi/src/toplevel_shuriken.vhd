@@ -159,6 +159,7 @@ begin
     clk_n         => DVIClockN,
     clk_pixel     => Clock54M,
     clk_pixel_en  => pixel_clk_en_27,
+    ConsoleMode   => MODE_GC,
     red_p         => VGA_Red,
     green_p       => VGA_Green,
     blue_p        => VGA_Blue,

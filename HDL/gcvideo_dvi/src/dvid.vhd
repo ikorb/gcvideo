@@ -33,6 +33,7 @@ entity dvid is
            clk_n         : in  STD_LOGIC;
            clk_pixel     : in  STD_LOGIC;
            clk_pixel_en  : in  boolean;
+           ConsoleMode   : in  console_mode_t;
            red_p         : in  STD_LOGIC_VECTOR (7 downto 0);
            green_p       : in  STD_LOGIC_VECTOR (7 downto 0);
            blue_p        : in  STD_LOGIC_VECTOR (7 downto 0);
@@ -117,6 +118,7 @@ architecture Behavioral of dvid is
   signal ifr_select    : unsigned(4 downto 0) := (others => '0'); -- group selection
   signal ifr_data      : std_logic_vector(8 downto 0) := (others => '0');
   signal ifr_send_acr  : boolean := false;
+  signal wii_acr       : std_logic := '0';
 
   signal aux_ready        : boolean := false;
   signal per_frame_packets: unsigned(1 downto 0) := (others => '0');
@@ -214,7 +216,8 @@ begin
     Data        => ifr_data
   );
 
-  ifr_fulladdr <= "00000" & ifr_addr when ifr_send_acr
+  wii_acr <= '1' when ConsoleMode = MODE_WII else '0';
+  ifr_fulladdr <= wii_acr & "0000" & ifr_addr when ifr_send_acr
                    else ifr_select & ifr_addr;
 
   -- TMDS
