@@ -83,7 +83,7 @@ begin
     elsif current_device = -1 then
       -- default device
       mem_busy_out <= '0';
-      mem_read_out <= (others => '0');
+      mem_read_out <= (others => '-');  -- same
     else
       -- copy outputs of selected device
       mem_busy_out <= DevOuts(current_device).mem_busy;
