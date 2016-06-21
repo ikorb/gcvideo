@@ -1,13 +1,21 @@
 # Pregenerated infoframes, built using slightly modified versions
 # of drivers/video/hdmi.c and include/linux/hdmi.h from the Linux kernel
 
-# CTS = 26976, N = 6144
-Audio Clock Regeneration:
+# CTS = 26976, N = 6144 (~48042 Hz)
+Audio Clock Regeneration 48042:
 H: 000001
 0: 00180060690000
 1: 00180060690000
 2: 00180060690000
 3: 00180060690000
+
+# CTS = 27000, N = 6144 (48000 Hz)
+Audio Clock Regeneration 48000:
+H: 000001
+0: 00180078690000
+1: 00180078690000
+2: 00180078690000
+3: 00180078690000
 
 Source Product Description:
 H: 190183
@@ -19,6 +27,14 @@ H: 190183
 Audio:
 H: 0a0184
 0: 00000000000170
+
+# dummy frame to fill empty slots
+empty:
+H: 000000
+0: 00000000000000
+1: 00000000000000
+2: 00000000000000
+3: 00000000000000
 
 480i full:
 H: 0d0282

@@ -104,7 +104,7 @@ package dvienc_defs is
       Clock      : in  std_logic;
       ClockEnable: in  boolean;
 
-      Address    : in  unsigned(11 downto 0);
+      Address    : in  unsigned(9 downto 0);
       Data       : out std_logic_vector(8 downto 0)
     );
   end component;

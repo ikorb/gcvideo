@@ -35,10 +35,11 @@ use Data::Dumper;
 no warnings 'portable';  # Support for 64-bit ints required
 
 my @modes = ( # order matters!
-    # ACR
-    # empty
-    # empty
-    # empty
+    # these four would be 960i/1152i, but the Cube can't output that
+    "Audio Clock Regeneration 48042",
+    "Source Product Description",
+    "Audio",
+    "empty",
 
     "480p full",
     "480p limited",
@@ -55,11 +56,11 @@ my @modes = ( # order matters!
     "288p full",
     "288p limited",
 
-    # four unused slots, but the generator must output something
-    "480p full",
-    "480p full",
-    "480p full",
-    "480p full",
+    # four unused slots
+    "Audio Clock Regeneration 48000",
+    "empty",
+    "empty",
+    "empty",
 
     "480p full 169",
     "480p limited 169",
@@ -181,34 +182,15 @@ while (<TPL>) {
 
 ### output when statements for the ROM
 
-# print the ACR packet four times because it may interrupt the other packets
-say $out "      ---- Audio Clock Regeneration (x4)";
-print_frame($out,  0, bitshuffle($frames{"Audio Clock Regeneration"}));
-print_frame($out, 32, bitshuffle($frames{"Audio Clock Regeneration"}));
-print_frame($out, 64, bitshuffle($frames{"Audio Clock Regeneration"}));
-print_frame($out, 96, bitshuffle($frames{"Audio Clock Regeneration"}));
-
-# print all modes
-my $ADDRESS_SCALE = 32 * 4;
-
-my $blocknum = 4; # first four would be 960i/1152i
+my $ADDRESS_SCALE = 32;
+my $blocknum = 0;
 
 foreach my $m (@modes) {
     my $address = $blocknum * $ADDRESS_SCALE;
 
     say $out "\n      ---- $m";
-
-    # AVI
     print_frame($out, $address, bitshuffle($frames{$m}));
     $address += 32;
-    # Audio
-    say $out "      -- Audio";
-    print_frame($out, $address, bitshuffle($frames{"Audio"}));
-    $address += 32;
-    # SPD
-    say $out "      -- SPD";
-    print_frame($out, $address, bitshuffle($frames{"Source Product Description"}));
-
     $blocknum++;
 }
 

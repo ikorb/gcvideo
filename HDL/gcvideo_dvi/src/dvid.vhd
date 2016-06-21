@@ -112,15 +112,14 @@ architecture Behavioral of dvid is
   signal blank_d: std_logic;
 
   -- infoframe ROM signals
-  signal ifr_fulladdr  : unsigned(11 downto 0);
+  signal ifr_fulladdr  : unsigned(9 downto 0);
   signal ifr_addr      : unsigned(4 downto 0) := (others => '0'); -- address counter
-  signal ifr_frame     : unsigned(1 downto 0) := (others => '0'); -- frame in group
   signal ifr_select    : unsigned(4 downto 0) := (others => '0'); -- group selection
-  signal ifr_prevselect: unsigned(4 downto 0) := (others => '0'); -- group selection backup during ACR
   signal ifr_data      : std_logic_vector(8 downto 0) := (others => '0');
+  signal ifr_send_acr  : boolean := false;
 
   signal aux_ready        : boolean := false;
-  signal per_frame_packets: natural range 0 to 4 := 0;
+  signal per_frame_packets: unsigned(1 downto 0) := (others => '0');
 
   -- subpackets
   signal subpacket1_odd,  subpacket2_odd,  subpacket3_odd,  subpacket4_odd : std_logic_vector(27 downto 0) := (others => '0');
@@ -214,7 +213,9 @@ begin
     Address     => ifr_fulladdr,
     Data        => ifr_data
   );
-  ifr_fulladdr <= ifr_select & ifr_frame & ifr_addr;
+
+  ifr_fulladdr <= "00000" & ifr_addr when ifr_send_acr
+                   else ifr_select & ifr_addr;
 
   -- TMDS
   TMDSWord_Red   <= latched_red;
@@ -431,9 +432,8 @@ begin
 
               if audio_needs_acr then
                 -- send an Audio Clock Regeneration packet ASAP
-                seq_address    <= UCode_Addr_TwoPackets;
-                ifr_prevselect <= ifr_select;
-                ifr_select     <= (others => '0');
+                seq_address  <= UCode_Addr_TwoPackets;
+                ifr_send_acr <= true;
 
               elsif per_frame_packets /= 0 then
                 -- send another of the once-per-frame packets
@@ -464,11 +464,11 @@ begin
             video_state <= VS_BLANKING;
 
             if audio_needs_acr then
-              -- restore previous once-per-frame group
-              ifr_select <= ifr_prevselect;
+              -- turn off infoframe-override flag
+              ifr_send_acr <= false;
 
             elsif per_frame_packets /= 0 then
-              ifr_frame <= ifr_frame + 1;
+              ifr_select <= "000" & per_frame_packets;
             end if;
 
             -- clear audio data
@@ -494,8 +494,7 @@ begin
 
       -- enable once-per-frame packet transmission at VSync start
       if vsync_delay(0) = '1' and vsync_delay(1) = '0' then
-        per_frame_packets <= 3;
-        ifr_frame         <= (others => '0');
+        per_frame_packets <= to_unsigned(3, 2);
 
         -- choose the packet sequence to send for the current video mode
         ifr_select <= (others => '0');
