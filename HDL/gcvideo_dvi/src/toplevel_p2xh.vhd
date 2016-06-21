@@ -169,7 +169,20 @@ begin
   Flash_Hold  <= '1';
   DDC_SCL     <= 'Z'; -- currently not used, but must be defined to avoid
   DDC_SDA     <= 'Z'; --   damaging the FPGA I/O drivers
-  CableDetect <= '1' when video_settings.CableDetect else '0';
+
+  process(video_settings)
+  begin
+    if video_settings.CableDetect then
+      CableDetect <= '1';
+    else
+      if TargetConsole = "WII" then
+        -- avoid a hard low so an external cable doesn't short the output
+        CableDetect <= 'Z';
+      else
+        CableDetect <= '0';
+      end if;
+    end if;
+  end process;
 
   -- heartbeat on LEDs
   process (Clock54M)
