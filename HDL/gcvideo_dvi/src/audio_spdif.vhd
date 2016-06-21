@@ -48,6 +48,7 @@ use work.video_defs.all;
 entity audio_spdif is
   port (
     Clock      : in  std_logic; -- 3*54 MHz
+    ConsoleMode: in  console_mode_t;
 
     I2S_BClock : in  std_logic;
     I2S_LRClock: in  std_logic;
@@ -62,17 +63,23 @@ entity audio_spdif is
 end audio_spdif;
 
 architecture Behavioral of audio_spdif is
-  constant clockdiv_num: integer := 32;
-  constant clockdiv_den: integer := 281 * 3;
+  -- fractional clock enable generator for 384fs
+  constant ClockDiv_Num_GC : integer := 32;
+  constant ClockDiv_Den_GC : integer := 281;
+  constant ClockDiv_Num_Wii: integer := 128;
+  constant ClockDiv_Den_Wii: integer := 1125;
+
+  signal clockdiv_num : integer range 32  to 128  := clockdiv_num_gc;
+  signal clockdiv_den : integer range 281 to 1125 := clockdiv_den_gc;
+
+  signal clock_counter: integer range -clockdiv_num_wii to clockdiv_den_wii := 0;
+  signal clocken_spdif: boolean;
+  signal prev_mode    : console_mode_t := MODE_GC;
 
   -- cleaned-up versions of the I2S signals
   signal bclock : std_logic;
   signal lrclock: std_logic;
   signal adata  : std_logic;
-
-  -- clock enable generation
-  signal clock_counter: integer range -clockdiv_num to clockdiv_den := 0;
-  signal clocken_spdif: boolean;
 
   attribute keep: string;
   attribute keep of clocken_spdif:signal is "TRUE";
@@ -138,16 +145,33 @@ begin
     Output      => adata
   );
 
-  -- generate a clock enable signal for SPDIF, 128*f_s
+  -- generate a clock enable signal for audio, 384fs
   process(Clock)
   begin
     if rising_edge(Clock) then
-      if clock_counter < 0 then
-        clock_counter <= clock_counter + clockdiv_den - clockdiv_num;
-        clocken_spdif <= true;
+      clocken_spdif <= false;
+      prev_mode     <= ConsoleMode;
+
+      if prev_mode /= ConsoleMode then
+        -- reset counter and update divider settings on mode switch
+        clock_counter <= 0;
+
+        if ConsoleMode = MODE_GC then
+          clockdiv_num <= ClockDiv_Num_GC;
+          clockdiv_den <= ClockDiv_Den_GC;
+        else
+          clockdiv_num <= ClockDiv_Num_Wii;
+          clockdiv_den <= ClockDiv_Den_Wii;
+        end if;
+
       else
-        clock_counter <= clock_counter - clockdiv_num;
-        clocken_spdif <= false;
+
+        if clock_counter < 0 then
+          clock_counter <= clock_counter + clockdiv_den - clockdiv_num;
+          clocken_spdif <= true;
+        else
+          clock_counter <= clock_counter - clockdiv_num;
+        end if;
       end if;
     end if;
   end process;

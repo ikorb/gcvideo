@@ -26,7 +26,7 @@
 --
 -- i2s_decoder.vhd: Decoder for I2S audio
 --
--- Note: Assumes 16 bit per channel
+-- Note: Assumes 16 bit per channel, right-aligned
 --
 ----------------------------------------------------------------------------------
 

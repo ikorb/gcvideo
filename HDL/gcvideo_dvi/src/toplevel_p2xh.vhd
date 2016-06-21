@@ -279,6 +279,7 @@ begin
   Inst_Audio: Audio_SPDIF
     port map (
       Clock       => ClockAudio,
+      ConsoleMode => console_mode,
       I2S_BClock  => I2S_BClock,
       I2S_LRClock => I2S_LRClock,
       I2S_Data    => I2S_Data,

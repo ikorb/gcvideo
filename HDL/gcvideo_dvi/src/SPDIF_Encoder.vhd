@@ -29,6 +29,7 @@
 -- Inspired (but then written from scratch) by the SPDIF encoder from
 -- Mike Field at http://hamsterworks.co.nz/mediawiki/index.php/SPDIF_out
 --
+-- Clock/ClockEnable inputs must result in 384 times the sample frequency
 ----------------------------------------------------------------------------------
 
 library IEEE;
@@ -66,27 +67,34 @@ architecture Behavioral of SPDIF_Encoder is
   signal parity         : std_logic  := '1';
   signal spdif_out      : std_logic  := '1';
 
+  signal shift_delay    : natural range 0 to 2 := 0;
 begin
 
   process(Clock, ClockEnable)
   begin
     if rising_edge(Clock) and ClockEnable then
-      -- shift out the next bit
-      if bit_phase   = PHASE_SECOND or
-         shift_state = SHIFT_PREAMBLE then
-        -- second half of bit (or preamble): flip if shifter is 1
-        spdif_out <= spdif_out xor shifter(0);
-        shifter   <= "0" & shifter(15 downto 1);
-        bit_phase <= PHASE_FIRST;
+      if shift_delay = 0 then
+        shift_delay <= 2;
 
-        -- update parity
-        if shift_state /= SHIFT_PREAMBLE then
-          parity <= parity xor shifter(0);
+        -- shift out the next bit
+        if bit_phase   = PHASE_SECOND or
+           shift_state = SHIFT_PREAMBLE then
+          -- second half of bit (or preamble): flip if shifter is 1
+          spdif_out <= spdif_out xor shifter(0);
+          shifter   <= "0" & shifter(15 downto 1);
+          bit_phase <= PHASE_FIRST;
+
+          -- update parity
+          if shift_state /= SHIFT_PREAMBLE then
+            parity <= parity xor shifter(0);
+          end if;
+        else
+          -- first half of bit: just flip
+          spdif_out <= not spdif_out;
+          bit_phase <= PHASE_SECOND;
         end if;
       else
-        -- first half of bit: just flip
-        spdif_out <= not spdif_out;
-        bit_phase <= PHASE_SECOND;
+        shift_delay <= shift_delay - 1;
       end if;
 
       -- check for new sample or empty shifter
@@ -94,69 +102,72 @@ begin
         -- new sample, start from scratch at next bit
         -- (avoids synchronization issues)
         shifter_bits    <= 0;
+        shift_delay     <= 0;
         shift_state     <= SHIFT_PREAMBLE;
         bit_phase       <= PHASE_SECOND;
         current_channel <= CHAN_LEFT;
-      elsif bit_phase = PHASE_SECOND or shift_state = SHIFT_PREAMBLE then
-        if shifter_bits > 0 then
-          shifter_bits <= shifter_bits - 1;
-        else
-          -- shifter is empty, move on to next state
-          case shift_state is
-            when SHIFT_PREAMBLE =>
-              shift_state  <= SHIFT_PREFIX;
-              shifter      <= (others => '0');
-              shifter_bits <= 8 -1;
+      elsif shift_delay = 0 then
+        if bit_phase = PHASE_SECOND or shift_state = SHIFT_PREAMBLE then
+          if shifter_bits > 0 then
+            shifter_bits <= shifter_bits - 1;
+          else
+            -- shifter is empty, move on to next state
+            case shift_state is
+              when SHIFT_PREAMBLE =>
+                shift_state  <= SHIFT_PREFIX;
+                shifter      <= (others => '0');
+                shifter_bits <= 8 -1;
 
-            when SHIFT_PREFIX =>
-              shift_state  <= SHIFT_SAMPLE;
-              if current_channel = CHAN_LEFT then
-                shifter <= std_logic_vector(AudioLeft);
-              else
-                shifter <= std_logic_vector(AudioRight);
-              end if;
-              shifter_bits <= 16 -1;
-
-            when SHIFT_SAMPLE =>
-              shift_state  <= SHIFT_STATUS;
-              shifter      <= (2 => channel_status, others => '0');
-              shifter_bits <= 3 -1;
-
-            when SHIFT_STATUS =>
-              shift_state  <= SHIFT_PARITY;
-              -- hack: this happens while the channel status is shifted out, so parity hasn't updated yet
-              shifter      <= (0 => parity xor channel_status, others => '0');
-              shifter_bits <= 1 -1;
-
-            when SHIFT_PARITY =>
-              -- new subframe
-              shift_state  <= SHIFT_PREAMBLE;
-              parity       <= '0';
-              if current_channel = CHAN_LEFT then
-                -- same frame, other channel
-                current_channel <= CHAN_RIGHT;
-                shifter         <= x"00" & PREAMBLE_Y;
-              else
-                -- new frame, new channel status bis
-                current_channel <= CHAN_LEFT;
-                if subcode_bit /= 0 then
-                  -- new block
-                  if subcode_bit = 190 then
-                    -- set "copy allowed" bit
-                    channel_status <= '1';
-                  else
-                    channel_status <= '0';
-                  end if;
-                  subcode_bit <= subcode_bit - 1;
-                  shifter <= x"00" & PREAMBLE_Z;
+              when SHIFT_PREFIX =>
+                shift_state  <= SHIFT_SAMPLE;
+                if current_channel = CHAN_LEFT then
+                  shifter <= std_logic_vector(AudioLeft);
                 else
-                  subcode_bit <= 191;
-                  shifter <= x"00" & PREAMBLE_X;
+                  shifter <= std_logic_vector(AudioRight);
                 end if;
+                shifter_bits <= 16 -1;
 
-              end if;
-              shifter_bits <= 8 -1;
-          end case;
+              when SHIFT_SAMPLE =>
+                shift_state  <= SHIFT_STATUS;
+                shifter      <= (2 => channel_status, others => '0');
+                shifter_bits <= 3 -1;
+
+              when SHIFT_STATUS =>
+                shift_state  <= SHIFT_PARITY;
+                -- hack: this happens while the channel status is shifted out, so parity hasn't updated yet
+                shifter      <= (0 => parity xor channel_status, others => '0');
+                shifter_bits <= 1 -1;
+
+              when SHIFT_PARITY =>
+                -- new subframe
+                shift_state  <= SHIFT_PREAMBLE;
+                parity       <= '0';
+                if current_channel = CHAN_LEFT then
+                  -- same frame, other channel
+                  current_channel <= CHAN_RIGHT;
+                  shifter         <= x"00" & PREAMBLE_Y;
+                else
+                  -- new frame, new channel status bis
+                  current_channel <= CHAN_LEFT;
+                  if subcode_bit /= 0 then
+                    -- new block
+                    if subcode_bit = 190 then
+                      -- set "copy allowed" bit
+                      channel_status <= '1';
+                    else
+                      channel_status <= '0';
+                    end if;
+                    subcode_bit <= subcode_bit - 1;
+                    shifter <= x"00" & PREAMBLE_Z;
+                  else
+                    subcode_bit <= 191;
+                    shifter <= x"00" & PREAMBLE_X;
+                  end if;
+
+                end if;
+                shifter_bits <= 8 -1;
+            end case;
+          end if;
         end if;
       end if;
     end if;

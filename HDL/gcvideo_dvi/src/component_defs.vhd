@@ -225,6 +225,7 @@ package component_defs is
   component audio_spdif is
     port (
       Clock      : in  std_logic; -- 3*54 MHz
+      ConsoleMode: in  console_mode_t;
 
       I2S_BClock : in  std_logic;
       I2S_LRClock: in  std_logic;
