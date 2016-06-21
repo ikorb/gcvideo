@@ -57,24 +57,33 @@ PAR_OPTS := -ol high -xe n -t 1
 
 SRC = $(SRC_COMMON)
 
-ifeq ($(TARGET),p2xh)
+ifeq ($(TARGET),p2xh-gc)
   SRC      += $(SRC_P2XH)
-  UCF      := src/pindefs-p2xh.ucf
+  UCF      := src/pindefs-p2xh-gc.ucf
   TOPLEVEL := toplevel_p2xh
+  CONSOLE  := GC
+else ifeq ($(TARGET),p2xh-wii)
+  SRC      += $(SRC_P2XH)
+  UCF      := src/pindefs-p2xh-wii.ucf
+  TOPLEVEL := toplevel_p2xh
+  CONSOLE  := WII
 else ifeq ($(TARGET),shuriken)
   SRC      += $(SRC_SHURIKEN)
   UCF      := src/pindefs-shuriken.ucf
   TOPLEVEL := toplevel_shuriken
+  CONSOLE  := GC
 else ifeq ($(TARGET),shuriken-v3)
   SRC      += $(SRC_SHURIKEN)
   UCF      := src/pindefs-shurikenv3.ucf
   TOPLEVEL := toplevel_shuriken
+  CONSOLE  := GC
 else
 dummy:
 	@echo "TARGET variable not specified"
 	@echo "Please select a build target using \"make TARGET=...\""
 	@echo "Valid targets:"
-	@echo "  - p2xh"
+	@echo "  - p2xh-gc"
+	@echo "  - p2xh-wii"
 	@echo "  - shuriken"
 	@echo "  - shuriken-v3"
 	@false
@@ -118,7 +127,7 @@ build/%.ngd: build/%.ngc $(UCF) $(BMM)
 	$(E) "---- NGDBUILD $<"
 	$(Q)cd build ; ngdbuild -dd _ngo -nt timestamp -uc ../$(UCF) -bm ../$(BMM) -p $(PART) $(TOPLEVEL).ngc $(TOPLEVEL).ngd
 
-build/%.ngc: build/%.xst
+build/%.ngc: build/%.xst $(SRC)
 	$(E) "---- XST      $<"
 	$(Q)cd build ; xst -ifn $(TOPLEVEL).xst -ofn $(TOPLEVEL).syr
 
@@ -128,6 +137,7 @@ build/%.xst: build/%.prj scripts/template.xst src/zpu_bootrom.mif
 	$(Q)echo -ifn $(TOPLEVEL).prj >> $@
 	$(Q)echo -ofn $(TOPLEVEL)     >> $@
 	$(Q)echo -top $(TOPLEVEL)     >> $@
+	$(Q)echo -generics {TargetConsole=\"$(CONSOLE)\"} >> $@
 
 build/%.prj: | build # FIXME: Should somehow depend on the content of the source file list
 	$(E) "---- GENPRJ   $@"

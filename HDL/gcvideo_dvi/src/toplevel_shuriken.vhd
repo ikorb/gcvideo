@@ -39,6 +39,9 @@ use work.Component_Defs.all;
 use work.video_defs.all;
 
 entity toplevel_shuriken is
+  generic (
+    TargetConsole: string -- "GC" or "WII"
+  );
   port (
     -- clocks
     VClockN    : in  std_logic;
