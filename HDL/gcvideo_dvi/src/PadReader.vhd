@@ -61,6 +61,8 @@ architecture Behavioral of PadReader is
   signal bitshifter     : std_logic_vector(95 downto 0);
   signal bits           : unsigned(6 downto 0);
   signal packet_done    : boolean := true;
+
+  signal shiftcount     : natural range 0 to 8 := 0;
 begin
 
   IRQ <= irq_internal;
@@ -78,15 +80,18 @@ begin
   ZPUBusOut.mem_busy <= '0';
 
   process(Clock)
+    variable did_shift: boolean;
   begin
     if rising_edge(Clock) then
       ---- read data from controller ----
       prev_data <= data_deglitched;
 
       -- check for start of bit
+      did_shift := false;
       if prev_data = '1' and data_deglitched = '0' then
         if packet_done then
-          bitshifter  <= (others => '0');
+          -- start of new packet
+          --bitshifter  <= (others => '0');
           bits        <= (others => '0');
           packet_done <= false;
         end if;
@@ -101,12 +106,19 @@ begin
             -- sample bit
             bits       <= bits + 1;
             bitshifter <= bitshifter(94 downto 0) & data_deglitched;
+            did_shift := true;
           end if;
         elsif not packet_done then
           -- timer overflow, end of packet
           irq_internal <= '1';
           packet_done  <= true;
         end if;
+      end if;
+
+      -- shift data after the CPU read a byte
+      if not did_shift and shiftcount /= 0 then
+        shiftcount <= shiftcount - 1;
+        bitshifter <= bitshifter(94 downto 0) & "0";
       end if;
 
       ---- ZPU bus interface ----
@@ -117,13 +129,21 @@ begin
         irq_internal <= '0';
       end if;
 
-      case ZPUBusIn.mem_addr(3 downto 2) is
-        when "00" => ZPUBusOut.mem_read <= bitshifter(95 downto 64);
-        when "01" => ZPUBusOut.mem_read <= bitshifter(63 downto 32);
-        when "10" => ZPUBusOut.mem_read <= bitshifter(31 downto  0);
-        when "11" =>
-          ZPUBusOut.mem_read             <= (others => '0');
+      ZPUBusOut.mem_read <= (others => '0');
+
+      case ZPUBusIn.mem_addr(2 downto 2) is
+        when "0" =>
+          ZPUBusOut.mem_read(7 downto 0) <= bitshifter(95 downto 88);
+          if ZSelect ='1' then
+            shiftcount <= 8;
+          end if;
+
+        when "1" =>
+          if shiftcount /= 0 then
+            ZPUBusOut.mem_read(7) <= '1';
+          end if;
           ZPUBusOut.mem_read(6 downto 0) <= std_logic_vector(bits);
+
         when others => null;
       end case;
 

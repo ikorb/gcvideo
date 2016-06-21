@@ -93,9 +93,11 @@ typedef struct {
 /* --- PadReader --- */
 
 typedef struct {
-  __I  uint32_t data[3];
+  __I  uint32_t data;
   __IO uint32_t bits;    // writing clears the interrupt flag
 } PadReader_TypeDef;
+
+#define PADREADER_BITS_SHIFTFLAG 0x80
 
 /* --- SPI --- */
 

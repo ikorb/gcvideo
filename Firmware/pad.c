@@ -50,13 +50,28 @@ static uint32_t prev_buttons;     // for repeat
 static tick_t   next_repeat_tick;
 static uint32_t repeat_count;
 
+static uint32_t paddata[3];
+
 volatile tick_t   pad_last_change;
 volatile uint32_t pad_buttons;
 
 void pad_handler(void) {
+  /* copy data to local array */
+  for (unsigned int word = 0; word < 3; word++) {
+    uint32_t tmp = 0;
+
+    for (unsigned int byte = 0; byte < 4; byte++) {
+      tmp = (tmp << 8) | (PADREADER->data & 0xff);
+
+      while (PADREADER->bits & PADREADER_BITS_SHIFTFLAG) ;
+    }
+
+    paddata[word] = tmp;
+  }
+
   /* check for a known packet */
   if (PADREADER->bits < 90 ||
-      (PADREADER->data[0] & PAD_SCAN_MASK) != PAD_SCAN_PREFIX)
+      (paddata[0] & PAD_SCAN_MASK) != PAD_SCAN_PREFIX)
     return;
 
   tick_t now = getticks();
@@ -67,7 +82,7 @@ void pad_handler(void) {
 
   prev_padtick = now;
 
-  uint32_t curdata = PADREADER->data[1] & PAD_BUTTON_MASK;
+  uint32_t curdata = paddata[1] & PAD_BUTTON_MASK;
 
   /* accept only if same as last time */
   if (curdata != prev_data) {
