@@ -133,11 +133,14 @@ begin
   CableDetect <= '1' when video_settings.CableDetect else '0';
 
   -- CPU subsystem
-  Inst_CPU: CPUSubsystem PORT MAP (
+  Inst_CPU: CPUSubsystem generic map (
+    TargetConsole    => "GC"
+  ) port map (
     Clock            => Clock54M,
     ExtReset         => not clock_locked,
     RawVideo         => video_422,
     PixelClockEnable => pixel_clk_en,
+    ConsoleMode      => MODE_GC,
     PadData          => PadData,
     SPI_MOSI         => Flash_MOSI,
     SPI_MISO         => Flash_MISO,

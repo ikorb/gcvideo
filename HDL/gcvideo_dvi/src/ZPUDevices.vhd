@@ -134,10 +134,14 @@ package ZPUDevices is
   end component;
 
   component ZPUVideoInterface is
+    generic (
+      TargetConsole   : string
+    );
     port (
       Clock           : in  std_logic;
       PixelClockEnable: in  boolean;
       Video           : in  VideoY422;
+      ConsoleMode     : in  console_mode_t;
       ZSelect         : in  std_logic;
       ZPUBusIn        : in  ZPUDeviceIn;
       ZPUBusOut       : out ZPUDeviceOut;

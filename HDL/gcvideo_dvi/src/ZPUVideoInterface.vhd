@@ -36,10 +36,14 @@ use work.video_defs.all;
 use work.ZPUDevices.all;
 
 entity ZPUVideoInterface is
+  generic (
+    TargetConsole   : string
+  );
   port (
     Clock           : in  std_logic;
     PixelClockEnable: in  boolean;
     Video           : in  VideoY422;
+    ConsoleMode     : in  console_mode_t;
     ZSelect         : in  std_logic;
     ZPUBusIn        : in  ZPUDeviceIn;
     ZPUBusOut       : out ZPUDeviceOut;
@@ -64,9 +68,13 @@ architecture Behavioral of ZPUVideoInterface is
   signal osd_bgsettings    : std_logic_vector(23 downto 0);
 
   signal stored_flags      : std_logic_vector(2 downto 0);
+  signal target_console    : std_logic;
+  signal console_mode      : std_logic;
 begin
 
   ZPUBusOut.mem_busy <= '0';
+  target_console     <= '1' when TargetConsole = "WII"  else '0';
+  console_mode       <= '1' when ConsoleMode = MODE_WII else '0';
 
   -- forward stored videosettings to output
   VSettings.ScanlineStrength   <= unsigned(vid_settings(7 downto 0));
@@ -108,7 +116,12 @@ begin
       case ZPUBusIn.mem_addr(4 downto 2) is
         when "000"  => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(pixel_counter, 32));
         when "001"  => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(line_counter,  32));
-        when "010"  => ZPUBusOut.mem_read <= x"0000000" & "0" & stored_flags;
+
+        when "010"  => ZPUBusOut.mem_read             <= (others => '0');
+                       ZPUBusOut.mem_read(4)          <= console_mode;
+                       ZPUBusOut.mem_read(3)          <= target_console;
+                       ZPUBusOut.mem_read(2 downto 0) <= stored_flags;
+
         when "011"  => ZPUBusOut.mem_read <= x"000" & "000"   & vid_settings;
         when "100"  => ZPUBusOut.mem_read <= x"00"            & osd_bgsettings;
         when "101"  => ZPUBusOut.mem_read <= x"000000"        & volume_setting;

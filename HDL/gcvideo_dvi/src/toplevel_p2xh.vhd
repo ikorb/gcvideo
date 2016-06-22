@@ -211,11 +211,14 @@ begin
   end process;
 
   -- CPU subsystem
-  Inst_CPU: CPUSubsystem PORT MAP (
+  Inst_CPU: CPUSubsystem generic map (
+    TargetConsole    => TargetConsole
+  ) port map (
     Clock            => Clock54M,
     ExtReset         => not clock_locked,
     RawVideo         => video_422,
     PixelClockEnable => pixel_clk_en,
+    ConsoleMode      => console_mode,
     PadData          => PadData,
     SPI_MOSI         => Flash_MOSI,
     SPI_MISO         => Flash_MISO,

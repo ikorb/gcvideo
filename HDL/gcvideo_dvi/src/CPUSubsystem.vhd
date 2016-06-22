@@ -37,11 +37,15 @@ use work.component_defs.all;
 use work.video_defs.all;
 
 entity CPUSubsystem is
+  generic (
+    TargetConsole    : string
+  );
   port (
     Clock            : in  std_logic;
     ExtReset         : in  std_logic;
     RawVideo         : in  VideoY422;
     PixelClockEnable : in  boolean;
+    ConsoleMode      : in  console_mode_t;
     PadData          : in  std_logic;
     SPI_MOSI         : out std_logic;
     SPI_MISO         : in  std_logic;
@@ -197,10 +201,13 @@ begin
   end generate;
 
   -- Video Interface device
-  Inst_VideoInterface: ZPUVideoInterface PORT MAP (
+  Inst_VideoInterface: ZPUVideoInterface generic map (
+    TargetConsole    => TargetConsole
+  ) port map (
     Clock            => Clock,
     PixelClockEnable => PixelClockEnable,
     Video            => RawVideo,
+    ConsoleMode      => ConsoleMode,
     ZSelect          => VideoIFSel,
     ZPUBusIn         => ZPUIn,
     ZPUBusOut        => VideoIFOut,

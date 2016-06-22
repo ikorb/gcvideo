@@ -266,11 +266,15 @@ package component_defs is
   end component;
 
   component CPUSubsystem is
+    generic (
+      TargetConsole   : string
+    );
     port (
       Clock           : in  std_logic;
       ExtReset        : in  std_logic;
       RawVideo        : in  VideoY422;
       PixelClockEnable: in  boolean;
+      ConsoleMode     : in  console_mode_t;
       PadData         : in  std_logic;
       SPI_MOSI        : out std_logic;
       SPI_MISO        : in  std_logic;
