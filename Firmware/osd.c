@@ -35,6 +35,7 @@
 #include "osd.h"
 
 #define CHARS_PER_LINE   45
+#define LINES_ON_SCREEN  35
 
 #define BOXCHAR_TOPLEFT  0x01
 #define BOXCHAR_TOP      0x06
@@ -72,6 +73,8 @@ void osd_putchar(const char c) {
   if (c == '\n') {
     cursor_x = 0;
     cursor_y++;
+    if (cursor_y >= LINES_ON_SCREEN)
+      cursor_y = 0;
     update_writeptr();
   } else {
     *writeptr++ = c | current_attr;
@@ -79,6 +82,10 @@ void osd_putchar(const char c) {
     if (cursor_x == CHARS_PER_LINE) {
       cursor_x = 0;
       cursor_y++;
+      if (cursor_y >= LINES_ON_SCREEN) {
+        cursor_y = 0;
+        update_writeptr();
+      }
     }
   }
 }
