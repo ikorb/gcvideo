@@ -49,7 +49,7 @@ static void mark_item(menu_t *menu, unsigned int item, char ch) {
 
 /* (un)draw marker on a value item */
 static void mark_value(menu_t *menu, unsigned int item, char ch) {
-  osd_putcharat(menu->xpos + menu->xsize - 6, menu->ypos + menu->items[item].line + 1,
+  osd_putcharat(menu->xpos + menu->xsize - 7, menu->ypos + menu->items[item].line + 1,
                 ch, ATTRIB_DIM_BG);
 }
 
