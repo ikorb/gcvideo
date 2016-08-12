@@ -63,13 +63,13 @@ extern volatile tick_t   pad_last_change;
 
 /* these two functions shouldn't be used in an interrupt handler! */
 static inline void pad_set(uint32_t which) {
-  IRQController->TempDisable = 1;
+  IRQController->TempDisable = IRQ_TempDisable;
   pad_buttons |= which;
   IRQController->TempDisable = 0;
 }
 
 static inline void pad_clear(uint32_t which) {
-  IRQController->TempDisable = 1;
+  IRQController->TempDisable = IRQ_TempDisable;
   pad_buttons &= ~which;
   IRQController->TempDisable = 0;
 }

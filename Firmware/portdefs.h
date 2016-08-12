@@ -49,13 +49,15 @@ typedef struct {
     __I uint32_t Flags;
     __O uint32_t Enable;
   };
-  __IO  uint32_t TempDisable;
+  __IO uint32_t TempDisable;
 } IRQController_TypeDef;
 
 #define IRQ_FLAG_VSYNC    (1U<<0)
 #define IRQ_FLAG_PAD      (1U<<1)
 #define IRQ_FLAG_ANY      (1U<<31)  // read
 #define IRQ_FLAG_GLOBALEN (1U<<31)  // write
+
+#define IRQ_TempDisable   (1U<<0)
 
 /* --- Video Interface --- */
 

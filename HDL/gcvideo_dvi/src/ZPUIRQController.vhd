@@ -57,7 +57,7 @@ begin
   ZPUBusOut.mem_busy <= '0';
 
   process(Clock)
-    variable i: natural range 0 to Devices-1;
+    variable i      : natural range 0 to Devices-1;
     variable any_int: std_logic;
   begin
     if rising_edge(Clock) then
@@ -84,20 +84,21 @@ begin
             end if;
 
           elsif ZPUBusIn.mem_readEnable = '1' then
+            ZPUBusOut.mem_read <= (others => '0');
+
             if ZPUBusIn.mem_addr(2) = '0' then
               -- read currently active interrupts
-              ZPUBusOut.mem_read <= (others => '0');
 
               any_int := '0';
               for i in 0 to Devices-1 loop
-                ZPUBusOut.mem_read(i) <= DevIRQs(i);
-                any_int := any_int or DevIRQs(i);
+                ZPUBusOut.mem_read(i+1) <= DevIRQs(i) and enable_bits(i);
+                any_int                 := any_int or (DevIRQs(i) and enable_bits(i));
               end loop;
 
               ZPUBusOut.mem_read(31) <= any_int;
             else
               -- read temp-disable bit
-              ZPUBusOut.mem_read <= (0 => temp_disable, others => '0');
+              ZPUBusOut.mem_read(0) <= temp_disable;
             end if;
 
           end if;
