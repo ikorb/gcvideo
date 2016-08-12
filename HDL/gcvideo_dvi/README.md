@@ -390,7 +390,7 @@ possible, only the clock generator and DDR outputs use Xilinx-specific
 components.
 
 At least one alternative board has been designed, the [Shuriken
-Video](http://www.staffs2.webspace.virginmedia.com/shuriken%20video.htm). It
+Video](http://www.retro-system.com/shuriken%20video.htm). It
 features a smaller footprint which is optimized for mounting it so
 that it sticks out of the original digital video connector hole of the
 Gamecube. The developer has used a smaller FPGA to keep the costs
