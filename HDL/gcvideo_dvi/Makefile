@@ -53,6 +53,7 @@ PART         := xc3s200a-vq100-4
 PROMFILE     := gcvideo-dvi-$(TARGET)-$(VERSION)-spirom
 PROMTYPE     := M25P40
 XSVFFILE     := gcvideo-dvi-$(TARGET)-$(VERSION)-$(PROMTYPE).xsvf
+BITFILE      := gcvideo-dvi-$(TARGET)-$(VERSION).bit
 
 MAP_OPTS := -timing -logic_opt on -ol high -xe n -t 1 -register_duplication on -cm balanced -detail -ir off -ignore_keep_hierarchy -pr b -bp -power off
 PAR_OPTS := -ol high -xe n -t 1
@@ -101,7 +102,7 @@ else
 endif
 
 
-all: build/$(XSVFFILE)
+all: build/$(XSVFFILE) build/$(BITFILE)
 
 build/$(XSVFFILE): build/$(PROMFILE).mcs
 	$(E) "---- XSVFGEN  $<"
@@ -112,6 +113,10 @@ build/$(PROMFILE).mcs: build/$(TOPLEVEL).bit
 	$(E) "---- PROMGEN  $<"
 	$(Q) sed -e "s/%BITFILE%/$(TOPLEVEL).bit/;s/%OUTFILE%/$(PROMFILE)./" scripts/impact-genprom.cmd > build/genprom.cmd
 	$(Q)cd build ; impact -batch genprom.cmd
+
+build/$(BITFILE): build/$(TOPLEVEL).bit
+	$(E) "---- CP       $<"
+	$(Q)cp build/$(TOPLEVEL).bit build/$(BITFILE)
 
 build/%.bit: build/%.ncd
 	$(E) "---- BITGEN   $<"
