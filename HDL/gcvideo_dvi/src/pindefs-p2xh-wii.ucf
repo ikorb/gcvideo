@@ -1,4 +1,4 @@
-# -------------------------------------------------------------------------------
+# ------------------------------------------------------------------ -*- conf -*-
 # GCVideo DVI HDL
 # Copyright (C) 2014-2016, Ingo Korb <ingo@akana.de>
 # All rights reserved.
@@ -60,6 +60,10 @@ TIMESPEC TS_CLOCK_54 = PERIOD "CLOCK_54" 54 MHz HIGH 50 %;
 # Controller
 NET "PadData"     LOC = P94 | IOSTANDARD = LVCMOS33 | PULLUP = FALSE;
 
+# IR Receiver
+NET "IRReceiver"  LOC = P85 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "IRButton"    LOC = P83 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+
 # SPI flash
 NET "Flash_MOSI"  LOC = P46 | IOSTANDARD = LVCMOS33;
 NET "Flash_MISO"  LOC = P51 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
@@ -81,12 +85,12 @@ NET "LED1" LOC = P28 | IOSTANDARD = LVCMOS33;
 NET "LED2" LOC = P29 | IOSTANDARD = LVCMOS33;
 
 # Test port
-#NET "TestGND" LOC = P60 | IOSTANDARD = LVCMOS33;
-#NET "Test[0]" LOC = P61 | IOSTANDARD = LVCMOS33;
-#NET "Test[1]" LOC = P62 | IOSTANDARD = LVCMOS33;
-#NET "Test[2]" LOC = P64 | IOSTANDARD = LVCMOS33;
-#NET "Test[3]" LOC = P65 | IOSTANDARD = LVCMOS33;
-#NET "Test[4]" LOC = P70 | IOSTANDARD = LVCMOS33;
-#NET "Test[5]" LOC = P71 | IOSTANDARD = LVCMOS33;
-#NET "Test[6]" LOC = P72 | IOSTANDARD = LVCMOS33;
-#NET "Test[7]" LOC = P73 | IOSTANDARD = LVCMOS33;
+# NET "TestGND" LOC = P60 | IOSTANDARD = LVCMOS33;
+# NET "Test[0]" LOC = P61 | IOSTANDARD = LVCMOS33;
+# NET "Test[1]" LOC = P62 | IOSTANDARD = LVCMOS33;
+# NET "Test[2]" LOC = P64 | IOSTANDARD = LVCMOS33;
+# NET "Test[3]" LOC = P65 | IOSTANDARD = LVCMOS33;
+# NET "Test[4]" LOC = P70 | IOSTANDARD = LVCMOS33;
+# NET "Test[5]" LOC = P71 | IOSTANDARD = LVCMOS33;
+# NET "Test[6]" LOC = P72 | IOSTANDARD = LVCMOS33;
+# NET "Test[7]" LOC = P73 | IOSTANDARD = LVCMOS33;

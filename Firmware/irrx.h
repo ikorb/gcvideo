@@ -25,52 +25,33 @@
    THE POSSIBILITY OF SUCH DAMAGE.
 
 
-   screen_about.c: About box
+   irrx.h: Infrared remote decoder
 
 */
 
-#include <stdbool.h>
-#include <stddef.h>
-#include <stdio.h>
-#include "menu.h"
-#include "osd.h"
-#include "pad.h"
-#include "portdefs.h"
-#include "screens.h"
-#include "settings.h"
-#include "spiflash.h"
+#ifndef IRRX_H
+#define IRRX_H
 
-void screen_about(void) {
-  osd_clrscr();
+#include <stdint.h>
 
-  /* draw about-box */
-  osd_fillbox(10, 10, 25, 9, ' ' | ATTRIB_DIM_BG);
-  osd_drawborder(10, 10, 25, 9);
-  osd_setattr(true, false);
-  if (VIDEOIF->flags & VIDEOIF_FLAG_TARGET_WII) {
-    osd_putsat(14, 11, "WiiVideo DVI v" VERSION);
-    if (VIDEOIF->flags & VIDEOIF_FLAG_MODE_WII) {
-      osd_putsat(17, 12, "in Wii mode");
-    } else {
-      osd_putsat(17, 12, "in GC mode");
-    }
-  } else {
-    osd_putsat(14, 11, "GCVideo DVI v" VERSION);
-  }
-  osd_putsat(12, 13, "Copyright \013 2015-2016");
-  osd_putsat(16, 14, "by Ingo Korb");
-  osd_putsat(15, 15, "ingo@akana.de");
-  osd_gotoxy(14, 17);
-  printf("FlashID %02x%02x%02x%02x",
-         flash_chip_id[0], flash_chip_id[1],
-         flash_chip_id[2], flash_chip_id[3]);
+typedef uint32_t ir_command_t;
 
-  /* wait until all buttons are released */
-  pad_wait_for_release();
+extern volatile ir_command_t ir_rawcommand;
+extern volatile uint8_t      ir_gotcommand;
 
-  /* now wait for any button press */
-  while (!(pad_buttons & PAD_ALL))
-    if (pad_buttons & PAD_VIDEOCHANGE)
-      return;
-  pad_clear(PAD_ALL);
-}
+typedef enum {
+  IRCODE_UP,
+  IRCODE_DOWN,
+  IRCODE_LEFT,
+  IRCODE_RIGHT,
+  IRCODE_ENTER,
+  IRCODE_BACK,
+
+  NUM_IRCODES
+} ircode_t;
+
+extern ir_command_t ir_codes[NUM_IRCODES];
+
+void irrx_handler(void);
+
+#endif

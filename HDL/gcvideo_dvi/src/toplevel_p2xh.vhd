@@ -59,6 +59,10 @@ entity toplevel_p2xh is
     -- gamecube controller
     PadData    : in  std_logic;
 
+    -- IR receiver
+    IRReceiver : in  std_logic;
+    IRButton   : in  std_logic;
+
     -- flash chip
     Flash_MOSI : out std_logic;
     Flash_MISO : in  std_logic;
@@ -220,6 +224,8 @@ begin
     PixelClockEnable => pixel_clk_en,
     ConsoleMode      => console_mode,
     PadData          => PadData,
+    IRReceiver       => IRReceiver,
+    IRButton         => IRButton,
     SPI_MOSI         => Flash_MOSI,
     SPI_MISO         => Flash_MISO,
     SPI_SCK          => Flash_SCK,

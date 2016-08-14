@@ -54,7 +54,7 @@ void screen_idle(void) {
   while (1) {
     tick_t now = getticks();
 
-    /* check for menu hotkey */
+    /* check for menu button combination on controller */
     if ((pad_buttons & (PAD_L | PAD_R | PAD_X | PAD_Y)) == (PAD_L | PAD_R | PAD_X | PAD_Y) &&
         time_after(now, pad_last_change + HZ)) {
       if (pad_buttons & PAD_START)
@@ -62,6 +62,18 @@ void screen_idle(void) {
         settings_init();
       return;
     }
+
+    /* check for IR menu button */
+    if (pad_buttons & IR_OK) {
+      if (!(IRRX->pulsedata & IRRX_BUTTON))
+        /* restore defaults if IR button is held */
+        settings_init();
+      return;
+    }
+
+    /* check for IR config button */
+    if (pad_buttons & IRBUTTON_LONG)
+      return;
 
     /* check for video mode change */
     if (pad_buttons & PAD_VIDEOCHANGE) {

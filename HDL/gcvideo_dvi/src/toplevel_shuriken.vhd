@@ -142,6 +142,8 @@ begin
     PixelClockEnable => pixel_clk_en,
     ConsoleMode      => MODE_GC,
     PadData          => PadData,
+    IRReceiver       => '1',
+    IRButton         => '1',
     SPI_MOSI         => Flash_MOSI,
     SPI_MISO         => Flash_MISO,
     SPI_SCK          => Flash_SCK,

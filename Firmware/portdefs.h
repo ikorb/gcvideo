@@ -54,6 +54,7 @@ typedef struct {
 
 #define IRQ_FLAG_VSYNC    (1U<<0)
 #define IRQ_FLAG_PAD      (1U<<1)
+#define IRQ_FLAG_IRRX     (1U<<2)
 #define IRQ_FLAG_ANY      (1U<<31)  // read
 #define IRQ_FLAG_GLOBALEN (1U<<31)  // write
 
@@ -113,6 +114,18 @@ typedef struct {
 #define SPI_FLAG_SSEL (1 << 0)
 #define SPI_FLAG_BUSY (1 << 1)
 
+/* --- IR receiver --- */
+
+typedef struct {
+  __IO uint32_t pulsedata;
+} IRRX_TypeDef;
+
+#define IRRX_PULSE_MASK (0xff)
+#define IRRX_TIMEOUT    (1 << 8)
+#define IRRX_STATE      (1 << 9)
+#define IRRX_BUTTON     (1 << 10)
+#define IRRX_IRQ        (1 << 11)
+
 /* --- OSD RAM --- */
 
 typedef struct {
@@ -127,11 +140,13 @@ typedef struct {
 #define VIDEOIF_BASE       (PERIPH_BASE + 0x100)
 #define PADREADER_BASE     (PERIPH_BASE + 0x200)
 #define SPI_BASE           (PERIPH_BASE + 0x300)
+#define IRRX_BASE          (PERIPH_BASE + 0x400)
 
 #define IRQController ((IRQController_TypeDef *)IRQController_BASE)
 #define VIDEOIF       ((VideoInterface_TypeDef *)VIDEOIF_BASE)
 #define PADREADER     ((PadReader_TypeDef *)PADREADER_BASE)
 #define OSDRAM        ((OSDRAM_TypeDef *)OSDRAM_BASE)
 #define SPI           ((SPI_TypeDef *)SPI_BASE)
+#define IRRX          ((IRRX_TypeDef *)IRRX_BASE)
 
 #endif

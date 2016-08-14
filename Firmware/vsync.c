@@ -29,16 +29,23 @@
 
 */
 
+#include <stdbool.h>
 #include "pad.h"
 #include "portdefs.h"
 #include "settings.h"
 #include "vsync.h"
+
+#define IRBUTTON_MAX_FRAMES  255
+#define IRBUTTON_MIN_FRAMES  2
+#define IRBUTTON_LONG_FRAMES 60
 
 volatile tick_t tick_counter;
 
 static uint32_t prev_xres;
 static uint32_t prev_yres;
 static uint32_t prev_flags;
+static uint32_t prev_irbutton = IRRX_BUTTON;
+static uint8_t  irbutton_count;
 
 static int disable_frames;
 
@@ -91,4 +98,32 @@ void vsync_handler(void) {
     prev_yres  = cur_yres;
     prev_flags = cur_flags;
   }
+
+  /* read IR button */
+  uint32_t cur_irbutton = IRRX->pulsedata & IRRX_BUTTON;
+
+  if (cur_irbutton != prev_irbutton) {
+    /* at edge */
+    if (cur_irbutton) {
+      /* release */
+      if (irbutton_count > IRBUTTON_MIN_FRAMES && irbutton_count < IRBUTTON_LONG_FRAMES) {
+        pad_set_irq(IRBUTTON_SHORT);
+      }
+
+    } else {
+      /* press */
+      irbutton_count = 0;
+    }
+
+  } else if (!cur_irbutton) {
+    /* held */
+    if (irbutton_count < IRBUTTON_MAX_FRAMES)
+      irbutton_count++;
+
+    if (irbutton_count == IRBUTTON_LONG_FRAMES) {
+      pad_set_irq(IRBUTTON_LONG);
+    }
+  }
+
+  prev_irbutton = cur_irbutton;
 }

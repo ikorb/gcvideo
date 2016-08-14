@@ -47,6 +47,8 @@ entity CPUSubsystem is
     PixelClockEnable : in  boolean;
     ConsoleMode      : in  console_mode_t;
     PadData          : in  std_logic;
+    IRReceiver       : in  std_logic;
+    IRButton         : in  std_logic;
     SPI_MOSI         : out std_logic;
     SPI_MISO         : in  std_logic;
     SPI_SCK          : out std_logic;
@@ -65,10 +67,10 @@ architecture Behavioral of CPUSubsystem is
   constant ZPUBRAMSize: natural := 13;
 
   -- number of devices on the I/O bus
-  constant DeviceCount: Natural := 5;
+  constant DeviceCount: Natural := 6;
 
   -- number of interrupt-generating devices
-  constant IRQDeviceCount: Natural := 2;
+  constant IRQDeviceCount: Natural := 3;
 
   -- ZPU signals
   signal cpu_reset          : std_logic;
@@ -92,6 +94,7 @@ architecture Behavioral of CPUSubsystem is
   signal PadSel          : std_logic;
   signal OSDRAMSel       : std_logic;
   signal SPISel          : std_logic;
+  signal IRRxSel         : std_logic;
 
   signal ZPUIn           : ZPUDeviceIn;
   signal IRQControllerOut: ZPUDeviceOut;
@@ -99,9 +102,11 @@ architecture Behavioral of CPUSubsystem is
   signal PadOut          : ZPUDeviceOut;
   signal OSDRAMOut       : ZPUDeviceOut;
   signal SPIOut          : ZPUDeviceOut;
+  signal IRRxOut         : ZPUDeviceOut;
 
   signal VSyncIRQ        : std_logic;
   signal PadIRQ          : std_logic;
+  signal IRRxIRQ         : std_logic;
   signal IRQSignals      : ZPUIRQSignals(0 to IRQDeviceCount-1);
 
   signal DeviceSels      : ZPUMuxSelects(0 to DeviceCount-1);
@@ -163,7 +168,7 @@ begin
 
   ---- devices
   -- interrupt controller
-  IRQSignals <= (0 => VSyncIRQ, 1 => PadIRQ);
+  IRQSignals <= (0 => VSyncIRQ, 1 => PadIRQ, 2 => IRRxIRQ);
   Inst_IRQController: ZPUIRQController GENERIC MAP (
     Devices => IRQDeviceCount
   ) PORT MAP (
@@ -175,6 +180,7 @@ begin
     IRQOut    => cpu_interrupt
   );
 
+  -- Gamepad
   PadAnGen: if AnalyzePadTiming generate
     -- Gamepad analyzer
     Inst_Padanalyzer: PadAnalyzer PORT MAP (
@@ -233,14 +239,27 @@ begin
   Inst_SPI: ZPU_SPI GENERIC MAP (
     SPIClockDiv => 20
   ) PORT MAP (
-    Clock => Clock,
-    ZSelect => SPISel,
-    ZPUBusIn => ZPUIn,
+    Clock     => Clock,
+    ZSelect   => SPISel,
+    ZPUBusIn  => ZPUIn,
     ZPUBusOut => SPIOut,
     MOSI      => SPI_MOSI,
     MISO      => SPI_MISO,
     SClock    => SPI_SCK,
     SSelect   => SPI_SSEL
+  );
+
+  -- IR Receiver
+  Inst_IRRx: ZPUIRReceiver generic map (
+    ClockScale => 4096
+  ) port map (
+    Clock      => Clock,
+    ZSelect    => IRRxSel,
+    ZPUBusIn   => ZPUIn,
+    ZPUBusOut  => IRRxOut,
+    IRQ        => IRRxIRQ,
+    IRReceiver => IRReceiver,
+    IRButton   => IRButton
   );
 
   -- CPU-to-device signals
@@ -260,6 +279,7 @@ begin
     PadSel           <= '0';
     OSDRAMSel        <= '0';
     SPISel           <= '0';
+    IRRxSel          <= '0';
 
     if cpu_mem_writeEnable = '1' or
        cpu_mem_readEnable  = '1' then
@@ -277,6 +297,7 @@ begin
               when x"1"   => VideoIFSel       <= '1';
               when x"2"   => PadSel           <= '1';
               when x"3"   => SPISel           <= '1';
+              when x"4"   => IRRxSel          <= '1';
               when others => null;
             end case;
           end if;
@@ -292,7 +313,8 @@ begin
     1 => VideoIFSel,
     2 => PadSel,
     3 => OSDRAMSel,
-    4 => SPISel
+    4 => SPISel,
+    5 => IRRxSel
   );
 
   DeviceOuts <= (
@@ -300,7 +322,8 @@ begin
     1 => VideoIFOut,
     2 => PadOut,
     3 => OSDRAMOut,
-    4 => SPIOut
+    4 => SPIOut,
+    5 => IRRxOut
   );
 
   MainZPUBusMux: ZPUBusMux

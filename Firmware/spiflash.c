@@ -31,6 +31,7 @@
 
 #include <stdbool.h>
 #include <string.h>
+#include "irrx.h"
 #include "portdefs.h"
 #include "settings.h"
 #include "spiflash.h"
@@ -49,7 +50,7 @@
 #define STATUSREG_WIP      (1<<0)
 
 #define SETTINGS_OFFSET  0x70000
-#define SETTINGS_VERSION 3
+#define SETTINGS_VERSION 4
 
 uint8_t flash_chip_id[4];
 
@@ -63,6 +64,7 @@ typedef struct {
   uint32_t video_settings[VIDMODE_COUNT];
   uint32_t osdbg_settings;
   uint32_t mode_switch_delay;
+  uint32_t ir_codes[NUM_IRCODES];
 } storedsettings_t;
 
 #define SET_FLAG_RESBOX (1<<0)
@@ -199,6 +201,8 @@ void spiflash_read_settings(void) {
       audio_mute = true;
     else
       audio_mute = false;
+
+    memcpy(ir_codes, set.ir_codes, sizeof(ir_codes));
   }
 }
 
@@ -223,6 +227,8 @@ void spiflash_write_settings(void) {
   set.volume = audio_volume;
   if (audio_mute)
     set.flags |= SET_FLAG_MUTE;
+
+  memcpy(set.ir_codes, ir_codes, sizeof(ir_codes));
 
   /* calculate checksum */
   for (unsigned int i = 1; i < sizeof(storedsettings_t); i++)

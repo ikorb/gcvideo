@@ -154,10 +154,10 @@ void screen_mainmenu(void) {
       osd_gotoxy(15, 14);
       osd_puts("Settings saved");
 
-      /* wait until all buttons are released */
-      while (pad_buttons & PAD_ALL)
-        if (pad_buttons & PAD_VIDEOCHANGE)
-          return;
+      /* wait until all controller buttons are released */
+      pad_wait_for_release();
+      if (pad_buttons & PAD_VIDEOCHANGE)
+        return;
 
       /* now wait for any button press */
       pad_clear(PAD_ALL);

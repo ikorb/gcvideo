@@ -196,6 +196,21 @@ package ZPUDevices is
     );
   end component;
 
+  component ZPUIRReceiver is
+    generic (
+      ClockScale: natural range 1 to 10000
+    );
+    port (
+      Clock     : in  std_logic;
+      ZSelect   : in  std_logic;
+      ZPUBusIn  : in  ZPUDeviceIn;
+      ZPUBusOut : out ZPUDeviceOut;
+      IRQ       : out std_logic;
+      IRReceiver: in  std_logic;
+      IRButton  : in  std_logic
+    );
+  end component;
+
 end ZPUDevices;
 
 package body ZPUDevices is

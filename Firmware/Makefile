@@ -35,15 +35,15 @@ CROSS_PREFIX=zpu-elf-
 CC := $(CROSS_PREFIX)gcc
 LD := $(CROSS_PREFIX)ld
 AS := $(CROSS_PREFIX)as
-CFLAGS = -Wall -Os -g -std=gnu99 -ffunction-sections -fdata-sections -I. -DVERSION=\"$(VERSION)\"
+CFLAGS = -Wall -Werror -Os -g -std=gnu99 -ffunction-sections -fdata-sections -I. -DVERSION=\"$(VERSION)\"
 LDFLAGS := -Tstandalone-bsd.ld -Wl,--gc-sections -Wl,--relax -nostartfiles
 
 DATA2MEM := data2mem
 
 TARGET      := gcvideo-sw
 CRT0        := crt0-bsd.o
-OBJFILES    := $(CRT0) main.o osd.o printf.o pad.o vsync.o menu.o \
-	modeset_common.o screen_about.o screen_allmodes.o \
+OBJFILES    := $(CRT0) main.o osd.o printf.o pad.o vsync.o menu.o irrx.o \
+	modeset_common.o screen_about.o screen_allmodes.o screen_irconfig.o \
 	screen_idle.o screen_mainmenu.o screen_osdsettings.o screen_othersettings.o \
 	settings.o spiflash.o
 BITFILE_IN  := ../HDL/gcvideo_dvi/build/toplevel_p2xh.bit

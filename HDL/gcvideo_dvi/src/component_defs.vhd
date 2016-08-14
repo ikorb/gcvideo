@@ -276,6 +276,8 @@ package component_defs is
       PixelClockEnable: in  boolean;
       ConsoleMode     : in  console_mode_t;
       PadData         : in  std_logic;
+      IRReceiver      : in  std_logic;
+      IRButton        : in  std_logic;
       SPI_MOSI        : out std_logic;
       SPI_MISO        : in  std_logic;
       SPI_SCK         : out std_logic;

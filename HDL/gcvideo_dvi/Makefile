@@ -19,6 +19,7 @@ SRC_COMMON := \
 	src/ZPUIRQController.vhd           \
 	src/ZPUVideoInterface.vhd          \
 	src/ZPUWatchdog.vhd                \
+	src/ZPUIRReceiver.vhd              \
 	src/ZPU_DPRAM.vhd                  \
 	src/ZPU_SPI.vhd                    \
 	src/audio_spdif.vhd                \

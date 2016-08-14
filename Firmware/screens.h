@@ -35,6 +35,7 @@
 void screen_about(void);
 void screen_allmodes(void);
 void screen_idle(void);
+void screen_irconfig(void);
 void screen_mainmenu(void);
 void screen_osdsettings(void);
 void screen_othersettings(void);

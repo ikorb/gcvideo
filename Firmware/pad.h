@@ -52,11 +52,26 @@
 #define PAD_START (1 << 12)
 // 29
 
-// mask for all physical buttons
-#define PAD_ALL   ((1 << 13)-1)
+// mask for all GC buttons
+#define PAD_ALL_GC ((1 << 13)-1)
+
+// buttons for short and long hardware "IR-Config" button presses
+#define IRBUTTON_SHORT (1 << 13)
+#define IRBUTTON_LONG  (1 << 14)
+
+// IR remote buttons
+#define IR_UP          (1 << 15)
+#define IR_DOWN        (1 << 16)
+#define IR_LEFT        (1 << 17)
+#define IR_RIGHT       (1 << 18)
+#define IR_OK          (1 << 19)
+#define IR_BACK        (1 << 20)
+
+// mask for all non-synthetic buttions
+#define PAD_ALL        ((1 << 21)-1)
 
 // synthetic button, triggered once on every input video mode change
-#define PAD_VIDEOCHANGE (1 << 13)
+#define PAD_VIDEOCHANGE (1 << 21)
 
 extern volatile uint32_t pad_buttons;
 extern volatile tick_t   pad_last_change;
@@ -83,6 +98,7 @@ static inline void pad_clear_irq(uint32_t which) {
   pad_buttons &= ~which;
 }
 
+void pad_wait_for_release(void);
 void pad_handler(void);
 
 #endif

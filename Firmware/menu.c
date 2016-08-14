@@ -137,25 +137,25 @@ static void value_submenu(menu_t *menu, unsigned int itemid) {
     unsigned int curbtns = pad_buttons;
 
     /* value change */
-    if (curbtns & PAD_LEFT) {
+    if (curbtns & (PAD_LEFT | IR_LEFT)) {
       update_value(menu, itemid, UPDATE_DECREMENT);
-      pad_clear(PAD_LEFT | PAD_UP | PAD_DOWN); // prioritize left/right
+      pad_clear(PAD_LEFT | PAD_UP | PAD_DOWN |
+                IR_LEFT  | IR_UP  | IR_DOWN); // prioritize left/right
     }
 
-    if (curbtns & PAD_RIGHT) {
+    if (curbtns & (PAD_RIGHT | IR_RIGHT)) {
       update_value(menu, itemid, UPDATE_INCREMENT);
-      pad_clear(PAD_RIGHT | PAD_UP | PAD_DOWN); // prioritize left/right
+      pad_clear(PAD_RIGHT | PAD_UP | PAD_DOWN |
+                IR_RIGHT  | IR_UP  | IR_DOWN); // prioritize left/right
     }
 
     /* exit with X/Y */
-    if (curbtns & (PAD_X | PAD_Y))
+    if (curbtns & (PAD_X | PAD_Y | IR_OK | IR_BACK))
       break;
 
     /* video mode change is ignored */
   }
-  pad_clear(PAD_START | PAD_X | PAD_Y |
-            PAD_LEFT | PAD_RIGHT | PAD_UP | PAD_DOWN |
-            PAD_Z | PAD_L | PAD_R | PAD_A | PAD_B);
+  pad_clear(PAD_ALL);
 
   mark_value(menu, itemid, ' ');
 }
@@ -206,7 +206,7 @@ int menu_exec(menu_t *menu, unsigned int initial_item) {
   mark_item(menu, cur_item, MENUMARKER_LEFT);
 
   /* wait until all buttons are released */
-  while (pad_buttons & PAD_ALL) ;
+  pad_wait_for_release();
 
   /* handle input */
   while (1) {
@@ -216,7 +216,7 @@ int menu_exec(menu_t *menu, unsigned int initial_item) {
     unsigned int curbtns = pad_buttons;
 
     /* selection movement with up/down */
-    if (curbtns & PAD_UP) {
+    if (curbtns & (PAD_UP | IR_UP)) {
       mark_item(menu, cur_item, ' ');
 
       do {
@@ -228,10 +228,11 @@ int menu_exec(menu_t *menu, unsigned int initial_item) {
 
       mark_item(menu, cur_item, MENUMARKER_LEFT);
 
-      pad_clear(PAD_UP | PAD_LEFT | PAD_RIGHT); // prioritize up/down over left/right
+      pad_clear(PAD_UP | PAD_LEFT | PAD_RIGHT |
+                IR_UP  | IR_LEFT  | IR_RIGHT); // prioritize up/down over left/right
     }
 
-    if (curbtns & PAD_DOWN) {
+    if (curbtns & (PAD_DOWN | IR_DOWN)) {
       mark_item(menu, cur_item, ' ');
 
       do {
@@ -242,23 +243,24 @@ int menu_exec(menu_t *menu, unsigned int initial_item) {
 
       mark_item(menu, cur_item, MENUMARKER_LEFT);
 
-      pad_clear(PAD_DOWN | PAD_LEFT | PAD_RIGHT); // prioritize up/down over left/right
+      pad_clear(PAD_DOWN | PAD_LEFT | PAD_RIGHT |
+                IR_DOWN  | IR_LEFT  | IR_RIGHT); // prioritize up/down over left/right
     }
 
     /* value change with left/right */
-    if ((curbtns & PAD_LEFT) && items[cur_item].value) {
+    if ((curbtns & (PAD_LEFT | IR_LEFT)) && items[cur_item].value) {
       update_value(menu, cur_item, UPDATE_DECREMENT);
-      pad_clear(PAD_LEFT);
+      pad_clear(PAD_LEFT | IR_LEFT);
     }
 
-    if ((curbtns & PAD_RIGHT) && items[cur_item].value) {
+    if ((curbtns & (PAD_RIGHT | IR_RIGHT)) && items[cur_item].value) {
       update_value(menu, cur_item, UPDATE_INCREMENT);
-      pad_clear(PAD_RIGHT);
+      pad_clear(PAD_RIGHT | IR_RIGHT);
     }
 
     /* selection with X */
-    if (curbtns & PAD_X) {
-      pad_clear(PAD_X);
+    if (curbtns & (PAD_X | IR_OK)) {
+      pad_clear(PAD_X | IR_OK);
       if (!items[cur_item].value) {
         /* no value attached, can exit from here */
         mark_item(menu, cur_item, ' ');
@@ -285,8 +287,8 @@ int menu_exec(menu_t *menu, unsigned int initial_item) {
     }
 
     /* abort with Y */
-    if (curbtns & PAD_Y) {
-      pad_clear(PAD_Y);
+    if (curbtns & (PAD_Y | IR_BACK)) {
+      pad_clear(PAD_Y | IR_BACK);
       mark_item(menu, cur_item, ' ');
       return MENU_ABORT;
     }

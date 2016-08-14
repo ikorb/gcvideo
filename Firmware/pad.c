@@ -55,6 +55,16 @@ static uint32_t paddata[3];
 volatile tick_t   pad_last_change;
 volatile uint32_t pad_buttons;
 
+void pad_wait_for_release(void) {
+  /* wait until all controller buttons are released */
+  while (pad_buttons & PAD_ALL_GC)
+    if (pad_buttons & PAD_VIDEOCHANGE)
+      return;
+
+  /* clear IR remote buttons too */
+  pad_clear(PAD_ALL);
+}
+
 void pad_handler(void) {
   /* copy data to local array */
   for (unsigned int word = 0; word < 3; word++) {
@@ -91,12 +101,12 @@ void pad_handler(void) {
   }
 
   /* update buttons */
-  curdata = (curdata >> 17) & PAD_ALL;
+  curdata = (curdata >> 17) & PAD_ALL_GC;
   if (prev_buttons != curdata) {
     /* buttons have changed */
     pad_last_change  = now;
     prev_buttons     = curdata;
-    pad_buttons      = (pad_buttons & ~PAD_ALL) | curdata;
+    pad_buttons      = (pad_buttons & ~PAD_ALL_GC) | curdata;
     next_repeat_tick = now + INITIAL_DELAY;
     repeat_count     = REPEAT_SLOWCOUNT;
     return;
