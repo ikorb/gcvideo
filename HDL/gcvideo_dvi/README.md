@@ -8,6 +8,9 @@ IIx HDMI FPGA board from [KNJN](http://www.knjn.com) as the board is
 easily available and small enough to integrate it in the existing
 Gamecube casing.
 
+For those who don't mind extremely fine pitch soldering, a Wii version
+is also available.
+
 ## Features ##
 
 - direct digital video output with no analog intermediate for best
@@ -17,6 +20,8 @@ Gamecube casing.
 - optional scanline overlay with selectable strength
 - SPDIF digital audio output
 - user-friendly on-screen configuration
+- on-screen menus controlled with a Gamecube controller or an IR
+    remote
 
 ## Limitations ##
 
@@ -43,7 +48,8 @@ There are four subdirectories:
 - `src` contains the VHDL sources and Xilinx ISE project files
 - `bin` contains the synthesized bit stream in various formats
 - `doc` contains a few images showing the necessary connections
-- `codegens` contains two code generators that generate VHDL source for two ROMs in the enhanced DVI encoder
+- `codegens` contains two code generators that generate VHDL source
+    for two ROMs in the enhanced DVI encoder
 
 ## Programming the board ##
 
@@ -57,7 +63,7 @@ interfaces available from KNJN and their FPGAconf program. This also
 requires an RS232 port ("COM port"), although there is at least one
 TXDI interface that integrates an RS232-to-USB converter. In FPGAconf,
 you need to use the "Program boot-PROM" button and select the
-`gcvideo-dvi-p2xh-1.0.bit` file from the `bin` subdirectory.
+`gcvideo-dvi-p2xh-gc-2.2.bit` file from the `bin` subdirectory.
 
 Another option to program the board is over the JTAG pins. This is
 only recommended for advanced users and requires a JTAG interface with
@@ -65,8 +71,8 @@ software that is either able to use indirect programming of an SPI
 flash chip connected to a Spartan 3A (e.g. Xilinx's own Impact) or
 that can play an SVF file. Please not that I did not have much success
 with the SVF file route yet. This way of programming the SPI flash on
-the board requires the `gcvideo-dvi-p2xh-1.0-spiprom.mcs` or
-`gcvideo-dvi-p2xh-1.0-m25p40.svf` files in the `bin` subdirectory,
+the board requires the `gcvideo-dvi-p2xh-gc-2.2-spiprom.mcs` or
+`gcvideo-dvi-p2xh-gc-2.2-m25p40.svf` files in the `bin` subdirectory,
 depending on the software you use. The SVF file has been created
 assuming that there is a M25P40 chip on the board. KNJN does not
 specify which chip they ship, only that it will be at least 4 MBit in
@@ -74,13 +80,17 @@ size - if your board has a different flash chip (located on the bottom
 side), contact me and I'll try to generate an SVF for it if it's
 supported by Xilinx' tools.
 
-If you plan to buy a Pluto IIx HDMI specifically to use it with a
-Gamecube, you could try to ask the vendor if they can ship it
-pre-programmed. I have no idea if they are willing to do it and this
-paragraph may vanish in later versions of this file if this option
-turns out to be unavailable.
+KNJN now also sells a version of the board preprogrammed with
+GCVideo-DVI, but unfortunately they do not specify which version they
+provide.
 
-## Connecting the board ##
+## Connecting the board to a Wii ##
+
+Use of GCVideo-DVI on a Wii is not recommended since the installation
+requires very fine-pitch soldering. The connection information is
+available in a [separate file](README-Wii.md).
+
+## Connecting the board to a Gamecube ##
 
 Multiple connections need to be made from the Gamecube to the Pluto
 IIx HDMI board to connect all the signals and power lines necessary to
@@ -88,7 +98,7 @@ convert the video signal. The image below shows roughly where each of
 the connections need to be made on the Pluto board (click for a larger
 version):
 
-[![Preview of Pluto IIx HDMI connection diagram](doc/connections-thumb.png)](doc/connections.png)
+[![Preview of Pluto IIx HDMI connection diagram](doc/connections-thumb.jpg)](doc/connections.jpg)
 
 ### Power ###
 
@@ -102,7 +112,7 @@ connector as shown in the image below:
 ![5V points on the GC power connector](doc/gc-power-5v.jpg)
 
 Either of the marked pins (they are already connected together on the
-Cube's board) must be connected to the VUNREG solder pad on the Pluto
+Gamecube's board) must be connected to the *VUNREG* solder pad on the Pluto
 board. If the image is unclear, the two 5V pins of the power connector
 are the two pins closest to the heat sink.
 
@@ -111,9 +121,9 @@ are the two pins closest to the heat sink.
 The Pluto IIx HDMI board also has a design flaw that reduces its
 compatibility with various displays significantly. To rectify this
 problem, you need to connect a 100 ohm resistor from the solder pad
-behind the HDMI connector (labelled "DDC +5V" on the bottom) to the
-VUNREG pin at the side of the board. Please make absolutely sure that
-you do not create a short between VUNREG and VCC when you do this as
+behind the HDMI connector (labelled *DDC +5V* on the bottom) to the
+*VUNREG* pin at the side of the board. Please make absolutely sure that
+you do not create a short between *VUNREG* and *VCC* when you do this as
 this will likely destroy both the FPGA board and the Gamecube it is
 attached to.
 
@@ -125,8 +135,8 @@ Some people have reported that most of their TVs did not recognize the
 signal from the Pluto board with the 100 ohm resistor installed. If
 you also suffer from this problem, first check that the resistor you
 installed is really a 100 ohm resistor and not a 100 kiloohm
-resistor. You can also try to use a direct wire connection from VUNREG
-to DDV +5V instead of a resistor, but this is not recommended.
+resistor. You can also try to use a direct wire connection from *VUNREG*
+to *DDC +5V* instead of a resistor, but this is not recommended.
 
 ### Gamecube digital port ###
 
@@ -177,17 +187,17 @@ as bundling them up can lead to flickering pixels.
 To read the controller buttons, another wire must be connected from
 the FPGA board to the Gamecube. The recommended connection point for
 this is on the bottom of the Cube's PCB, it must be connected
-to pin 94 on the Pluto FPGA board.
+to *pin 94* on the Pluto FPGA board.
 
 [![Preview of Controller point](doc/gc-controller-thumb.jpg)](doc/gc-controller.jpg)
 
-If for some reason you decide that you do not want to wire the
-controller signal, please connect pin 94 of the Pluto board to the GND
-pad beside it to ensure that the OSD is not accidentally triggered.
+If you do not want to wire up the controller, e.g. if you want to use
+an IR remote for navigating the OSD, please connect *pin 94* of the
+Pluto board to a GND pad.
 
 ### SPDIF output ###
 
-The SPDIF output is on pin 78. It is **not** suitable for direct connection
+The SPDIF output is on *pin 78*. It is **not** suitable for direct connection
 to a coaxial SPDIF input.
 
 To connect the SPDIF pin to your audio device without killing the
@@ -203,8 +213,41 @@ encounter a device that has issues with the SPDIF signal generated by
 GCVideo, there is probably not much that can be done about it.
 
 
+### IR receiver and IR button ###
+
+The OSD of GCVideo can be controlled either with a Gamecube controller
+or with an infrared remote that uses the NEC protocol (same one as
+supported by OSSC). The buttons used by GCVideo can be freely chosen,
+as long as the remote supports this protocol.
+
+To use this functionality, two pieces of additional hardware are
+needed: A button (momentary contact, normally open) and an IR receiver
+module that can operate at 3.3V. It has been successfully
+tested with an OS-Opto OS-838G as well as a Vishay TSOP4838 IR
+receiver module, but it should also work with similar 3-pin IR
+receivers that are meant for receiving consumer IR signals with a
+modulation frequency between 36 and 40 kHz.
+
+Such a receiver module needs power for its internal circuits. A
+convenient place to power it from are the pads labelled "GND" and
+"VCC" near the short edge of the Pluto board. Please make sure to read
+the data sheet of your IR receiver module to figure out which of its
+pin are used to power it. The third pin is the data output, which
+needs to be connected to *pin 85* on the Pluto board.
+
+In addition to the IR receiver module, a simple button is required
+which connects between *GND* and *pin 83* on the Pluto board, which
+will be called "IR button" in this manual. This button allows you to
+choose which buttons of your IR remote you want to use to control
+GCVideo without getting in a chicken-and-egg situation.
+
 
 ## OSD ##
+
+It is possible to navigate in the OSD with both a Gamecube controller
+and an IR remote, even at the same time.
+
+### Using with a controller ###
 
 The on-screen display uses the controller in port 1. It has only been
 tested with a genuine Nintendo controller and a Hama clone pad. As I
@@ -225,6 +268,48 @@ problematic for example on the boot screen of the Gamecube because the
 cube will rotate doe to the D-pad inputs. If you want to use the OSD
 on the Gamecube's main menu, you can do so without causing
 interference by going into the cube's option menu first.
+
+### Using with an IR remote ###
+
+To keep the code simple, GCVideo only needs six buttons on an IR
+remote. The first four of them have been named "Up", "Down", "Left"
+and "Right" which allow navigation in the menus just like the D-Pad on
+a Gamecube controller. The other two are "Enter" and "Back", which are
+used to enter or leave submenus, similar to the X and Y buttons when
+a Gamecube controller is used for navigating the OSD.
+
+Since there are no interferences between the Ir remote and a game
+running on the system, calling up the main menu with an IR remote just
+needs a press on the "Enter" button instead of a complicated button
+combination. You can also hold down the IR button when you enter the
+main menu of GCVideo's OSD to reset all settings except the remote
+button assignments to their defaults.
+
+
+#### Button configuration ####
+
+Since I don't know what remote you want to use with GCVideo, it can be
+configured to accept any IR remote buttons as long as the remote uses
+the so-called NEC protocol. To enter the button configuration screen,
+hold down the button connected to pin 83 of the Pluto board ("IR
+button") until the configuration screen appears.
+
+On the configuration screen, you need to push six buttons on your
+remote for each of the functions highlighted on the screen, one after
+the other. GCVideo will tell you if you accidentally try to assign the
+same button to two different functions. If a button press is not
+acknowledged with either "Ok" or "Dupe" on this screen, the remote you
+are trying to use might not be compatible (or you have a wiring error
+or my code is too strict).
+
+If you decide to abort the button assignment, hit the IR button once
+to restore your previous button configuration.
+
+The IR remote button assignments are saved together with all the other
+settings when you select "Save settings" on the main menu.
+
+
+### General OSD usage ###
 
 GCVideo remembers six sets of settings, one for each basic video mode
 (240p, 288p, 480i, 576i, 480p, 576p). When you enter the OSD, the
