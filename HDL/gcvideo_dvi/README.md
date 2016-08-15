@@ -414,10 +414,11 @@ GCVideo, but not the volume at the Gamecube's Analog AV output.
     this can be fixed by using a wire instead of a resistor, although
     this is not recommended unless absolutely neccessary.
 
-If everything is wired correctly, the two LEDs on the Pluto board
-should blink at slightly different, but regular rates. If only one of
-them is blinking, you probably swapped some of the video data
-lines. If neither of them is blinking, check all the wiring and also
+If everything is wired correctly, at least one of the two LEDs on the
+Pluto board should blink at a regular rate. The second LED also blinks
+(at a different rate) in the Gamecube version or shows the current
+console mode (Wii or Gamecube) in the Wii version.
+If neither of them is blinking, check all the wiring and also
 make sure that the board is actually programmed.
 
 ### XRGB Mini ###
