@@ -59,6 +59,10 @@ entity toplevel_shuriken is
     -- gamecube controller
     PadData    : in  std_logic;
 
+    -- IR receiver
+    IRReceiver : in  std_logic;
+    IRButton   : in  std_logic;
+
     -- flash chip
     Flash_MOSI : out std_logic;
     Flash_MISO : in  std_logic;
@@ -142,8 +146,8 @@ begin
     PixelClockEnable => pixel_clk_en,
     ConsoleMode      => MODE_GC,
     PadData          => PadData,
-    IRReceiver       => '1',
-    IRButton         => '1',
+    IRReceiver       => IRReceiver,
+    IRButton         => IRButton,
     SPI_MOSI         => Flash_MOSI,
     SPI_MISO         => Flash_MISO,
     SPI_SCK          => Flash_SCK,
