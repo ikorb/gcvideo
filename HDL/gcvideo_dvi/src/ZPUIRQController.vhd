@@ -91,8 +91,8 @@ begin
 
               any_int := '0';
               for i in 0 to Devices-1 loop
-                ZPUBusOut.mem_read(i+1) <= DevIRQs(i) and enable_bits(i);
-                any_int                 := any_int or (DevIRQs(i) and enable_bits(i));
+                ZPUBusOut.mem_read(i) <= DevIRQs(i) and enable_bits(i);
+                any_int               := any_int or (DevIRQs(i) and enable_bits(i));
               end loop;
 
               ZPUBusOut.mem_read(31) <= any_int;
