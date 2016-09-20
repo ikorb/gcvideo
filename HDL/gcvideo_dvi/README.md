@@ -63,7 +63,7 @@ interfaces available from KNJN and their FPGAconf program. This also
 requires an RS232 port ("COM port"), although there is at least one
 TXDI interface that integrates an RS232-to-USB converter. In FPGAconf,
 you need to use the "Program boot-PROM" button and select the
-`gcvideo-dvi-p2xh-gc-2.2.bit` file from the `bin` subdirectory.
+`gcvideo-dvi-p2xh-gc-2.3.bit` file from the `bin` subdirectory.
 
 Another option to program the board is over the JTAG pins. This is
 only recommended for advanced users and requires a JTAG interface with
@@ -71,8 +71,8 @@ software that is either able to use indirect programming of an SPI
 flash chip connected to a Spartan 3A (e.g. Xilinx's own Impact) or
 that can play an SVF file. Please not that I did not have much success
 with the SVF file route yet. This way of programming the SPI flash on
-the board requires the `gcvideo-dvi-p2xh-gc-2.2-spiprom.mcs` or
-`gcvideo-dvi-p2xh-gc-2.2-m25p40.svf` files in the `bin` subdirectory,
+the board requires the `gcvideo-dvi-p2xh-gc-2.3-spiprom.mcs` or
+`gcvideo-dvi-p2xh-gc-2.3-m25p40.svf` files in the `bin` subdirectory,
 depending on the software you use. The SVF file has been created
 assuming that there is a M25P40 chip on the board. KNJN does not
 specify which chip they ship, only that it will be at least 4 MBit in
