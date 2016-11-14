@@ -322,7 +322,7 @@ _emulate_pushpc:
         ;; -- pushspadd --
         ;; [ret offset] -> [offset*4 + sp]
         .section ".emulate_pushspadd", "ax"
-_emilate_pushspadd:
+_emulate_pushspadd:
         pushsp                  ; [sp-4 ret offset]
         im      4               ; adjust for return address
         add                     ; [sp ret offset]
