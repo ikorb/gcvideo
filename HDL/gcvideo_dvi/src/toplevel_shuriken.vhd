@@ -124,6 +124,9 @@ architecture Behavioral of toplevel_shuriken is
   -- audio
   signal audio          : AudioData;
 
+  -- console mode detection
+  signal console_mode   : console_mode_t := MODE_GC;
+
   -- misc
   signal video_settings : VideoSettings_t;
   signal clock_locked   : std_logic;
@@ -133,18 +136,40 @@ architecture Behavioral of toplevel_shuriken is
 
 begin
 
+  mode_detect: if TargetConsole = "WII" generate
+    Inst_CMD: ConsoleModeDetect port map (
+      Clock       => Clock54M,
+      I2S_LRClock => I2S_LRClock,
+      ConsoleMode => console_mode
+    );
+
+    -- (note: console_mode is initialized to MODE_GC)
+  end generate;
+
   -- misc outputs
-  CableDetect <= '1' when video_settings.CableDetect else '0';
+  process(video_settings)
+  begin
+    if video_settings.CableDetect then
+      CableDetect <= '1';
+    else
+      if TargetConsole = "WII" then
+        -- avoid a hard low so an external cable doesn't short the output
+        CableDetect <= 'Z';
+      else
+        CableDetect <= '0';
+      end if;
+    end if;
+  end process;
 
   -- CPU subsystem
   Inst_CPU: CPUSubsystem generic map (
-    TargetConsole    => "GC"
+    TargetConsole    => TargetConsole
   ) port map (
     Clock            => Clock54M,
     ExtReset         => not clock_locked,
     RawVideo         => video_422,
     PixelClockEnable => pixel_clk_en,
-    ConsoleMode      => MODE_GC,
+    ConsoleMode      => console_mode,
     PadData          => PadData,
     IRReceiver       => IRReceiver,
     IRButton         => IRButton,
@@ -168,7 +193,7 @@ begin
     clk_n         => DVIClockN,
     clk_pixel     => Clock54M,
     clk_pixel_en  => pixel_clk_en_27,
-    ConsoleMode   => MODE_GC,
+    ConsoleMode   => console_mode,
     red_p         => VGA_Red,
     green_p       => VGA_Green,
     blue_p        => VGA_Blue,
@@ -212,7 +237,7 @@ begin
   Inst_Audio: Audio_SPDIF
     PORT MAP (
       Clock       => ClockAudio,
-      ConsoleMode => MODE_GC,
+      ConsoleMode => console_mode,
       I2S_BClock  => I2S_BClock,
       I2S_LRClock => I2S_LRClock,
       I2S_Data    => I2S_Data,

@@ -1,0 +1,77 @@
+# ------------------------------------------------------------------ -*- conf -*-
+# GCVideo DVI HDL
+# Copyright (C) 2014-2016, Ingo Korb <ingo@akana.de>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
+#
+# pindefs-shurikenv3.ucf: Pin definitions for the Shuriken Video v3/v4 board
+#
+# -------------------------------------------------------------------------------
+
+# video output
+NET "DVI_Clock[0]" LOC = P77 | IOSTANDARD = TMDS_33;
+NET "DVI_Clock[1]" LOC = P78 | IOSTANDARD = TMDS_33;
+NET "DVI_Blue[0]"  LOC = P83 | IOSTANDARD = TMDS_33;
+NET "DVI_Blue[1]"  LOC = P84 | IOSTANDARD = TMDS_33;
+NET "DVI_Green[0]" LOC = P88 | IOSTANDARD = TMDS_33;
+NET "DVI_Green[1]" LOC = P89 | IOSTANDARD = TMDS_33;
+NET "DVI_Red[0]"   LOC = P93 | IOSTANDARD = TMDS_33;
+NET "DVI_Red[1]"   LOC = P94 | IOSTANDARD = TMDS_33;
+
+# Gamecube digital video port
+NET "CableDetect" LOC = P3  | IOSTANDARD = LVCMOS33;
+NET "CSel"        LOC = P5  | IOSTANDARD = LVCMOS18 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | PULLUP = FALSE;
+NET "VData[0]"    LOC = P6  | IOSTANDARD = LVCMOS18 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | PULLUP = FALSE;
+NET "VData[1]"    LOC = P7  | IOSTANDARD = LVCMOS18 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | PULLUP = FALSE;
+NET "VData[2]"    LOC = P9  | IOSTANDARD = LVCMOS18 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | PULLUP = FALSE;
+NET "VData[3]"    LOC = P10 | IOSTANDARD = LVCMOS18 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | PULLUP = FALSE;
+NET "VData[4]"    LOC = P12 | IOSTANDARD = LVCMOS18 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | PULLUP = FALSE;
+NET "VData[5]"    LOC = P13 | IOSTANDARD = LVCMOS18 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | PULLUP = FALSE;
+NET "VData[6]"    LOC = P15 | IOSTANDARD = LVCMOS18 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | PULLUP = FALSE;
+NET "VData[7]"    LOC = P16 | IOSTANDARD = LVCMOS18 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | PULLUP = FALSE;
+
+NET "VClockN" LOC = P43 | IOSTANDARD = LVCMOS18 | PULLUP = FALSE;
+NET "VClockN" TNM_NET = "CLOCK_54";
+TIMESPEC TS_CLOCK_54 = PERIOD "CLOCK_54" 54 MHz HIGH 50 %;
+
+# Controller
+NET "PadData"     LOC = P73 | IOSTANDARD = LVCMOS33 | PULLUP = FALSE;
+
+# IR Receiver
+NET "IRReceiver"  LOC = P71 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "IRButton"    LOC = P70 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+
+# SPI flash
+NET "Flash_MOSI"  LOC = P46 | IOSTANDARD = LVCMOS33;
+NET "Flash_MISO"  LOC = P51 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;
+NET "Flash_SCK"   LOC = P53 | IOSTANDARD = LVCMOS33;
+NET "Flash_SSEL"  LOC = P27 | IOSTANDARD = LVCMOS33;
+
+# Audio
+NET "I2S_Data"    LOC = P40 | IOSTANDARD = LVCMOS18;
+NET "I2S_LRClock" LOC = P39 | IOSTANDARD = LVCMOS18;
+NET "I2S_BClock"  LOC = P41 | IOSTANDARD = LVCMOS18;
+NET "SPDIF_Out"   LOC = P72 | IOSTANDARD = LVCMOS33;
+
+NET "Inst_Audio/clocken_spdif" TNM_NET = FFS "MC_AUDIO";
+TIMESPEC TS_Audio = FROM "MC_AUDIO" TO "MC_AUDIO" TS_CLOCK_54 / 2;

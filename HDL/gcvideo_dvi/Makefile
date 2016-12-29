@@ -70,16 +70,26 @@ else ifeq ($(TARGET),p2xh-wii)
   UCF      := src/pindefs-p2xh-wii.ucf
   TOPLEVEL := toplevel_p2xh
   CONSOLE  := WII
-else ifeq ($(TARGET),shuriken)
+else ifeq ($(TARGET),shuriken-gc)
   SRC      += $(SRC_SHURIKEN)
-  UCF      := src/pindefs-shuriken.ucf
+  UCF      := src/pindefs-shuriken-gc.ucf
   TOPLEVEL := toplevel_shuriken
   CONSOLE  := GC
-else ifeq ($(TARGET),shuriken-v3)
+else ifeq ($(TARGET),shuriken-wii)
   SRC      += $(SRC_SHURIKEN)
-  UCF      := src/pindefs-shurikenv3.ucf
+  UCF      := src/pindefs-shuriken-wii.ucf
+  TOPLEVEL := toplevel_shuriken
+  CONSOLE  := WII
+else ifeq ($(TARGET),shuriken-v3-gc)
+  SRC      += $(SRC_SHURIKEN)
+  UCF      := src/pindefs-shurikenv3-gc.ucf
   TOPLEVEL := toplevel_shuriken
   CONSOLE  := GC
+else ifeq ($(TARGET),shuriken-v3-wii)
+  SRC      += $(SRC_SHURIKEN)
+  UCF      := src/pindefs-shurikenv3-wii.ucf
+  TOPLEVEL := toplevel_shuriken
+  CONSOLE  := WII
 else
 dummy:
 	@echo "TARGET variable not specified"
@@ -87,8 +97,10 @@ dummy:
 	@echo "Valid targets:"
 	@echo "  - p2xh-gc"
 	@echo "  - p2xh-wii"
-	@echo "  - shuriken"
-	@echo "  - shuriken-v3"
+	@echo "  - shuriken-gc"
+	@echo "  - shuriken-wii"
+	@echo "  - shuriken-v3-gc"
+	@echo "  - shuriken-v3-wii"
 	@false
 endif
 
