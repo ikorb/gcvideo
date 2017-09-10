@@ -96,14 +96,13 @@ architecture Behavioral of audio_spdif is
 
   signal volume_sync1        : unsigned(7 downto 0);
   signal volume_sync2        : unsigned(7 downto 0);
+  signal volume_adjusted     : signed(9 downto 0);
 
-  function scale_audio(val: signed(15 downto 0); factor: unsigned(7 downto 0))
+  function scale_audio(val: signed(15 downto 0); factor: signed(9 downto 0))
     return signed is
     variable tmp: signed(25 downto 0);
-    variable factor_plus_one: signed(9 downto 0);
   begin
-    factor_plus_one := signed("00" & factor) + 1;
-    tmp := val * factor_plus_one;
+    tmp := val * factor;
     return tmp(25 downto 10);
   end function;
 
@@ -197,6 +196,7 @@ begin
       enable_l_dly <= enable_l;
       enable_r_dly <= enable_r;
 
+      volume_adjusted <= signed("00" & volume_sync2) + 1;
       volume_sync2 <= volume_sync1;
       volume_sync1 <= Volume;
 
@@ -204,7 +204,7 @@ begin
         if volume_sync2 = x"00" then
           audio_left <= (others => '0');
         else
-          audio_left <= scale_audio(audio_left_unscaled, volume_sync2);
+          audio_left <= scale_audio(audio_left_unscaled, volume_adjusted);
         end if;
       end if;
 
@@ -212,7 +212,7 @@ begin
         if volume_sync2 = x"00" then
           audio_right <= (others => '0');
         else
-          audio_right <= scale_audio(audio_right_unscaled, volume_sync2);
+          audio_right <= scale_audio(audio_right_unscaled, volume_adjusted);
         end if;
       end if;
     end if;

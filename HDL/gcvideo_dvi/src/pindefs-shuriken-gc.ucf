@@ -73,5 +73,8 @@ NET "I2S_LRClock" LOC = P39 | IOSTANDARD = LVCMOS33;
 NET "I2S_BClock"  LOC = P41 | IOSTANDARD = LVCMOS33;
 NET "SPDIF_Out"   LOC = P73 | IOSTANDARD = LVCMOS33;
 
-NET "Inst_Audio/clocken_spdif" TNM_NET = FFS "MC_AUDIO";
+NET "Inst_Audio/clocken_spdif" TNM_NET = "MC_AUDIO";
 TIMESPEC TS_Audio = FROM "MC_AUDIO" TO "MC_AUDIO" TS_CLOCK_54 / 2;
+
+NET "Inst_Audio/Clock" TNM_NET = "Clock_Audio";
+TIMESPEC TS_VideoToAudio = FROM "CLOCK_54" TO "Clock_Audio" TIG;
