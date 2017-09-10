@@ -267,7 +267,8 @@ package component_defs is
 
   component CPUSubsystem is
     generic (
-      TargetConsole   : string
+      TargetConsole   : string;
+      Firmware        : string
     );
     port (
       Clock           : in  std_logic;

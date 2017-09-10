@@ -42,16 +42,16 @@ library work;
 use work.zpupkg.all;
 
 entity zpu_rom is
-generic
-	(
-		maxAddrBitBRAM : integer := maxAddrBitBRAMLimit -- Specify your actual ROM size to save LEs and unnecessary block RAM usage.
-	);
-port (
-	clk : in std_logic;
-	areset : in std_logic := '0';
-	from_zpu : in ZPU_ToROM;
-	to_zpu : out ZPU_FromROM
-);
+  generic (
+    ROMContents   : string;
+    maxAddrBitBRAM: integer := maxAddrBitBRAMLimit -- Specify your actual ROM size to save LEs and unnecessary block RAM usage.
+  );
+  port (
+    clk     : in  std_logic;
+    areset  : in  std_logic := '0';
+    from_zpu: in  ZPU_ToROM;
+    to_zpu  : out ZPU_FromROM
+  );
 end zpu_rom;
 
 architecture arch of zpu_rom is
@@ -60,7 +60,7 @@ type ram_type is array(natural range 0 to ((2**(maxAddrBitBRAM+1))/4)-1) of std_
 
   -- initializer function
   impure function init_mem return ram_type is
-    file mif_file : text open read_mode is "zpu_bootrom.mif";
+    file mif_file : text open read_mode is ROMContents;
     variable mif_line : line;
     variable temp_bv  : bit_vector(wordSize-1 downto 0);
     variable temp_mem : ram_type;

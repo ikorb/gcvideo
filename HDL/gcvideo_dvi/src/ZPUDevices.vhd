@@ -73,6 +73,7 @@ package ZPUDevices is
 
   component zpu_rom is
     generic (
+      ROMContents    : string;
       maxAddrBitBRAM : integer
     );
     port (

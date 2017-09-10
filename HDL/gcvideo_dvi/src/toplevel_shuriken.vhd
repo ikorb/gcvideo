@@ -40,7 +40,8 @@ use work.video_defs.all;
 
 entity toplevel_shuriken is
   generic (
-    TargetConsole: string -- "GC" or "WII"
+    TargetConsole: string; -- "GC" or "WII"
+    Firmware     : string
   );
   port (
     -- clocks
@@ -163,7 +164,8 @@ begin
 
   -- CPU subsystem
   Inst_CPU: CPUSubsystem generic map (
-    TargetConsole    => TargetConsole
+    TargetConsole    => TargetConsole,
+    Firmware         => Firmware
   ) port map (
     Clock            => Clock54M,
     ExtReset         => not clock_locked,

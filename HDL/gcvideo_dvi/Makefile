@@ -65,31 +65,37 @@ ifeq ($(TARGET),p2xh-gc)
   UCF      := src/pindefs-p2xh-gc.ucf
   TOPLEVEL := toplevel_p2xh
   CONSOLE  := GC
+  FIRMWARE := gc-dvi
 else ifeq ($(TARGET),p2xh-wii)
   SRC      += $(SRC_P2XH)
   UCF      := src/pindefs-p2xh-wii.ucf
   TOPLEVEL := toplevel_p2xh
   CONSOLE  := WII
+  FIRMWARE := wii-dvi
 else ifeq ($(TARGET),shuriken-gc)
   SRC      += $(SRC_SHURIKEN)
   UCF      := src/pindefs-shuriken-gc.ucf
   TOPLEVEL := toplevel_shuriken
   CONSOLE  := GC
+  FIRMWARE := gc-dvi
 else ifeq ($(TARGET),shuriken-wii)
   SRC      += $(SRC_SHURIKEN)
   UCF      := src/pindefs-shuriken-wii.ucf
   TOPLEVEL := toplevel_shuriken
   CONSOLE  := WII
+  FIRMWARE := wii-dvi
 else ifeq ($(TARGET),shuriken-v3-gc)
   SRC      += $(SRC_SHURIKEN)
   UCF      := src/pindefs-shurikenv3-gc.ucf
   TOPLEVEL := toplevel_shuriken
   CONSOLE  := GC
+  FIRMWARE := gc-dvi
 else ifeq ($(TARGET),shuriken-v3-wii)
   SRC      += $(SRC_SHURIKEN)
   UCF      := src/pindefs-shurikenv3-wii.ucf
   TOPLEVEL := toplevel_shuriken
   CONSOLE  := WII
+  FIRMWARE := wii-dvi
 else
 dummy:
 	@echo "TARGET variable not specified"
@@ -113,6 +119,7 @@ else
  E := @echo
 endif
 
+FIRMWARE_MIF := gcvideo-sw-$(FIRMWARE).mif
 
 all: build/$(XSVFFILE) build/$(BITFILE)
 
@@ -150,13 +157,16 @@ build/%.ngc: build/%.xst $(SRC)
 	$(E) "---- XST      $<"
 	$(Q)cd build ; xst -ifn $(TOPLEVEL).xst -ofn $(TOPLEVEL).syr
 
-build/%.xst: build/%.prj scripts/template.xst src/zpu_bootrom.mif
+build/%.xst: build/%.prj scripts/template.xst build/$(FIRMWARE_MIF)
 	$(E) "---- GENXST   $<"
 	$(Q)cp scripts/template.xst $@
 	$(Q)echo -ifn $(TOPLEVEL).prj >> $@
 	$(Q)echo -ofn $(TOPLEVEL)     >> $@
 	$(Q)echo -top $(TOPLEVEL)     >> $@
-	$(Q)echo -generics {TargetConsole=\"$(CONSOLE)\"} >> $@
+	$(Q)echo -generics {TargetConsole=\"$(CONSOLE)\" Firmware=\"$(FIRMWARE_MIF)\"} >> $@
+
+build/$(FIRMWARE_MIF):
+	$(MAKE) -C ../../Firmware TARGET=$(FIRMWARE) VERSION=$(VERSION)
 
 build/%.prj: | build # FIXME: Should somehow depend on the content of the source file list
 	$(E) "---- GENPRJ   $@"

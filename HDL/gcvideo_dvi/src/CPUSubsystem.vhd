@@ -38,7 +38,8 @@ use work.video_defs.all;
 
 entity CPUSubsystem is
   generic (
-    TargetConsole    : string
+    TargetConsole    : string;
+    Firmware         : string
   );
   port (
     Clock            : in  std_logic;
@@ -147,6 +148,7 @@ begin
   );
 
   Inst_BootRAM: zpu_rom GENERIC MAP (
+    ROMContents    => Firmware,
     maxAddrBitBRAM => ZPUBRAMSize
   ) PORT MAP (
     clk      => Clock,
