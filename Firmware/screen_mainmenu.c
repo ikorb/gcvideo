@@ -70,7 +70,7 @@ static menuitem_t mainmenu_items[] = {
 static void mainmenu_draw(menu_t *menu);
 
 static menu_t mainmenu = {
-  7, 6,
+  7, 7,
   31, 18,
   mainmenu_draw,
   sizeof(mainmenu_items) / sizeof(*mainmenu_items),
@@ -81,6 +81,14 @@ static menu_t mainmenu = {
 
 static void mainmenu_draw(menu_t *menu) {
   modeset_draw(menu);
+
+  /* draw the logo */
+  osd_fillbox(16, 3, 13, 4, ' ' | ATTRIB_DIM_BG);
+  osd_drawborder(16, 3, 13, 4);
+  osd_gotoxy(18, 4);
+  osd_puts("\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14");
+  osd_gotoxy(18, 5);
+  osd_puts("\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d");
 
   /* draw the two video mode lines */
   osd_gotoxy(menu->xpos + menu->xsize - 20, menu->ypos + menu->ysize - 3);
