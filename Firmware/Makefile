@@ -28,27 +28,48 @@
 # Makefile: program construction rules
 #
 
-VERSION := 2.3
+VERSION := TEST
+
+ifeq ($(TARGET), gc-dvi)
+  EXTRA_CFLAGS := -DCONSOLE_GC
+else ifeq ($(TARGET), wii-dvi)
+  EXTRA_CFLAGS := -DCONSOLE_WII
+else ifeq ($(TARGET), gc-dual)
+  EXTRA_CFLAGS := -DCONSOLE_GC -DOUTPUT_DUAL
+else ifeq ($(TARGET), wii-dual)
+  EXTRA_CFLAGS := -DCONSOLE_WII -DOUTPUT_DUAL
+else
+dummy:
+	@echo "TARGET variable not specified"
+	@echo "Please select a build target using \"make TARGET=...\""
+	@echo "Valid targets:"
+	@echo "  - gc-dvi"
+	@echo "  - wii-dvi"
+	@echo "  - gc-dual"
+	@echo "  - wii-dual"
+	@false
+endif
 
 PERL := perl
 CROSS_PREFIX=zpu-elf-
 CC := $(CROSS_PREFIX)gcc
 LD := $(CROSS_PREFIX)ld
 AS := $(CROSS_PREFIX)as
-CFLAGS = -Wall -Werror -Os -g -std=gnu99 -ffunction-sections -fdata-sections -I. -DVERSION=\"$(VERSION)\"
+CFLAGS = -Wall -Werror -Os -g -std=gnu99 -ffunction-sections -fdata-sections -I. -DVERSION=\"$(VERSION)\" $(EXTRA_CFLAGS)
 LDFLAGS := -Tstandalone-bsd.ld -Wl,--gc-sections -Wl,--relax -nostartfiles
 
 DATA2MEM := data2mem
 
-TARGET      := gcvideo-sw
-CRT0        := crt0-bsd.o
-OBJFILES    := $(CRT0) main.o osd.o printf.o pad.o vsync.o menu.o irrx.o \
-	modeset_common.o screen_about.o screen_allmodes.o screen_irconfig.o \
-	screen_idle.o screen_mainmenu.o screen_osdsettings.o screen_othersettings.o \
-	settings.o spiflash.o
+BASENAME    := gcvideo-sw-$(TARGET)
+OBJDIR      := obj-$(TARGET)
+CRT0        := crt0-bsd.S
+SRCFILES    := main.c osd.c printf.c pad.c vsync.c menu.c irrx.c \
+	modeset_common.c screen_about.c screen_allmodes.c screen_irconfig.c \
+	screen_idle.c screen_mainmenu.c screen_osdsettings.c screen_othersettings.c \
+	settings.c spiflash.c
 BITFILE_IN  := ../HDL/gcvideo_dvi/build/toplevel_p2xh.bit
 BITFILE_OUT := ../HDL/gcvideo_dvi/build/p2xh_output.bit
-MIFFILE_OUT := ../HDL/gcvideo_dvi/src/zpu_bootrom.mif
+MIFFILE_OUT := ../HDL/gcvideo_dvi/build/$(BASENAME).mif
 BMMFILE     := ../HDL/gcvideo_dvi/src/zpu_bootram_bd.bmm
 
 BRAM_SIZE   := 16384
@@ -64,47 +85,55 @@ else
  E := @echo
 endif
 
+OBJFILES := $(patsubst %,$(OBJDIR)/%,$(SRCFILES:.c=.o) $(CRT0:.S=.o))
+
 all: mif
 
 .PHONY : inject mif
 
-inject: $(TARGET).mem
+inject: $(OBJDIR)/$(BASENAME).mem
 	$(E) "  DATA2MEM"
 	$(Q)$(DATA2MEM) -bm $(BMMFILE) -bt $(BITFILE_IN) -bd $< -o b $(BITFILE_OUT)
 
-mif: $(TARGET).mif
+mif: $(OBJDIR)/$(BASENAME).mif
 	$(E) "  COPY     $<"
 	$(Q)cp $< $(MIFFILE_OUT)
 
-%.mif: %.bin
+$(OBJDIR)/%.mif: $(OBJDIR)/%.bin
 	$(E) "  BIN2MIF  $<"
 	$(Q)$(PERL) ./bin2mif.pl -swapwords 32 $(BRAM_SIZE) $< $@
 
-%.mem: %.bin
+$(OBJDIR)/%.mem: $(OBJDIR)/%.bin
 	$(E) "  BIN2MEM  $<"
 	$(Q)$(PERL) ./bin2mem.pl $< $@
 
-%.bin: %.elf
+$(OBJDIR)/%.bin: $(OBJDIR)/%.elf
 	$(E) "  BIN      $@"
 	$(Q)$(CROSS_PREFIX)objcopy -O binary $< $@
 
-$(TARGET).elf: $(OBJFILES)
+$(OBJDIR)/$(BASENAME).elf: $(OBJFILES)
 	$(E) "  LINK     $@"
 	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
-%.o: %.S
+$(OBJDIR)/%.o: %.S | $(OBJDIR)
 	$(E) "  AS       $<"
 	$(Q)$(CC) $(CFLAGS) -c -o $@ $<
 
-%.o: %.c
+$(OBJDIR)/%.o: %.c | $(OBJDIR)
 	$(E) "  CC       $<"
 	$(Q)$(CC) $(CFLAGS) $(GENDEPFLAGS) -c -o $@ $<
 
+# Create the output directory
+$(OBJDIR):
+	$(E) "  MKDIR  $(OBJDIR)"
+	$(Q)mkdir -p $(OBJDIR)
+
 clean:
 	$(E) "  CLEAN"
-	$(Q)-rm -f $(TARGET).bin $(TARGET).elf $(TARGET).mem $(TARGET).mif $(OBJFILES)
+	$(Q)-rm -f $(OBJDIR)/$(BASENAME).bin $(OBJDIR)/$(BASENAME).elf
+	$(Q)-rm -f $(OBJDIR)/$(BASENAME).mem $(OBJDIR)/$(BASENAME).mif $(OBJFILES)
 	$(Q)-rm -f .dep/*
-	$(Q)-rmdir .dep
+	$(Q)-rmdir .dep $(OBJDIR)
 
 .PRECIOUS : %.bin
 
