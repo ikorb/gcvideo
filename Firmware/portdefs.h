@@ -74,8 +74,7 @@ typedef struct {
 #define VIDEOIF_FLAG_PROGRESSIVE (1<<0)
 #define VIDEOIF_FLAG_PAL         (1<<1)
 #define VIDEOIF_FLAG_31KHZ       (1<<2)
-#define VIDEOIF_FLAG_TARGET_WII  (1<<3)
-#define VIDEOIF_FLAG_MODE_WII    (1<<4)
+#define VIDEOIF_FLAG_MODE_WII    (1<<3)
 
 #define VIDEOIF_SET_SL_STRENGTH_MASK 0xff
 #define VIDEOIF_SET_SL_ENABLE        (1<<8)

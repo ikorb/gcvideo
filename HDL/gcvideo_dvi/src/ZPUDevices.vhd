@@ -135,9 +135,6 @@ package ZPUDevices is
   end component;
 
   component ZPUVideoInterface is
-    generic (
-      TargetConsole   : string
-    );
     port (
       Clock           : in  std_logic;
       PixelClockEnable: in  boolean;

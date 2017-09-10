@@ -38,7 +38,6 @@ use work.video_defs.all;
 
 entity CPUSubsystem is
   generic (
-    TargetConsole    : string;
     Firmware         : string
   );
   port (
@@ -209,9 +208,7 @@ begin
   end generate;
 
   -- Video Interface device
-  Inst_VideoInterface: ZPUVideoInterface generic map (
-    TargetConsole    => TargetConsole
-  ) port map (
+  Inst_VideoInterface: ZPUVideoInterface port map (
     Clock            => Clock,
     PixelClockEnable => PixelClockEnable,
     Video            => RawVideo,

@@ -164,7 +164,6 @@ begin
 
   -- CPU subsystem
   Inst_CPU: CPUSubsystem generic map (
-    TargetConsole    => TargetConsole,
     Firmware         => Firmware
   ) port map (
     Clock            => Clock54M,

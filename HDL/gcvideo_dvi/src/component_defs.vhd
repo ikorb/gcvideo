@@ -267,7 +267,6 @@ package component_defs is
 
   component CPUSubsystem is
     generic (
-      TargetConsole   : string;
       Firmware        : string
     );
     port (

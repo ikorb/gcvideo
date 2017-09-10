@@ -40,6 +40,13 @@
 #include "settings.h"
 #include "spiflash.h"
 
+/* helper symbols for slightly better code readability */
+#ifdef CONSOLE_WII
+#  define MODE_WII 1
+#else
+#  define MODE_WII 0
+#endif
+
 void screen_about(void) {
   osd_clrscr();
 
@@ -47,13 +54,15 @@ void screen_about(void) {
   osd_fillbox(10, 10, 25, 9, ' ' | ATTRIB_DIM_BG);
   osd_drawborder(10, 10, 25, 9);
   osd_setattr(true, false);
-  if (VIDEOIF->flags & VIDEOIF_FLAG_TARGET_WII) {
+  if (MODE_WII) {
     osd_putsat(14, 11, "WiiVideo DVI v" VERSION);
+
     if (VIDEOIF->flags & VIDEOIF_FLAG_MODE_WII) {
       osd_putsat(17, 12, "in Wii mode");
     } else {
       osd_putsat(17, 12, "in GC mode");
     }
+
   } else {
     osd_putsat(14, 11, "GCVideo DVI v" VERSION);
   }
