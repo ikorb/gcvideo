@@ -1,0 +1,87 @@
+# ------------------------------------------------------------------ -*- conf -*-
+# GCVideo DVI HDL
+# Copyright (C) 2014-2017, Ingo Korb <ingo@akana.de>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
+#
+# constraints-p2xh: Pin definitions for the Pluto IIx-HDMI board
+#
+# -------------------------------------------------------------------------------
+
+# video output
+NET "DVI_Clock[0]" LOC = P34;
+NET "DVI_Clock[1]" LOC = P35;
+NET "DVI_Red[0]"   LOC = P48;
+NET "DVI_Red[1]"   LOC = P49;
+NET "DVI_Green[0]" LOC = P43;
+NET "DVI_Green[1]" LOC = P44;
+NET "DVI_Blue[0]"  LOC = P36;
+NET "DVI_Blue[1]"  LOC = P37;
+
+# The DDC pins are unused, but setting them to PCI mode enables the upper clamp diode
+NET "DDC_SDA" LOC = P50 | IOSTANDARD = PCI33_3;
+NET "DDC_SCL" LOC = P33 | IOSTANDARD = PCI33_3;
+
+# Gamecube digital video port
+NET "CableDetect" LOC = P20;
+NET "CSel"        LOC = P19;
+NET "VData[0]"    LOC = P16;
+NET "VData[1]"    LOC = P15;
+NET "VData[2]"    LOC = P13;
+NET "VData[3]"    LOC = P12;
+NET "VData[4]"    LOC = P10;
+NET "VData[5]"    LOC = P9;
+NET "VData[6]"    LOC = P6;
+NET "VData[7]"    LOC = P5;
+NET "VClockN"     LOC = P89;
+
+# Controller
+NET "PadData"     LOC = P94;
+
+# IR Receiver
+NET "IRReceiver"  LOC = P85;
+NET "IRButton"    LOC = P83;
+
+# SPI flash
+NET "Flash_Hold"  LOC = P31 | IOSTANDARD = LVCMOS33;
+
+# Audio
+NET "I2S_Data"     LOC = P3;
+NET "I2S_LRClock"  LOC = P98;
+NET "I2S_BClock"   LOC = P4;
+NET "SPDIF_Out"    LOC = P78;
+
+# LEDs
+NET "LED1" LOC = P28 | IOSTANDARD = LVCMOS33;
+NET "LED2" LOC = P29 | IOSTANDARD = LVCMOS33;
+
+# Test port
+#NET "TestGND" LOC = P60 | IOSTANDARD = LVCMOS33;
+#NET "Test[0]" LOC = P61 | IOSTANDARD = LVCMOS33;
+#NET "Test[1]" LOC = P62 | IOSTANDARD = LVCMOS33;
+#NET "Test[2]" LOC = P64 | IOSTANDARD = LVCMOS33;
+#NET "Test[3]" LOC = P65 | IOSTANDARD = LVCMOS33;
+#NET "Test[4]" LOC = P70 | IOSTANDARD = LVCMOS33;
+#NET "Test[5]" LOC = P71 | IOSTANDARD = LVCMOS33;
+#NET "Test[6]" LOC = P72 | IOSTANDARD = LVCMOS33;
+#NET "Test[7]" LOC = P73 | IOSTANDARD = LVCMOS33;

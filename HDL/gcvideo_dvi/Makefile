@@ -62,38 +62,38 @@ SRC = $(SRC_COMMON)
 
 ifeq ($(TARGET),p2xh-gc)
   SRC      += $(SRC_P2XH)
-  UCF      := src/pindefs-p2xh-gc.ucf
   TOPLEVEL := toplevel_p2xh
+  BOARD    := p2xh
   CONSOLE  := GC
   FIRMWARE := gc-dvi
 else ifeq ($(TARGET),p2xh-wii)
   SRC      += $(SRC_P2XH)
-  UCF      := src/pindefs-p2xh-wii.ucf
   TOPLEVEL := toplevel_p2xh
+  BOARD    := p2xh
   CONSOLE  := WII
   FIRMWARE := wii-dvi
 else ifeq ($(TARGET),shuriken-gc)
   SRC      += $(SRC_SHURIKEN)
-  UCF      := src/pindefs-shuriken-gc.ucf
   TOPLEVEL := toplevel_shuriken
+  BOARD    := shuriken
   CONSOLE  := GC
   FIRMWARE := gc-dvi
 else ifeq ($(TARGET),shuriken-wii)
   SRC      += $(SRC_SHURIKEN)
-  UCF      := src/pindefs-shuriken-wii.ucf
   TOPLEVEL := toplevel_shuriken
+  BOARD    := shuriken
   CONSOLE  := WII
   FIRMWARE := wii-dvi
 else ifeq ($(TARGET),shuriken-v3-gc)
   SRC      += $(SRC_SHURIKEN)
-  UCF      := src/pindefs-shurikenv3-gc.ucf
   TOPLEVEL := toplevel_shuriken
+  BOARD    := shuriken-v3
   CONSOLE  := GC
   FIRMWARE := gc-dvi
 else ifeq ($(TARGET),shuriken-v3-wii)
   SRC      += $(SRC_SHURIKEN)
-  UCF      := src/pindefs-shurikenv3-wii.ucf
   TOPLEVEL := toplevel_shuriken
+  BOARD    := shuriken-v3
   CONSOLE  := WII
   FIRMWARE := wii-dvi
 else
@@ -118,6 +118,10 @@ else
  Q := @
  E := @echo
 endif
+
+CONSOLE_LC := $(shell echo $(CONSOLE)|tr A-Z a-z)
+
+UCF := build/constraints-$(BOARD)-$(CONSOLE_LC).ucf
 
 FIRMWARE_MIF := gcvideo-sw-$(FIRMWARE).mif
 
@@ -164,6 +168,10 @@ build/%.xst: build/%.prj scripts/template.xst build/$(FIRMWARE_MIF)
 	$(Q)echo -ofn $(TOPLEVEL)     >> $@
 	$(Q)echo -top $(TOPLEVEL)     >> $@
 	$(Q)echo -generics {TargetConsole=\"$(CONSOLE)\" Firmware=\"$(FIRMWARE_MIF)\"} >> $@
+
+$(UCF): src/constraints-common.ucf src/constraints-$(BOARD).ucf src/constraints-$(CONSOLE_LC).ucf
+	$(E) "---- GENUCF   $<"
+	$(Q)cat $^ > $@
 
 build/$(FIRMWARE_MIF):
 	$(MAKE) -C ../../Firmware TARGET=$(FIRMWARE) VERSION=$(VERSION)
