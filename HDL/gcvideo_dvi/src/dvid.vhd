@@ -34,17 +34,9 @@ entity dvid is
            clk_pixel     : in  STD_LOGIC;
            clk_pixel_en  : in  boolean;
            ConsoleMode   : in  console_mode_t;
-           red_p         : in  STD_LOGIC_VECTOR (7 downto 0);
-           green_p       : in  STD_LOGIC_VECTOR (7 downto 0);
-           blue_p        : in  STD_LOGIC_VECTOR (7 downto 0);
-           blank         : in  STD_LOGIC;
-           hsync         : in  STD_LOGIC;
-           vsync         : in  STD_LOGIC;
+           Video         : in  VideoRGB;
 
            EnhancedMode  : in  boolean;
-           IsProgressive : in  boolean;
-           IsPAL         : in  boolean;
-           Is30kHz       : in  boolean;
            Limited_Range : in  boolean;
            Widescreen    : in  boolean;
            Audio         : in  AudioData;
@@ -313,12 +305,28 @@ begin
       hsync_delay(0 to delay_clocks-2) <= hsync_delay(1 to delay_clocks-1);
       vsync_delay(0 to delay_clocks-2) <= vsync_delay(1 to delay_clocks-1);
       blank_delay(0 to delay_clocks-2) <= blank_delay(1 to delay_clocks-1);
-      red_delay(delay_clocks-1)   <= red_p;
-      green_delay(delay_clocks-1) <= green_p;
-      blue_delay(delay_clocks-1)  <= blue_p;
-      hsync_delay(delay_clocks-1) <= hsync;
-      vsync_delay(delay_clocks-1) <= vsync;
-      blank_delay(delay_clocks-1) <= blank;
+      red_delay(delay_clocks-1)   <= std_logic_vector(Video.PixelR);
+      green_delay(delay_clocks-1) <= std_logic_vector(Video.PixelG);
+      blue_delay(delay_clocks-1)  <= std_logic_vector(Video.PixelB);
+
+      if Video.VSync then
+        vsync_delay(delay_clocks-1) <= '0';
+      else
+        vsync_delay(delay_clocks-1) <= '1';
+      end if;
+
+      if Video.HSync then
+        hsync_delay(delay_clocks-1) <= '0';
+      else
+        hsync_delay(delay_clocks-1) <= '1';
+      end if;
+
+      if Video.Blanking then
+        blank_delay(delay_clocks-1) <= '1';
+      else
+        blank_delay(delay_clocks-1) <= '0';
+      end if;
+
       red_d   <= red_delay(0);
       green_d <= green_delay(0);
       blue_d  <= blue_delay(0);
@@ -423,7 +431,7 @@ begin
       case video_state is
         when VS_BLANKING =>
           if EnhancedMode then
-            if blank = '0' then -- check for early warning
+            if not Video.Blanking then -- check for early warning
               video_state <= VS_VIDEO_PRE;
               seq_start   <= true;
               seq_address <= UCode_Addr_Blank2Vid;
@@ -505,15 +513,15 @@ begin
           ifr_select(0) <= '1';
         end if;
 
-        if IsPAL then
+        if Video.IsPAL then
           ifr_select(1) <= '1';
         end if;
 
-        if IsProgressive then
+        if Video.IsProgressive then
           ifr_select(2) <= '1';
         end if;
 
-        if not Is30kHz then
+        if not Video.Is30kHz then
           ifr_select(3) <= '1';
         end if;
 

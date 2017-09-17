@@ -111,12 +111,7 @@ architecture Behavioral of toplevel_p2xh is
   signal pixel_clk_en_27: boolean; -- used for DVI output, automatically results in pixel-doubling for 15k modes
 
   -- internal 24 bit VGA signals
-  signal VGA_Red        : std_logic_vector(7 downto 0);
-  signal VGA_Green      : std_logic_vector(7 downto 0);
-  signal VGA_Blue       : std_logic_vector(7 downto 0);
-  signal VGA_HSync      : std_logic;
   signal VGA_VSync      : std_logic;
-  signal VGA_Blank      : std_logic;
 
   -- encoded DVI signals
   signal red_enc        : std_logic;
@@ -183,6 +178,7 @@ begin
     HeartbeatClock => heartbeat_clock,
     HeartbeatVSync => heartbeat_vsync
   );
+  VGA_VSync <= '0' when video_out.VSync else '1';
 
   leds_gc: if TargetConsole = "GC" generate
     LED1 <= heartbeat_clock;
@@ -226,16 +222,8 @@ begin
     clk_pixel     => Clock54M,
     clk_pixel_en  => pixel_clk_en_27,
     ConsoleMode   => console_mode,
-    red_p         => VGA_Red,
-    green_p       => VGA_Green,
-    blue_p        => VGA_Blue,
-    blank         => VGA_Blank,
-    hsync         => VGA_HSync,
-    vsync         => VGA_VSync,
+    Video         => video_out,
     EnhancedMode  => video_settings.EnhancedMode,
-    IsProgressive => video_out.IsProgressive,
-    IsPAL         => video_out.IsPAL,
-    Is30kHz       => video_out.Is30kHz,
     Limited_Range => video_settings.LimitedRange,
     Widescreen    => video_settings.Widescreen,
     Audio         => audio,
@@ -369,40 +357,19 @@ begin
     end if;
   end process;
 
-  -- send video signals to output
+  -- apply blanking to final RGB signal
   process (Clock54M, pixel_clk_en_ld)
   begin
     if rising_edge(Clock54M) and pixel_clk_en_ld then
-      -- output sync signals
-      if video_out.VSync then
-        VGA_VSync <= '0';
-      else
-        VGA_VSync <= '1';
-      end if;
+      video_out <= video_rgb;
 
-      if video_out.HSync then
-        VGA_HSync <= '0';
-      else
-        VGA_HSync <= '1';
-      end if;
-
-      -- output to VGA
-      if video_out.Blanking then
-        VGA_Red   <= (others => '0');
-        VGA_Green <= (others => '0');
-        VGA_Blue  <= (others => '0');
-        VGA_Blank <= '1';
-      else
-        VGA_Red   <= std_logic_vector(video_out.PixelR);
-        VGA_Green <= std_logic_vector(video_out.PixelG);
-        VGA_Blue  <= std_logic_vector(video_out.PixelB);
-        VGA_Blank <= '0';
+      if video_rgb.Blanking then
+        video_out.PixelR <= (others => '0');
+        video_out.PixelG <= (others => '0');
+        video_out.PixelB <= (others => '0');
       end if;
     end if;
   end process;
-
-  -- select output signal
-  video_out <= video_rgb;
 
 end Behavioral;
 

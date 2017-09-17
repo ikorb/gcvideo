@@ -158,16 +158,8 @@ package component_defs is
       clk_pixel     : in  std_logic;
       clk_pixel_en  : in  boolean;
       ConsoleMode   : in  console_mode_t;
-      red_p         : in  std_logic_vector(7 downto 0);
-      green_p       : in  std_logic_vector(7 downto 0);
-      blue_p        : in  std_logic_vector(7 downto 0);
-      blank         : in  std_logic;
-      hsync         : in  std_logic;
-      vsync         : in  std_logic;
+      Video         : in  VideoRGB;
       EnhancedMode  : in  boolean;
-      IsProgressive : in  boolean;
-      IsPAL         : in  boolean;
-      Is30kHz       : in  boolean;
       Limited_Range : in  boolean;
       Widescreen    : in  boolean;
       Audio         : in  AudioData;
