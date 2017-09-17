@@ -1,6 +1,6 @@
 # GCVideo DVI Firmware
 #
-# Copyright (C) 2015-2016, Ingo Korb <ingo@akana.de>
+# Copyright (C) 2015-2017, Ingo Korb <ingo@akana.de>
 # All rights reserved.
 #
 # Redistribution and use in source and binary forms, with or without

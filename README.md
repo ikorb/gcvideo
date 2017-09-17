@@ -71,7 +71,7 @@ should contain README.md files with further information.
 # Licence #
 
 <pre>
-Copyright (C) 2014-2016, Ingo Korb &lt;ingo@akana.de&gt;
+Copyright (C) 2014-2017, Ingo Korb &lt;ingo@akana.de&gt;
 All rights reserved.
 
 Redistribution and use in source and binary forms, with or without
