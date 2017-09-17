@@ -140,12 +140,8 @@ architecture Behavioral of toplevel_p2xh is
   signal clock_locked   : std_logic;
   signal scanline_even  : boolean;
 
-  signal led1_counter   : natural range 0 to 24 := 0;
-  signal led2_counter   : natural range 0 to 375000 := 0;
-  signal heartbeat_led1 : std_logic := '0';
-  signal heartbeat_led2 : std_logic := '0';
-  signal heartbeat_vsync: std_logic := '0';
-  signal heartbeat_hsync: std_logic := '0';
+  signal heartbeat_clock: std_logic;
+  signal heartbeat_vsync: std_logic;
 
   signal obuf_oe        : std_logic;
 
@@ -161,20 +157,11 @@ begin
     -- (note: console_mode is initialized to MODE_GC)
   end generate;
 
-  -- misc outputs
-  l1_gc: if TargetConsole = "GC" generate
-    LED1 <= heartbeat_led1;
-  end generate;
-
-  l1_wii: if TargetConsole = "WII" generate
-    LED1 <= '1' when console_mode = MODE_WII else '0';
-  end generate;
-
-  LED2        <= heartbeat_led2;
   Flash_Hold  <= '1';
   DDC_SCL     <= 'Z'; -- currently not used, but must be defined to avoid
   DDC_SDA     <= 'Z'; --   damaging the FPGA I/O drivers
 
+  -- misc outputs
   process(video_settings)
   begin
     if video_settings.CableDetect then
@@ -190,30 +177,22 @@ begin
   end process;
 
   -- heartbeat on LEDs
-  process (Clock54M)
-  begin
-    if rising_edge(Clock54M) then
-      if heartbeat_vsync /= VGA_VSync then
-        if led1_counter /= 0 then
-          led1_counter <= led1_counter - 1;
-        else
-          led1_counter   <= 24;
-          heartbeat_led1 <= not heartbeat_led1;
-        end if;
-      end if;
-      heartbeat_vsync <= VGA_VSync;
+  Inst_Heartbeat: LED_Heartbeat port map (
+    Clock          => Clock54M,
+    VSync          => VGA_VSync,
+    HeartbeatClock => heartbeat_clock,
+    HeartbeatVSync => heartbeat_vsync
+  );
 
-      if heartbeat_hsync /= VGA_HSync then
-        if led2_counter  /= 0 then
-          led2_counter   <= led2_counter - 1;
-        else
-          led2_counter   <= 7500;
-          heartbeat_led2 <= not heartbeat_led2;
-        end if;
-      end if;
-      heartbeat_hsync <= VGA_HSync;
-    end if;
-  end process;
+  leds_gc: if TargetConsole = "GC" generate
+    LED1 <= heartbeat_clock;
+    LED2 <= heartbeat_vsync;
+  end generate;
+
+  leds_wii: if TargetConsole = "WII" generate
+    LED1 <= '1' when console_mode = MODE_WII else '0';
+    LED2 <= heartbeat_clock xor heartbeat_vsync;
+  end generate;
 
   -- CPU subsystem
   Inst_CPU: CPUSubsystem generic map (

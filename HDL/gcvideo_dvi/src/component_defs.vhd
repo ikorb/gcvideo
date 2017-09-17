@@ -324,6 +324,15 @@ package component_defs is
     );
   end component;
 
+  component LED_Heartbeat is
+    port (
+      Clock         : in  std_logic;
+      VSync         : in  std_logic;
+      HeartbeatClock: out std_logic;
+      HeartbeatVSync: out std_logic
+    );
+  end component;
+
 end component_defs;
 
 package body component_defs is

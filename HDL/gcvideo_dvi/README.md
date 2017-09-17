@@ -421,6 +421,22 @@ console mode (Wii or Gamecube) in the Wii version.
 If neither of them is blinking, check all the wiring and also
 make sure that the board is actually programmed.
 
+The blink pattern of the LEDs is based on both the master 54MHz clock
+and the VSync signal. With two heartbeat LEDs, one of them shows
+the presence of the 54MHz clock by pulsing approximately 3 times per
+second with a short on/long off pattern. The second LED shows the
+presence of a VSync signal (decoded from the digital video bus) by
+blinking at about 0.5 Hz with an NTSC video signal or slightly slower
+with a PAL signal - this means that it should be on for about one
+second, then off for about one second and so forth.
+
+If only a single heartbeat LED is available, it shows the quick
+pulsing of the clock heartbeat pattern, but the short on/long off
+pattern is changed to a short off/long on pattern and back about every
+second if VSync signals are detected. (Or more technical, the clock
+heartbeat pattern is XORed with the VSync pattern, so every second
+second the pattern is inverted)
+
 ### XRGB Mini ###
 
 If possible, avoid connecting the output of GCVideo DVI to the HDMI
