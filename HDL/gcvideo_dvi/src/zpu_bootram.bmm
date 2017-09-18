@@ -1,14 +1,14 @@
 ADDRESS_MAP softcore_top PPC405 0
 	ADDRESS_SPACE memory1 RAMB16 [0x00000000:0x00003FFF]
 		BUS_BLOCK
-			Inst_CPU/Inst_BootRAM/Mram_ram8 [31:28];
-			Inst_CPU/Inst_BootRAM/Mram_ram7 [27:24];
-			Inst_CPU/Inst_BootRAM/Mram_ram6 [23:20];
-			Inst_CPU/Inst_BootRAM/Mram_ram5 [19:16];
-			Inst_CPU/Inst_BootRAM/Mram_ram4 [15:12];
-			Inst_CPU/Inst_BootRAM/Mram_ram3 [11:8];
-			Inst_CPU/Inst_BootRAM/Mram_ram2 [7:4];
-			Inst_CPU/Inst_BootRAM/Mram_ram1 [3:0];
+			Inst_Datapipe/Inst_CPU/Inst_BootRAM/Mram_ram8 [31:28];
+			Inst_Datapipe/Inst_CPU/Inst_BootRAM/Mram_ram7 [27:24];
+			Inst_Datapipe/Inst_CPU/Inst_BootRAM/Mram_ram6 [23:20];
+			Inst_Datapipe/Inst_CPU/Inst_BootRAM/Mram_ram5 [19:16];
+			Inst_Datapipe/Inst_CPU/Inst_BootRAM/Mram_ram4 [15:12];
+			Inst_Datapipe/Inst_CPU/Inst_BootRAM/Mram_ram3 [11:8];
+			Inst_Datapipe/Inst_CPU/Inst_BootRAM/Mram_ram2 [7:4];
+			Inst_Datapipe/Inst_CPU/Inst_BootRAM/Mram_ram1 [3:0];
 		END_BUS_BLOCK;
 	END_ADDRESS_SPACE;
 END_ADDRESS_MAP;

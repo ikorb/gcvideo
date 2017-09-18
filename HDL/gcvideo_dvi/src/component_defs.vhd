@@ -146,12 +146,6 @@ package component_defs is
   end component;
 
   COMPONENT dvid
-  GENERIC (
-    Invert_Red  : Boolean := false;
-    Invert_Green: Boolean := false;
-    Invert_Blue : Boolean := false;
-    Invert_Clock: Boolean := false
-  );
   PORT(
       clk           : in  std_logic;
       clk_n         : in  std_logic;
@@ -166,6 +160,10 @@ package component_defs is
       TMDSWord_Red  : out std_logic_vector(9 downto 0);
       TMDSWord_Green: out std_logic_vector(9 downto 0);
       TMDSWord_Blue : out std_logic_vector(9 downto 0);
+      Pair_Red      : in  Pair_Swap_t := Pair_Regular;
+      Pair_Green    : in  Pair_Swap_t := Pair_Regular;
+      Pair_Blue     : in  Pair_Swap_t := Pair_Regular;
+      Pair_Clock    : in  Pair_Swap_t := Pair_Regular;
       red_s         : out std_logic;
       green_s       : out std_logic;
       blue_s        : out std_logic;
@@ -322,6 +320,60 @@ package component_defs is
       VSync         : in  std_logic;
       HeartbeatClock: out std_logic;
       HeartbeatVSync: out std_logic
+    );
+  end component;
+
+  component Datapipe is
+    generic (
+      TargetConsole: string; -- "GC" or "WII"
+      Firmware     : string
+    );
+    port (
+      -- clocks
+      VClockN    : in  std_logic;
+
+      -- gamecube video signals
+      VData      : in  std_logic_vector(7 downto 0);
+      CSel       : in  std_logic; -- usually named ClkSel, but it's really a color select
+      CableDetect: out std_logic;
+
+      -- console audio signals
+      I2S_BClock : in  std_logic;
+      I2S_LRClock: in  std_logic;
+      I2S_Data   : in  std_logic;
+
+      -- gamecube controller
+      PadData    : in  std_logic;
+
+      -- IR receiver
+      IRReceiver : in  std_logic;
+      IRButton   : in  std_logic;
+
+      -- flash chip
+      Flash_MOSI : out std_logic;
+      Flash_MISO : in  std_logic;
+      Flash_SCK  : out std_logic;
+      Flash_SSEL : out std_logic;
+
+      -- exported internal signals
+      ConsoleMode: out console_mode_t;
+      PipeClock  : out std_logic;
+
+      -- audio out
+      SPDIF_Out  : out std_logic;
+
+      -- sync out
+      VSync_out  : out std_logic;
+
+      -- digital video out
+      Pair_Red   : in  Pair_Swap_t := Pair_Regular;
+      Pair_Green : in  Pair_Swap_t := Pair_Regular;
+      Pair_Blue  : in  Pair_Swap_t := Pair_Regular;
+      Pair_Clock : in  Pair_Swap_t := Pair_Regular;
+      DVI_Clock  : out std_logic_vector(1 downto 0);
+      DVI_Red    : out std_logic_vector(1 downto 0);
+      DVI_Green  : out std_logic_vector(1 downto 0);
+      DVI_Blue   : out std_logic_vector(1 downto 0)
     );
   end component;
 

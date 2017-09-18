@@ -23,12 +23,6 @@ use work.dvienc_defs.all;
 use work.video_defs.all;
 
 entity dvid is
-    Generic ( -- allow inversion of each differential pair to account for pin swaps
-      Invert_Red  : Boolean := false;
-      Invert_Green: Boolean := false;
-      Invert_Blue : Boolean := false;
-      Invert_Clock: Boolean := false
-    );
     Port ( clk           : in  STD_LOGIC;
            clk_n         : in  STD_LOGIC;
            clk_pixel     : in  STD_LOGIC;
@@ -45,6 +39,12 @@ entity dvid is
            TMDSWord_Red  : out std_logic_vector(9 downto 0);
            TMDSWord_Green: out std_logic_vector(9 downto 0);
            TMDSWord_Blue : out std_logic_vector(9 downto 0);
+
+           -- allow inversion of each differential pair to account for pin swaps
+           Pair_Red      : in  Pair_Swap_t;
+           Pair_Green    : in  Pair_Swap_t;
+           Pair_Blue     : in  Pair_Swap_t;
+           Pair_Clock    : in  Pair_Swap_t;
 
            red_s         : out STD_LOGIC;
            green_s       : out STD_LOGIC;
@@ -254,10 +254,10 @@ begin
     port map (Q => clock_s, D0 => out_clock(0), D1 => out_clock(1), C0 => clk, C1 => clk_n, CE => '1', R => '0', S => '0');
 
   -- add optional inversion of the output bits
-  out_red   <= not shift_red(1 downto 0)   when Invert_Red   else shift_red(1 downto 0);
-  out_green <= not shift_green(1 downto 0) when Invert_Green else shift_green(1 downto 0);
-  out_blue  <= not shift_blue(1 downto 0)  when Invert_Blue  else shift_blue(1 downto 0);
-  out_clock <= not shift_clock(1 downto 0) when Invert_Clock else shift_clock(1 downto 0);
+  out_red   <= not shift_red(1 downto 0)   when Pair_Red   = Pair_Swapped else shift_red(1 downto 0);
+  out_green <= not shift_green(1 downto 0) when Pair_Green = Pair_Swapped else shift_green(1 downto 0);
+  out_blue  <= not shift_blue(1 downto 0)  when Pair_Blue  = Pair_Swapped else shift_blue(1 downto 0);
+  out_clock <= not shift_clock(1 downto 0) when Pair_Clock = Pair_Swapped else shift_clock(1 downto 0);
 
   -- select between the output of the various encoders
   process(clk_pixel, clk_pixel_en)

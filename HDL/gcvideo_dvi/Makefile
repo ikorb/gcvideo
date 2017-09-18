@@ -30,6 +30,7 @@ SRC_COMMON := \
 	src/component_defs.vhd             \
 	src/convert_422_to_444.vhd         \
 	src/convert_yuv_to_rgb.vhd         \
+	src/datapipe.vhd                   \
 	src/delayline_bool.vhd             \
 	src/delayline_unsigned.vhd         \
 	src/dvid.vhd                       \
