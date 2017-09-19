@@ -140,6 +140,7 @@ package ZPUDevices is
       PixelClockEnable: in  boolean;
       Video           : in  VideoY422;
       ConsoleMode     : in  console_mode_t;
+      ForceYPbPr      : in  boolean;
       ZSelect         : in  std_logic;
       ZPUBusIn        : in  ZPUDeviceIn;
       ZPUBusOut       : out ZPUDeviceOut;

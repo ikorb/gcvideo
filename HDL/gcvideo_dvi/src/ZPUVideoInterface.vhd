@@ -41,6 +41,7 @@ entity ZPUVideoInterface is
     PixelClockEnable: in  boolean;
     Video           : in  VideoY422;
     ConsoleMode     : in  console_mode_t;
+    ForceYPbPr      : in  boolean;
     ZSelect         : in  std_logic;
     ZPUBusIn        : in  ZPUDeviceIn;
     ZPUBusOut       : out ZPUDeviceOut;
@@ -62,16 +63,18 @@ architecture Behavioral of ZPUVideoInterface is
   signal active_line       : boolean;
   signal active_line_count : natural range 0 to 7;
   signal volume_setting    : std_logic_vector(7 downto 0) := x"ff";
-  signal vid_settings      : std_logic_vector(16 downto 0) := "0" & x"2000"; -- cable detect active
+  signal vid_settings      : std_logic_vector(18 downto 0) := "000" & x"2000"; -- cable detect active
   signal osd_bgsettings    : std_logic_vector(23 downto 0);
   signal image_controls    : std_logic_vector(24 downto 0);
 
   signal stored_flags      : std_logic_vector(2 downto 0);
   signal console_mode      : std_logic;
+  signal force_ypbpr       : std_logic;
 begin
 
   ZPUBusOut.mem_busy <= '0';
   console_mode       <= '1' when ConsoleMode = MODE_WII else '0';
+  force_ypbpr        <= '1' when ForceYPbPr             else '0';
 
   -- forward stored videosettings to output
   VSettings.ScanlineStrength   <= unsigned(vid_settings(7 downto 0));
@@ -84,6 +87,8 @@ begin
   VSettings.LimitedRange       <= (vid_settings(14) = '1');
   VSettings.EnhancedMode       <= (vid_settings(15) = '1');
   VSettings.Widescreen         <= (vid_settings(16) = '1');
+  VSettings.RGBOutput          <= (vid_settings(17) = '1');
+  VSettings.SyncOnGreen        <= (vid_settings(18) = '1');
   VSettings.Volume             <= unsigned(volume_setting);
 
   -- forward OSD settings to output
@@ -119,10 +124,11 @@ begin
         when "001"  => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(line_counter,  32));
 
         when "010"  => ZPUBusOut.mem_read             <= (others => '0');
+                       ZPUBusOut.mem_read(4)          <= force_ypbpr;
                        ZPUBusOut.mem_read(3)          <= console_mode;
                        ZPUBusOut.mem_read(2 downto 0) <= stored_flags;
 
-        when "011"  => ZPUBusOut.mem_read <= x"000" & "000"& vid_settings;
+        when "011"  => ZPUBusOut.mem_read <= x"000" & "0" & vid_settings;
         when "100"  => ZPUBusOut.mem_read <= x"00"        & osd_bgsettings;
         when "101"  => ZPUBusOut.mem_read <= x"000000"    & volume_setting;
         when "110"  => ZPUBusOut.mem_read <= x"0" & "000" & image_controls;
@@ -132,7 +138,7 @@ begin
       -- write path
       if ZSelect = '1' and ZPUBusIn.mem_writeEnable = '1' then
         case ZPUBusIn.mem_addr(4 downto 2) is
-          when "011"  => vid_settings   <= ZPUBusIn.mem_write(16 downto 0);
+          when "011"  => vid_settings   <= ZPUBusIn.mem_write(18 downto 0);
           when "100"  => osd_bgsettings <= ZPUBusIn.mem_write(23 downto 0);
           when "101"  => volume_setting <= ZPUBusIn.mem_write( 7 downto 0);
           when "110"  => image_controls <= ZPUBusIn.mem_write(24 downto 0);

@@ -77,8 +77,16 @@ entity Datapipe is
     -- audio out
     SPDIF_Out  : out std_logic;
 
-    -- sync out
+    -- analog video out
+    DAC_Red    : out std_logic_vector(7 downto 0);
+    DAC_Green  : out std_logic_vector(7 downto 0);
+    DAC_Blue   : out std_logic_vector(7 downto 0);
+    DAC_SyncN  : out std_logic;
+    DAC_Clock  : out std_logic;
+    CSync_out  : out std_logic;
     VSync_out  : out std_logic;
+    HSync_out  : out std_logic;
+    ForceYPbPr : in  std_logic;
 
     -- digital video out
     Pair_Red   : in  Pair_Swap_t;
@@ -140,6 +148,7 @@ architecture Behavioral of Datapipe is
   signal clock_locked   : std_logic;
   signal scanline_even  : boolean;
   signal obuf_oe        : std_logic;
+  signal force_ypbpr    : boolean;
 
 begin
 
@@ -159,6 +168,7 @@ begin
   PipeClock <= Clock54M;
 
   -- logic/bool adapters
+  force_ypbpr <= (ForceYPbPr = '0');
   obuf_oe     <= '1' when video_settings.DisableOutput else '0';
 
   -- cable detect output
@@ -185,6 +195,7 @@ begin
     RawVideo         => video_422,
     PixelClockEnable => pixel_clk_en,
     ConsoleMode      => console_mode,
+    ForceYPbPr       => force_ypbpr,
     PadData          => PadData,
     IRReceiver       => IRReceiver,
     IRButton         => IRButton,
@@ -366,14 +377,79 @@ begin
     end if;
   end process;
 
-  -- external sync
+  -- generate signals for analog output: DAC Clock
+  process(Clock54M)
+  begin
+    if rising_edge(Clock54M) then
+      if pixel_clk_en_ld then
+        DAC_Clock <= '0';
+      else
+        DAC_Clock <= '1';
+      end if;
+    end if;
+  end process;
+
+  -- parallel video data
   process(Clock54M, pixel_clk_en_ld)
   begin
     if rising_edge(Clock54M) and pixel_clk_en_ld then
+      if video_settings.RGBOutput and ForceYPbPr /= '0' then
+        -- RGB mode
+        if video_settings.SyncOnGreen then
+          if video_out.CSync then
+            DAC_SyncN <= '0';
+          else
+            DAC_SyncN <= '1';
+          end if;
+        else
+          DAC_SyncN <= '0';
+        end if;
+
+        -- video_out already has blanking applied
+        DAC_Red   <= std_logic_vector(video_out.PixelR);
+        DAC_Green <= std_logic_vector(video_out.PixelG);
+        DAC_Blue  <= std_logic_vector(video_out.PixelB);
+      else
+        -- component mode
+        if video_444_osd.CSync then
+          DAC_SyncN <= '0';
+        else
+          DAC_SyncN <= '1';
+        end if;
+
+        if video_444_osd.Blanking then
+          DAC_Red   <= x"80";
+          DAC_Green <= x"10";
+          DAC_Blue  <= x"80";
+        else
+          DAC_Red   <= std_logic_vector(video_444_osd.PixelCr + 128);
+          DAC_Green <= std_logic_vector(video_444_osd.PixelY);
+          DAC_Blue  <= std_logic_vector(video_444_osd.PixelCb + 128);
+        end if;
+      end if;
+    end if;
+  end process;
+
+  -- external Syncs
+  process(Clock54M, pixel_clk_en_ld)
+  begin
+    if rising_edge(Clock54M) and pixel_clk_en_ld then
+      if video_out.CSync then
+        CSync_out <= '0';
+      else
+        CSync_out <= '1';
+      end if;
+
       if video_out.VSync then
         VSync_out <= '0';
       else
         VSync_out <= '1';
+      end if;
+
+      if video_out.HSync then
+        HSync_out <= '0';
+      else
+        HSync_out <= '1';
       end if;
     end if;
   end process;

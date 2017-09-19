@@ -265,6 +265,7 @@ package component_defs is
       RawVideo        : in  VideoY422;
       PixelClockEnable: in  boolean;
       ConsoleMode     : in  console_mode_t;
+      ForceYPbPr      : in  boolean;
       PadData         : in  std_logic;
       IRReceiver      : in  std_logic;
       IRButton        : in  std_logic;
@@ -373,8 +374,16 @@ package component_defs is
       -- audio out
       SPDIF_Out  : out std_logic;
 
-      -- sync out
+      -- analog video out
+      DAC_Red    : out std_logic_vector(7 downto 0);
+      DAC_Green  : out std_logic_vector(7 downto 0);
+      DAC_Blue   : out std_logic_vector(7 downto 0);
+      DAC_SyncN  : out std_logic;
+      DAC_Clock  : out std_logic;
+      CSync_out  : out std_logic;
       VSync_out  : out std_logic;
+      HSync_out  : out std_logic;
+      ForceYPbPr : in  std_logic := '1'; -- default: Not forced
 
       -- digital video out
       Pair_Red   : in  Pair_Swap_t := Pair_Regular;

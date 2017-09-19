@@ -74,6 +74,24 @@ static void print_value(menu_t *menu, unsigned int itemnum) {
       osd_puts(" Odd");
     break;
 
+  case VALTYPE_RGBMODE:
+    osd_gotoxy(menu->xpos + menu->xsize - 7,
+               menu->ypos + menu->items[itemnum].line + 1);
+    switch (value) {
+    case 0:
+      osd_puts("YPbPr");
+      break;
+
+    case 1:
+      osd_puts("  RGB");
+      break;
+
+    default:
+      osd_puts(" RGsB");
+      break;
+    }
+    break;
+
   case VALTYPE_BYTE:
   case VALTYPE_SBYTE_99:
   case VALTYPE_SBYTE_127:
@@ -93,6 +111,16 @@ static void update_value(menu_t *menu, unsigned int itemid, updatetype_t upd) {
   case VALTYPE_EVENODD:
     /* bool always toggles */
     curval = !curval;
+    break;
+
+  case VALTYPE_RGBMODE:
+    if (upd == UPDATE_INCREMENT) {
+      if (curval < 2)
+        curval++;
+    } else {
+      if (curval > 0)
+        curval--;
+    }
     break;
 
   case VALTYPE_BYTE:
@@ -287,6 +315,7 @@ int menu_exec(menu_t *menu, unsigned int initial_item) {
           update_value(menu, cur_item, UPDATE_INCREMENT); // bool always toggles
           break;
 
+        case VALTYPE_RGBMODE:
         case VALTYPE_BYTE:
         case VALTYPE_SBYTE_99:
         case VALTYPE_SBYTE_127:

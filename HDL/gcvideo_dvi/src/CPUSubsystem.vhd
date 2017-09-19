@@ -46,6 +46,7 @@ entity CPUSubsystem is
     RawVideo         : in  VideoY422;
     PixelClockEnable : in  boolean;
     ConsoleMode      : in  console_mode_t;
+    ForceYPbPr       : in  boolean;
     PadData          : in  std_logic;
     IRReceiver       : in  std_logic;
     IRButton         : in  std_logic;
@@ -214,6 +215,7 @@ begin
     PixelClockEnable => PixelClockEnable,
     Video            => RawVideo,
     ConsoleMode      => ConsoleMode,
+    ForceYPbPr       => ForceYPbPr,
     ZSelect          => VideoIFSel,
     ZPUBusIn         => ZPUIn,
     ZPUBusOut        => VideoIFOut,

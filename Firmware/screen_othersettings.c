@@ -45,7 +45,15 @@
 #define MENUITEM_SWITCHDELAY 4
 #define MENUITEM_VOLUME      5
 #define MENUITEM_MUTE        6
-#define MENUITEM_EXIT        7
+#ifdef OUTPUT_DUAL
+#  define MENUITEM_ANALOGOUT 7
+#  define MENUITEM_EXIT      8
+#  define HAVE_DUAL 1
+#else
+#  define MENUITEM_ANALOGOUT 0
+#  define MENUITEM_EXIT      7
+#  define HAVE_DUAL 0
+#endif
 
 /* --- getters and setters --- */
 
@@ -56,6 +64,16 @@ static int get_169(void)         { return video_settings[current_videomode] & VI
 static int get_switchdelay(void) { return mode_switch_delay;                                           }
 static int get_volume(void)      { return audio_volume;                                                }
 static int get_mute(void)        { return audio_mute;                                                  }
+
+static int get_analogmode(void) {
+  uint32_t val = (video_settings[current_videomode] & VIDEOIF_SET_ANALOG_MASK)
+    >> VIDEOIF_SET_ANALOG_SHIFT;
+  if (val == 3)
+    return 2;
+  else
+    return val;
+}
+
 
 static void set_all_modes(uint32_t flag, bool state) {
   for (unsigned int i = 0; i < VIDMODE_COUNT; i++) {
@@ -111,6 +129,15 @@ static bool set_mute(int value) {
   return false;
 }
 
+static bool set_analogmode(int value) {
+  if (value == 2)
+    value = 3;
+  set_all_modes(VIDEOIF_SET_ANALOG_MASK, false);
+  set_all_modes(value << VIDEOIF_SET_ANALOG_SHIFT, true);
+  VIDEOIF->settings = video_settings[current_videomode];
+  return false;
+}
+
 static valueitem_t value_cabledetect = { get_cabledetect, set_cabledetect, VALTYPE_BOOL };
 static valueitem_t value_rgblimited  = { get_rgblimited,  set_rgblimited,  VALTYPE_BOOL };
 static valueitem_t value_dvienhanced = { get_dvienhanced, set_dvienhanced, VALTYPE_BOOL };
@@ -119,10 +146,34 @@ static valueitem_t value_switchdelay = { get_switchdelay, set_switchdelay, VALTY
 static valueitem_t value_volume      = { get_volume,      set_volume,      VALTYPE_BYTE };
 static valueitem_t value_mute        = { get_mute,        set_mute,        VALTYPE_BOOL };
 
+static valueitem_t __attribute__((unused)) value_analogmode =
+  { get_analogmode, set_analogmode, VALTYPE_RGBMODE };
+
 /* --- menu definition --- */
 
 static void otherset_draw(menu_t *menu);
 
+#ifdef OUTPUT_DUAL
+static menuitem_t otherset_items[] = {
+  { "Allow 480p mode",   &value_cabledetect, 0, 0 }, // 0
+  { "RGB Limited Range", &value_rgblimited,  1, 0 }, // 1
+  { "Enhanced DVI mode", &value_dvienhanced, 2, 0 }, // 2
+  { "  Display as 16:9", &value_169,         3, 0 }, // 3
+  { "Mode switch delay", &value_switchdelay, 4, 0 }, // 4
+  { "Volume",            &value_volume,      5, 0 }, // 5
+  { "Mute",              &value_mute,        6, 0 }, // 6
+  { "Analog output",     &value_analogmode,  7, 0 }, // 7
+  { "Exit",              NULL,               9, 0 }, // 8
+};
+
+static menu_t otherset_menu = {
+  9, 9,
+  26, 12,
+  otherset_draw,
+  sizeof(otherset_items) / sizeof(*otherset_items),
+  otherset_items
+};
+#else
 static menuitem_t otherset_items[] = {
   { "Allow 480p mode",   &value_cabledetect, 0, 0 }, // 0
   { "RGB Limited Range", &value_rgblimited,  1, 0 }, // 1
@@ -141,12 +192,21 @@ static menu_t otherset_menu = {
   sizeof(otherset_items) / sizeof(*otherset_items),
   otherset_items
 };
+#endif
 
 static void otherset_draw(menu_t *menu) {
   if (video_settings[current_videomode] & VIDEOIF_SET_DVIENHANCED) {
     otherset_items[MENUITEM_169].flags = 0;
   } else {
     otherset_items[MENUITEM_169].flags = MENU_FLAG_DISABLED;
+  }
+
+  if (HAVE_DUAL) {
+    if (VIDEOIF->flags & VIDEOIF_FLAG_FORCE_YPBPR) {
+      otherset_items[MENUITEM_ANALOGOUT].flags = MENU_FLAG_DISABLED;
+    } else {
+      otherset_items[MENUITEM_ANALOGOUT].flags = 0;
+    }
   }
 }
 

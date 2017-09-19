@@ -47,6 +47,12 @@
 #  define MODE_WII 0
 #endif
 
+#ifdef OUTPUT_DUAL
+#  define DUAL_OUT 1
+#else
+#  define DUAL_OUT 0
+#endif
+
 void screen_about(void) {
   osd_clrscr();
 
@@ -55,7 +61,11 @@ void screen_about(void) {
   osd_drawborder(10, 10, 25, 9);
   osd_setattr(true, false);
   if (MODE_WII) {
-    osd_putsat(14, 11, "WiiVideo DVI v" VERSION);
+    if (DUAL_OUT) {
+      osd_putsat(13, 11, "WiiVideo Dual v" VERSION);
+    } else {
+      osd_putsat(14, 11, "WiiVideo DVI v" VERSION);
+    }
 
     if (VIDEOIF->flags & VIDEOIF_FLAG_MODE_WII) {
       osd_putsat(17, 12, "in Wii mode");
@@ -64,7 +74,11 @@ void screen_about(void) {
     }
 
   } else {
-    osd_putsat(14, 11, "GCVideo DVI v" VERSION);
+    if (DUAL_OUT) {
+      osd_putsat(14, 11, "GCVideo Dual v" VERSION);
+    } else {
+      osd_putsat(14, 11, "GCVideo DVI v" VERSION);
+    }
   }
   osd_putsat(12, 13, "Copyright \013 2015-2017");
   osd_putsat(16, 14, "by Ingo Korb");
