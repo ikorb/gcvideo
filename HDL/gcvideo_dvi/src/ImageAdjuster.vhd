@@ -24,7 +24,7 @@
 -- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 -- THE POSSIBILITY OF SUCH DAMAGE.
 --
--- convert_yuv_to_rgb: YCbCr 444 to RGB converter, inferred multiplier version
+-- PictureAdjuster.vhd: Brightness/Contrast/Saturation adjustment
 --
 ----------------------------------------------------------------------------------
 
@@ -35,116 +35,69 @@ use IEEE.NUMERIC_STD.ALL;
 use work.component_defs.all;
 use work.video_defs.all;
 
-entity convert_yuv_to_rgb is
+entity ImageAdjuster is
   port (
     PixelClock      : in  std_logic;
     PixelClockEnable: in  boolean;
-
-    -- input video
     VideoIn         : in  VideoYCbCr;
-    Limited_Range   : in  boolean;
-
-    -- output video
-    VideoOut        : out VideoRGB
+    VideoOut        : out VideoYCbCr;
+    Settings        : in  ImageControls_t
   );
-end convert_yuv_to_rgb;
+end ImageAdjuster;
 
-architecture Behavioral of convert_yuv_to_rgb is
+architecture Behavioral of ImageAdjuster is
+  constant MODULE_DELAY: natural := 2;
 
-  -- delay in (enabled) clock cycles for untouched signals
-  constant Delayticks: Natural := 4;
+  signal ymult : signed(18 downto 0);
+  signal cbmult: signed(17 downto 0);
+  signal crmult: signed(17 downto 0);
 
-  signal ystore: signed(18 downto 0) := (others => '0');
-  signal rtemp : signed(18 downto 0) := (others => '0'); -- Cr for R
-  signal gtempr: signed(18 downto 0) := (others => '0'); -- Cr for G
-  signal gtempb: signed(18 downto 0) := (others => '0'); -- Cb for G
-  signal btemp : signed(18 downto 0) := (others => '0'); -- Cb for B
-
-  signal rsum    : signed(18 downto 0) := (others => '0'); -- (Y + rtemp) / 256
-  signal gsum    : signed(18 downto 0) := (others => '0'); -- (Y - gtemp1 - gtemp2) / 256
-  signal bsum    : signed(18 downto 0) := (others => '0'); -- (Y + btemp) / 256
-  signal gsumtemp: signed(18 downto 0) := (others => '0');
-
-  signal yscale : signed(10 downto 0) := to_signed(298, 11);
-  signal yshift : signed( 5 downto 0) := to_signed(  0,  6);
-  signal rscale : signed(10 downto 0) := to_signed(409, 11);
-  signal grscale: signed(10 downto 0) := to_signed(208, 11);
-  signal gbscale: signed(10 downto 0) := to_signed(100, 11);
-  signal bscale : signed(10 downto 0) := to_signed(517, 11);
-  signal rout   : unsigned(7 downto 0);
-  signal bout   : unsigned(7 downto 0);
-
-  -- clip value to 8 bit range
-  function clip(v: signed)
+  -- clip Y to 0..(255-16) because internally it's adjusted to 0 IRE at 0
+  function clip_y(v: signed)
     return unsigned is
   begin
     if v < 0 then
       return x"00";
-    elsif v > 255 then
-      return x"ff";
+    elsif v > 255-16 then
+      return x"ef";
     else
       return resize(unsigned(v), 8);
     end if;
   end function;
 
+  -- clip Cb/Cr to valid range
+  function clip_c(v: signed)
+    return signed is
+  begin
+    if v < 16 - 128 then
+      return to_signed(16 - 128, 8);
+    elsif v > 240 - 128 then
+      return to_signed(240 - 128, 8);
+    else
+      return resize(signed(v), 8);
+    end if;
+  end function;
+
 begin
 
-  -- capture and interpolate colors
-  process (PixelClock, PixelClockEnable)
-    variable cr_s: signed(7 downto 0);
-    variable cb_s: signed(7 downto 0);
+  process(PixelClock, PixelClockEnable)
   begin
     if rising_edge(PixelClock) and PixelClockEnable then
-      -- update factors for limited/full range
-      if Limited_Range then
-        yscale  <= to_signed(256, 11);
-        yshift  <= to_signed( 16,  6);
-        rscale  <= to_signed(351, 11);
-        grscale <= to_signed(179, 11);
-        gbscale <= to_signed( 86, 11);
-        bscale  <= to_signed(443, 11);
-      else
-        yscale  <= to_signed(298, 11);
-        yshift  <= to_signed(  0,  6);
-        rscale  <= to_signed(409, 11);
-        grscale <= to_signed(208, 11);
-        gbscale <= to_signed(100, 11);
-        bscale  <= to_signed(517, 11);
-      end if;
+      ymult <= resize(mksigned(VideoIn.pixelY) * mksigned(Settings.Contrast), 19) +
+               Settings.Brightness * to_signed(128, 9);
+      cbmult <= VideoIn.PixelCb * mksigned(Settings.Saturation);
+      crmult <= VideoIn.PixelCr * mksigned(Settings.Saturation);
 
-      -- pipeline stage 1: calculate the scaled color values
-      cr_s := VideoIn.PixelCr;
-      cb_s := VideoIn.PixelCb;
-
-        -- FIXME: Expression from S6, not optimal for S3A architecture
-      ystore <= resize((mksigned(VideoIn.PixelY) + yshift) * yscale, 19)
-              + to_signed(128, 19); -- add 0.5 to get a rounded result
-      rtemp  <= rscale  * cr_s;
-      gtempr <= grscale * cr_s;
-      gtempb <= gbscale * cb_s;
-      btemp  <= bscale  * cb_s;
-
-      -- pipeline stage 2: add/subtract
-      rsum     <= (ystore + rtemp) / 256;
-      gsumtemp <= ystore - gtempr;
-      bsum     <= (ystore + btemp) / 256;
-
-      -- pipeline stage 3: clipping r/b, subtract g
-      rout <= clip(rsum);
-      gsum <= (gsumtemp - gtempb) / 256;
-      bout <= clip(bsum);
-
-      -- pipeline stage 4: clip g, output
-      VideoOut.PixelR <= rout;
-      VideoOut.PixelG <= clip(gsum);
-      VideoOut.PixelB <= bout;
+      VideoOut.PixelY  <= clip_y(ymult / 128);
+      VideoOut.PixelCb <= clip_c(cbmult / 128);
+      VideoOut.PixelCr <= clip_c(crmult / 128);
     end if;
   end process;
 
   -- generate delayed signals
   Inst_HSyncDelay: delayline_bool
     generic map (
-      Delayticks => Delayticks
+      Delayticks  => MODULE_DELAY
     )
     port map (
       Clock       => PixelClock,
@@ -155,7 +108,7 @@ begin
 
   Inst_VSyncDelay: delayline_bool
     generic map (
-      Delayticks => Delayticks
+      Delayticks  => MODULE_DELAY
     )
     port map (
       Clock       => PixelClock,
@@ -166,7 +119,7 @@ begin
 
   Inst_CSyncDelay: delayline_bool
     generic map (
-      Delayticks => Delayticks
+      Delayticks  => MODULE_DELAY
     )
     port map (
       Clock       => PixelClock,
@@ -177,7 +130,7 @@ begin
 
   Inst_BlankingDelay: delayline_bool
     generic map (
-      Delayticks => Delayticks
+      Delayticks  => MODULE_DELAY
     )
     port map (
       Clock       => PixelClock,
@@ -188,7 +141,7 @@ begin
 
   Inst_FieldDelay: delayline_bool
     generic map (
-      Delayticks => Delayticks
+      Delayticks  => MODULE_DELAY
     )
     port map (
       Clock       => PixelClock,
@@ -203,4 +156,3 @@ begin
   VideoOut.Is30kHz       <= VideoIn.Is30kHz;
 
 end Behavioral;
-

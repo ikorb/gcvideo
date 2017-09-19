@@ -14,6 +14,7 @@ SRC_COMMON := \
 	src/SimpleROM.vhd                  \
 	src/TMDS_encoder.vhd               \
 	src/TextOSD.vhd                    \
+	src/ImageAdjuster.vhd              \
 	src/ZPUBusMux.vhd                  \
 	src/ZPUDevices.vhd                 \
 	src/ZPUIRQController.vhd           \

@@ -46,7 +46,8 @@ entity ZPUVideoInterface is
     ZPUBusOut       : out ZPUDeviceOut;
     IRQ             : out std_logic;
     VSettings       : out VideoSettings_t;
-    OSDSettings     : out OSDSettings_t
+    OSDSettings     : out OSDSettings_t;
+    ImageControls   : out ImageControls_t
   );
 end ZPUVideoInterface;
 
@@ -63,6 +64,7 @@ architecture Behavioral of ZPUVideoInterface is
   signal volume_setting    : std_logic_vector(7 downto 0) := x"ff";
   signal vid_settings      : std_logic_vector(16 downto 0) := "0" & x"2000"; -- cable detect active
   signal osd_bgsettings    : std_logic_vector(23 downto 0);
+  signal image_controls    : std_logic_vector(24 downto 0);
 
   signal stored_flags      : std_logic_vector(2 downto 0);
   signal console_mode      : std_logic;
@@ -89,6 +91,10 @@ begin
   OSDSettings.BGTintCb   <=   signed(osd_bgsettings(15 downto  8));
   OSDSettings.BGTintCr   <=   signed(osd_bgsettings( 7 downto  0));
 
+  -- forward picture settings
+  ImageControls.Saturation <= unsigned(image_controls(24 downto 16));
+  ImageControls.Brightness <=   signed(image_controls(15 downto  8));
+  ImageControls.Contrast   <= unsigned(image_controls( 7 downto  0));
 
   process(Clock)
   begin
@@ -116,18 +122,20 @@ begin
                        ZPUBusOut.mem_read(3)          <= console_mode;
                        ZPUBusOut.mem_read(2 downto 0) <= stored_flags;
 
-        when "011"  => ZPUBusOut.mem_read <= x"000" & "000"   & vid_settings;
-        when "100"  => ZPUBusOut.mem_read <= x"00"            & osd_bgsettings;
-        when "101"  => ZPUBusOut.mem_read <= x"000000"        & volume_setting;
+        when "011"  => ZPUBusOut.mem_read <= x"000" & "000"& vid_settings;
+        when "100"  => ZPUBusOut.mem_read <= x"00"        & osd_bgsettings;
+        when "101"  => ZPUBusOut.mem_read <= x"000000"    & volume_setting;
+        when "110"  => ZPUBusOut.mem_read <= x"0" & "000" & image_controls;
         when others => ZPUBusOut.mem_read <= (others => '-');  -- undefined
       end case;
 
       -- write path
       if ZSelect = '1' and ZPUBusIn.mem_writeEnable = '1' then
         case ZPUBusIn.mem_addr(4 downto 2) is
-          when "011"  => vid_settings    <= ZPUBusIn.mem_write(16 downto 0);
-          when "100"  => osd_bgsettings  <= ZPUBusIn.mem_write(23 downto 0);
-          when "101"  => volume_setting  <= ZPUBusIn.mem_write( 7 downto 0);
+          when "011"  => vid_settings   <= ZPUBusIn.mem_write(16 downto 0);
+          when "100"  => osd_bgsettings <= ZPUBusIn.mem_write(23 downto 0);
+          when "101"  => volume_setting <= ZPUBusIn.mem_write( 7 downto 0);
+          when "110"  => image_controls <= ZPUBusIn.mem_write(24 downto 0);
           when others => null;
         end case;
       end if;

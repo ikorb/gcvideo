@@ -51,12 +51,16 @@ extern const char    *mode_names[VIDMODE_COUNT];
 
 extern uint32_t     video_settings[VIDMODE_COUNT];
 extern uint32_t     osdbg_settings;
+extern int8_t       picture_brightness;
+extern int8_t       picture_contrast;
+extern int8_t       picture_saturation;
 extern uint32_t     mode_switch_delay;
 extern bool         resbox_enabled;
 extern video_mode_t current_videomode;
 extern uint8_t      audio_volume;
 extern bool         audio_mute;
 
+void update_imagecontrols(void);
 video_mode_t detect_inputmode(void);
 void print_resolution(void);
 void settings_init(void);

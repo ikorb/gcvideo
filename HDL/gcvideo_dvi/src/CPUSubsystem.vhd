@@ -56,7 +56,8 @@ entity CPUSubsystem is
     OSDRamAddr       : in  std_logic_vector(10 downto 0);
     OSDRamData       : out std_logic_vector(8 downto 0);
     OSDSettings      : out OSDSettings_t;
-    VSettings        : out VideoSettings_t
+    VSettings        : out VideoSettings_t;
+    ImageControls    : out ImageControls_t
   );
 end CPUSubsystem;
 
@@ -218,7 +219,8 @@ begin
     ZPUBusOut        => VideoIFOut,
     IRQ              => VSyncIRQ,
     VSettings        => VSettings,
-    OSDSettings      => OSDSettings
+    OSDSettings      => OSDSettings,
+    ImageControls    => ImageControls
   );
 
   -- OSD RAM

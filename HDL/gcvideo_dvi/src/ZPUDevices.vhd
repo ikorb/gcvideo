@@ -145,7 +145,8 @@ package ZPUDevices is
       ZPUBusOut       : out ZPUDeviceOut;
       IRQ             : out std_logic;
       VSettings       : out VideoSettings_t;
-      OSDSettings     : out OSDSettings_t
+      OSDSettings     : out OSDSettings_t;
+      ImageControls   : out ImageControls_t
     );
   end component;
 

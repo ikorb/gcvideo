@@ -43,11 +43,12 @@
 
 // 0-4 are from modeset_common.h
 #define MENUITEM_OSDSET      5
-#define MENUITEM_OTHERSET    6
-#define MENUITEM_VIEWALL     7
-#define MENUITEM_STORE       8
-#define MENUITEM_ABOUT       9
-#define MENUITEM_EXIT        10
+#define MENUITEM_PICTURESET  6
+#define MENUITEM_OTHERSET    7
+#define MENUITEM_VIEWALL     8
+#define MENUITEM_STORE       9
+#define MENUITEM_ABOUT       10
+#define MENUITEM_EXIT        11
 
 static menuitem_t mainmenu_items[];
 
@@ -60,18 +61,19 @@ static menuitem_t mainmenu_items[] = {
   { " Scanlines on",          &modeset_value_sleven,      4, 0 }, // 3
   { " Alternating scanlines", &modeset_value_slalt,       5, 0 }, // 4
   { "OSD settings...",        NULL,                       7, 0 }, // 5
-  { "Other settings...",      NULL,                       8, 0 }, // 6
-  { "View all modes...",      NULL,                       9, 0 }, // 7
-  { "Store settings",         NULL,                      11, 0 }, // 8
-  { "About...",               NULL,                      12, 0 }, // 9
-  { "Exit",                   NULL,                      13, 0 }, // 10
+  { "Picture settings...",    NULL,                       8, 0 }, // 6
+  { "Other settings...",      NULL,                       9, 0 }, // 7
+  { "View all modes...",      NULL,                      10, 0 }, // 8
+  { "Store settings",         NULL,                      12, 0 }, // 9
+  { "About...",               NULL,                      13, 0 }, // 10
+  { "Exit",                   NULL,                      14, 0 }, // 11
 };
 
 static void mainmenu_draw(menu_t *menu);
 
 static menu_t mainmenu = {
   7, 7,
-  31, 18,
+  31, 20,
   mainmenu_draw,
   sizeof(mainmenu_items) / sizeof(*mainmenu_items),
   mainmenu_items
@@ -134,6 +136,10 @@ void screen_mainmenu(void) {
 
     case MENUITEM_OSDSET:
       screen_osdsettings();
+      break;
+
+    case MENUITEM_PICTURESET:
+      screen_picturesettings();
       break;
 
     case MENUITEM_OTHERSET:

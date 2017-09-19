@@ -69,6 +69,7 @@ typedef struct {
   __IO uint32_t settings;
   __IO uint32_t osd_bg;
   __IO uint32_t audio_volume;
+  __IO uint32_t image_controls;
 } VideoInterface_TypeDef;
 
 #define VIDEOIF_FLAG_PROGRESSIVE (1<<0)
@@ -93,6 +94,15 @@ typedef struct {
 #define VIDEOIF_OSDBG_TINTCB_SHIFT   8
 #define VIDEOIF_OSDBG_TINTCR_MASK    0x0000ff
 #define VIDEOIF_OSDBG_TINTCR_SHIFT   0
+
+#define VIDEOIF_IMGCTL_SATURATION_MASK  0x1ff0000
+#define VIDEOIF_IMGCTL_SATURATION_SHIFT 16
+#define VIDEOIF_IMGCTL_BRIGHTNESS_MASK  0x000ff00
+#define VIDEOIF_IMGCTL_BRIGHTNESS_SHIFT 8
+#define VIDEOIF_IMGCTL_CONTRAST_MASK    0x00000ff
+#define VIDEOIF_IMGCTL_CONTRAST_SHIFT   0
+
+#define VIDEOIF_IMGCTL_NEUTRAL 0x00800080
 
 /* --- PadReader --- */
 

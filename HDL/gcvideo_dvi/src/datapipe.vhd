@@ -104,6 +104,7 @@ architecture Behavioral of Datapipe is
   signal video_ld       : VideoY422;
   signal video_444      : VideoYCbCr;
   signal video_444_rb   : VideoYCbCr; -- reblanked
+  signal video_444_adj  : VideoYCbCr; -- adjusted
   signal video_444_sl   : VideoYCbCr; -- scanlined
   signal video_444_osd  : VideoYCbCr;
   signal video_rgb      : VideoRGB;
@@ -124,6 +125,9 @@ architecture Behavioral of Datapipe is
   signal osd_ram_addr   : std_logic_vector(10 downto 0);
   signal osd_ram_data   : std_logic_vector(8 downto 0);
   signal osd_settings   : OSDSettings_t;
+
+  -- contrast/brightness/saturation adjustments
+  signal image_controls : ImageControls_t;
 
   -- audio
   signal audio          : AudioData;
@@ -191,7 +195,8 @@ begin
     OSDRamAddr       => osd_ram_addr,
     OSDRamData       => osd_ram_data,
     OSDSettings      => osd_settings,
-    VSettings        => video_settings
+    VSettings        => video_settings,
+    ImageControls    => image_controls
   );
 
   -- DVI output
@@ -288,6 +293,16 @@ begin
       VideoOut         => video_444_rb
     );
 
+  -- adjust brightness/constrast/saturation
+  Inst_ImageAdjuster: ImageAdjuster
+    PORT MAP (
+      PixelClock       => Clock54M,
+      PixelClockEnable => pixel_clk_en_ld,
+      VideoIn          => video_444_rb,
+      VideoOut         => video_444_adj,
+      Settings         => image_controls
+    );
+
   -- overlay scanlines
   Inst_Scanliner: Scanline_Generator
     PORT MAP (
@@ -296,7 +311,7 @@ begin
       Enable           => video_settings.ScanlinesEnabled,
       Strength         => video_settings.ScanlineStrength,
       Use_Even         => scanline_even,
-      VideoIn          => video_444_rb,
+      VideoIn          => video_444_adj,
       VideoOut         => video_444_sl
     );
 

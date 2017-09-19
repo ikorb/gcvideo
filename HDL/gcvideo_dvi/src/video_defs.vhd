@@ -104,6 +104,12 @@ package video_defs is
     BGTintCr  :   signed(7 downto 0);
   end record;
 
+  type ImageControls_t is record
+    Contrast  : unsigned(7 downto 0);
+    Brightness:   signed(7 downto 0);
+    Saturation: unsigned(8 downto 0);
+  end record;
+
   type VideoSettings_t is record
     ScanlineStrength  : unsigned(7 downto 0);
     ScanlinesAlternate: boolean;
@@ -117,6 +123,13 @@ package video_defs is
     Widescreen        : boolean;
     Volume            : unsigned(7 downto 0);
   end record;
+
+  -- 8 bit unsigned to 9 bit signed, no modifications
+  function mksigned(a: unsigned)
+    return signed is
+  begin
+    return signed("0" & a);
+  end function;
 
 end video_defs;
 

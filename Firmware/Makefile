@@ -66,7 +66,7 @@ CRT0        := crt0-bsd.S
 SRCFILES    := main.c osd.c printf.c pad.c vsync.c menu.c irrx.c \
 	modeset_common.c screen_about.c screen_allmodes.c screen_irconfig.c \
 	screen_idle.c screen_mainmenu.c screen_osdsettings.c screen_othersettings.c \
-	settings.c spiflash.c
+	settings.c spiflash.c screen_picturesettings.c
 BITFILE_IN  := ../HDL/gcvideo_dvi/build/toplevel_p2xh.bit
 BITFILE_OUT := ../HDL/gcvideo_dvi/build/p2xh_output.bit
 MIFFILE_OUT := ../HDL/gcvideo_dvi/build/$(BASENAME).mif

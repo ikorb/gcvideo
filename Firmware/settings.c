@@ -55,6 +55,21 @@ bool         resbox_enabled;
 video_mode_t current_videomode;
 uint8_t      audio_volume;
 bool         audio_mute;
+int8_t       picture_brightness;
+int8_t       picture_contrast;
+int8_t       picture_saturation;
+
+void update_imagecontrols(void) {
+  uint32_t imgctl;
+  uint8_t  contrast   = picture_contrast + 0x80;
+  uint16_t saturation = ((picture_saturation + 0x80) * contrast) / 128;
+
+  imgctl = (contrast << VIDEOIF_IMGCTL_CONTRAST_SHIFT) |
+    ((uint8_t)picture_brightness << VIDEOIF_IMGCTL_BRIGHTNESS_SHIFT) |
+    (saturation << VIDEOIF_IMGCTL_SATURATION_SHIFT);
+
+  VIDEOIF->image_controls = imgctl;
+}
 
 video_mode_t detect_inputmode(void) {
   uint32_t cur_flags = VIDEOIF->flags & (VIDEOIF_FLAG_PROGRESSIVE | VIDEOIF_FLAG_PAL | VIDEOIF_FLAG_31KHZ);
@@ -107,12 +122,17 @@ void settings_init(void) {
   video_settings[VIDMODE_480p] = VIDEOIF_SET_CABLEDETECT | 0x80;
   video_settings[VIDMODE_576p] = VIDEOIF_SET_CABLEDETECT | 0x80;
   osdbg_settings = 0x501bf8;  // partially transparent, blue tinted background
+  picture_brightness = 0;
+  picture_contrast   = 0;
+  picture_saturation = 0;
 
   audio_mute        = false;
   audio_volume      = 255;
   mode_switch_delay = 0;
   current_videomode = detect_inputmode();
-  VIDEOIF->settings = video_settings[current_videomode];
-  VIDEOIF->osd_bg   = osdbg_settings;
-  VIDEOIF->audio_volume = 255;
+
+  VIDEOIF->settings       = video_settings[current_videomode];
+  VIDEOIF->osd_bg         = osdbg_settings;
+  VIDEOIF->audio_volume   = 255;
+  VIDEOIF->image_controls = 0x00800080;
 }

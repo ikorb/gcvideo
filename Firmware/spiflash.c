@@ -50,7 +50,9 @@
 #define STATUSREG_WIP      (1<<0)
 
 #define SETTINGS_OFFSET  0x70000
-#define SETTINGS_VERSION 4
+#define SETTINGS_VERSION 5
+#define SETTINGS_SIZE_V4 60
+#define SETTINGS_SIZE_V5 63
 
 uint8_t flash_chip_id[4];
 
@@ -65,6 +67,9 @@ typedef struct {
   uint32_t osdbg_settings;
   uint32_t mode_switch_delay;
   uint32_t ir_codes[NUM_IRCODES];
+  int8_t   brightness;
+  int8_t   contrast;
+  int8_t   saturation;
 } storedsettings_t;
 
 #define SET_FLAG_RESBOX (1<<0)
@@ -159,15 +164,22 @@ void spiflash_read_settings(void) {
   /* scan for the first valid settings record */
   for (i = 0; i < 256; i++) {
     read_settings(i, &set);
-    if (set.version == SETTINGS_VERSION) {
+    if (set.version == SETTINGS_VERSION ||
+        set.version == 4) {
       /* found a record with the expected version, verify checksum */
       uint8_t *byteset = (uint8_t *)&set;
       uint8_t sum = 0;
+      uint8_t size = 0;
 
-      for (unsigned int j = 1; j < sizeof(storedsettings_t); j++)
+      switch (set.version) {
+      case 4: size = SETTINGS_SIZE_V4; break;
+      case 5: size = SETTINGS_SIZE_V5; break;
+      }
+
+      for (unsigned int j = 1; j < size; j++)
         sum += byteset[j];
 
-      if (sum == set.checksum) {
+      if (size != 0 && sum == set.checksum) {
         /* found a valid setting record */
         valid = true;
         break;
@@ -203,6 +215,13 @@ void spiflash_read_settings(void) {
       audio_mute = false;
 
     memcpy(ir_codes, set.ir_codes, sizeof(ir_codes));
+
+    if (set.version >= 5) {
+      picture_brightness = set.brightness;
+      picture_contrast   = set.contrast;
+      picture_saturation = set.saturation;
+      update_imagecontrols();
+    }
   }
 }
 
@@ -229,6 +248,10 @@ void spiflash_write_settings(void) {
     set.flags |= SET_FLAG_MUTE;
 
   memcpy(set.ir_codes, ir_codes, sizeof(ir_codes));
+
+  set.brightness = picture_brightness;
+  set.contrast   = picture_contrast;
+  set.saturation = picture_saturation;
 
   /* calculate checksum */
   for (unsigned int i = 1; i < sizeof(storedsettings_t); i++)

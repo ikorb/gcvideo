@@ -38,6 +38,7 @@ void screen_idle(void);
 void screen_irconfig(void);
 void screen_mainmenu(void);
 void screen_osdsettings(void);
+void screen_picturesettings(void);
 void screen_othersettings(void);
 
 #endif
