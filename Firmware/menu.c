@@ -75,7 +75,8 @@ static void print_value(menu_t *menu, unsigned int itemnum) {
     break;
 
   case VALTYPE_BYTE:
-  case VALTYPE_SBYTE:
+  case VALTYPE_SBYTE_99:
+  case VALTYPE_SBYTE_127:
     printf("%4d", value);
     break;
   }
@@ -104,12 +105,22 @@ static void update_value(menu_t *menu, unsigned int itemid, updatetype_t upd) {
     }
     break;
 
-  case VALTYPE_SBYTE:
+  case VALTYPE_SBYTE_99:
     if (upd == UPDATE_INCREMENT) {
       if (curval < 99)
         curval++;
     } else {
       if (curval > -99)
+        curval--;
+    }
+    break;
+
+    case VALTYPE_SBYTE_127:
+    if (upd == UPDATE_INCREMENT) {
+      if (curval < 127)
+        curval++;
+    } else {
+      if (curval > -128)
         curval--;
     }
     break;
@@ -277,7 +288,8 @@ int menu_exec(menu_t *menu, unsigned int initial_item) {
           break;
 
         case VALTYPE_BYTE:
-        case VALTYPE_SBYTE:
+        case VALTYPE_SBYTE_99:
+        case VALTYPE_SBYTE_127:
           mark_item(menu, cur_item, ' ');
           value_submenu(menu, cur_item);
           mark_item(menu, cur_item, MENUMARKER_LEFT);

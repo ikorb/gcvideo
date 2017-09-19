@@ -74,10 +74,10 @@ static bool set_tint_cr(int value) {
   return false;
 }
 
-static valueitem_t value_resbox      = { get_resbox,   set_resbox,   VALTYPE_BOOL  };
-static valueitem_t value_alpha       = { get_alpha,    set_alpha,    VALTYPE_BYTE  };
-static valueitem_t value_tint_cb     = { get_tint_cb,  set_tint_cb,  VALTYPE_SBYTE };
-static valueitem_t value_tint_cr     = { get_tint_cr,  set_tint_cr,  VALTYPE_SBYTE };
+static valueitem_t value_resbox      = { get_resbox,   set_resbox,   VALTYPE_BOOL     };
+static valueitem_t value_alpha       = { get_alpha,    set_alpha,    VALTYPE_BYTE     };
+static valueitem_t value_tint_cb     = { get_tint_cb,  set_tint_cb,  VALTYPE_SBYTE_99 };
+static valueitem_t value_tint_cr     = { get_tint_cr,  set_tint_cr,  VALTYPE_SBYTE_99 };
 
 /* --- menu definition --- */
 

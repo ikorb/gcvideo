@@ -34,7 +34,13 @@
 
 #include <stdbool.h>
 
-typedef enum { VALTYPE_BOOL, VALTYPE_EVENODD, VALTYPE_BYTE, VALTYPE_SBYTE } valuetype_t;
+typedef enum {
+  VALTYPE_BOOL,
+  VALTYPE_EVENODD,
+  VALTYPE_BYTE,
+  VALTYPE_SBYTE_99,  // -99 to 99
+  VALTYPE_SBYTE_127, // -128 to 127
+} valuetype_t;
 
 typedef struct {
   int  (*get)(void);
