@@ -55,13 +55,21 @@ CROSS_PREFIX=zpu-elf-
 CC := $(CROSS_PREFIX)gcc
 LD := $(CROSS_PREFIX)ld
 AS := $(CROSS_PREFIX)as
-CFLAGS = -Wall -Werror -Os -g -std=gnu99 -ffunction-sections -fdata-sections -I. -DVERSION=\"$(VERSION)\" $(EXTRA_CFLAGS)
+CFLAGS = -Wall -Werror -Os -g -std=gnu99 -ffunction-sections -fdata-sections -I. \
+         -DVERSION=\"$(VERSION)\" $(EXTRA_CFLAGS) $(patsubst %,-D%,$(FEATURE_FLAGS))
 LDFLAGS := -Tstandalone-bsd.ld -Wl,--gc-sections -Wl,--relax -nostartfiles
 
 DATA2MEM := data2mem
 
+ifndef FEATURE_FLAGS
+  OBJDIR := obj-$(TARGET)
+else
+  space := $(subst ,, )
+  FLAGSUFFIX := $(subst $(space),-,$(strip $(FEATURE_FLAGS)))
+  OBJDIR := obj-$(TARGET)-$(FLAGSUFFIX)
+endif
+
 BASENAME    := gcvideo-sw-$(TARGET)
-OBJDIR      := obj-$(TARGET)
 CRT0        := crt0-bsd.S
 SRCFILES    := main.c osd.c printf.c pad.c vsync.c menu.c irrx.c \
 	modeset_common.c screen_about.c screen_allmodes.c screen_irconfig.c \

@@ -177,7 +177,7 @@ $(UCF): src/constraints-common.ucf src/constraints-$(BOARD).ucf src/constraints-
 	$(Q)cat $^ > $@
 
 build/$(FIRMWARE_MIF):
-	$(MAKE) -C ../../Firmware TARGET=$(FIRMWARE) VERSION=$(VERSION)
+	$(MAKE) -C ../../Firmware TARGET=$(FIRMWARE) VERSION=$(VERSION) FEATURE_FLAGS="$(FWFLAGS)"
 
 build/%.prj: | build # FIXME: Should somehow depend on the content of the source file list
 	$(E) "---- GENPRJ   $@"
