@@ -50,6 +50,7 @@ SRC_COMMON := \
 
 SRC_P2XH     := src/toplevel_p2xh.vhd
 SRC_SHURIKEN := src/toplevel_shuriken.vhd
+SRC_DUAL     := src/toplevel_dual.vhd
 BMM          := src/zpu_bootram.bmm
 PART         := xc3s200a-vq100-4
 
@@ -99,6 +100,19 @@ else ifeq ($(TARGET),shuriken-v3-wii)
   BOARD    := shuriken-v3
   CONSOLE  := WII
   FIRMWARE := wii-dvi
+else ifeq ($(TARGET),dual-gc)
+  SRC      += $(SRC_DUAL)
+  TOPLEVEL := toplevel_dual
+  BOARD    := dualgc
+  CONSOLE  := GC
+  FIRMWARE := gc-dual
+  FWFLAGS  := DISABLE_CABLEDETECT
+else ifeq ($(TARGET),dual-wii)
+  SRC      += $(SRC_DUAL)
+  TOPLEVEL := toplevel_dual
+  BOARD    := dualwii
+  CONSOLE  := WII
+  FIRMWARE := wii-dual
 else
 dummy:
 	@echo "TARGET variable not specified"
@@ -110,6 +124,8 @@ dummy:
 	@echo "  - shuriken-wii"
 	@echo "  - shuriken-v3-gc"
 	@echo "  - shuriken-v3-wii"
+	@echo "  - dual-gc"
+	@echo "  - dual-wii"
 	@false
 endif
 

@@ -208,6 +208,11 @@ static void otherset_draw(menu_t *menu) {
       otherset_items[MENUITEM_ANALOGOUT].flags = 0;
     }
   }
+
+  /* some boards do not have cable detect connected */
+#ifdef DISABLE_CABLEDETECT
+  otherset_items[MENUITEM_CABLEDETECT].flags = MENU_FLAG_DISABLED;
+#endif
 }
 
 void screen_othersettings(void) {
