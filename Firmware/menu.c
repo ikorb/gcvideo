@@ -94,8 +94,14 @@ static void print_value(menu_t *menu, unsigned int itemnum) {
 
   case VALTYPE_BYTE:
   case VALTYPE_SBYTE_99:
-  case VALTYPE_SBYTE_127:
     printf("%4d", value);
+    break;
+
+  case VALTYPE_SBYTE_127:
+    if (value == 0)
+      printf("   0");
+    else
+      printf("%+4d", value);
     break;
   }
 }
