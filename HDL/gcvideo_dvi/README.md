@@ -331,6 +331,23 @@ defaults by using L+R+X+Y+Start to call up the OSD menu. This reset
 function is temporary - if you want to revert setting that have been
 stored, make sure to use the "Store settings" menu item.
 
+### Picture Settings ###
+
+The Picture Settings submenu has controls to change the brightness,
+contrast and saturation of the picture.
+
+Each of the controls has a range from -128 to +127. When all
+three controls are set to 0, the picture is output exactly as produced
+by the console, without any modification. The picture settings are
+saved together with all the other settings by selecting "Store
+settings" in the main menu.
+
+Please note that some extreme combinations of settings in this menu
+can result in errorneous color output, e.g. bright white flipping to
+black or shifted tint in highly-saturated colors. If you encounter
+this, the recommended workaround is to use less extreme picture
+settings in GCVideo, prefereably neutral.
+
 ### Other settings submenu ###
 
 In the "Other settings" submenu, you can enable or disable a few
