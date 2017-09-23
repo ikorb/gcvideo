@@ -207,4 +207,7 @@ clean:
 	$(E) "---- CLEAN"
 	-$(Q)rm -rf build # brute-force cleanup
 
+printversion:
+	@echo $(VERSION)
+
 .PRECIOUS : build/%.prj build/%.xst build/%.ngc build/%.ngd build/%.pcf build/%.ncd build/%.bit build/$(PROMFILE).mcs build/$(XSVFFILE)
