@@ -167,6 +167,7 @@ build/%.bit: build/%.ncd
 build/%.ncd: build/%.pcf
 	$(E) "---- PAR      $<"
 	$(Q)cd build ; par -w $(PAR_OPTS) $(TOPLEVEL)_map.ncd $(TOPLEVEL).ncd $(TOPLEVEL).pcf
+	$(Q)grep " Timing constraints? not met" build/$(TOPLEVEL).par && false || true
 
 build/%.pcf: build/%.ngd
 	$(E) "---- MAP      $<"
