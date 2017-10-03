@@ -94,8 +94,19 @@ architecture Behavioral of audio_spdif is
   signal enable_l_dly        : boolean;
   signal enable_r_dly        : boolean;
 
-  signal volume_sync1        : unsigned(7 downto 0);
-  signal volume_sync2        : unsigned(7 downto 0);
+  -- syncing signals from other clock domains
+  constant SYNC_LEVELS: integer := 3;
+
+  type cmode_sync_t is array(0 to SYNC_LEVELS) of console_mode_t;
+  type volume_sync_t is array(0 to SYNC_LEVELS) of unsigned(7 downto 0);
+
+  signal consolemode_sync: cmode_sync_t;
+  signal volume_sync     : volume_sync_t;
+  attribute shreg_extract: string;
+  attribute shreg_extract of consolemode_sync: signal is "no";
+  attribute shreg_extract of volume_sync: signal is "no";
+
+  -- volume setting
   signal volume_adjusted     : signed(9 downto 0);
 
   function scale_audio(val: signed(15 downto 0); factor: signed(9 downto 0))
@@ -148,14 +159,16 @@ begin
   process(Clock)
   begin
     if rising_edge(Clock) then
+      consolemode_sync(0 to SYNC_LEVELS-1) <= consolemode_sync(1 to SYNC_LEVELS);
+      consolemode_sync(SYNC_LEVELS)        <= ConsoleMode;
+      prev_mode     <= consolemode_sync(0);
       clocken_spdif <= false;
-      prev_mode     <= ConsoleMode;
 
-      if prev_mode /= ConsoleMode then
+      if prev_mode /= consolemode_sync(0) then
         -- reset counter and update divider settings on mode switch
         clock_counter <= 0;
 
-        if ConsoleMode = MODE_GC then
+        if consolemode_sync(0) = MODE_GC then
           clockdiv_num <= ClockDiv_Num_GC;
           clockdiv_den <= ClockDiv_Den_GC;
         else
@@ -191,17 +204,21 @@ begin
 
   -- adjust volume
   process(Clock, clocken_spdif)
+    variable vol: unsigned(9 downto 0);
   begin
     if rising_edge(Clock) and clocken_spdif then
       enable_l_dly <= enable_l;
       enable_r_dly <= enable_r;
 
-      volume_adjusted <= signed("00" & volume_sync2) + 1;
-      volume_sync2 <= volume_sync1;
-      volume_sync1 <= Volume;
+      volume_sync(0 to SYNC_LEVELS-1) <= volume_sync(1 to SYNC_LEVELS);
+      volume_sync(SYNC_LEVELS)        <= Volume;
+
+      vol(7 downto 0) := volume_sync(0);
+      vol(9 downto 8) := "00";
+      volume_adjusted <= signed(vol) + 1;
 
       if enable_l then
-        if volume_sync2 = x"00" then
+        if volume_sync(0) = x"00" then
           audio_left <= (others => '0');
         else
           audio_left <= scale_audio(audio_left_unscaled, volume_adjusted);
@@ -209,7 +226,7 @@ begin
       end if;
 
       if enable_r then
-        if volume_sync2 = x"00" then
+        if volume_sync(0) = x"00" then
           audio_right <= (others => '0');
         else
           audio_right <= scale_audio(audio_right_unscaled, volume_adjusted);

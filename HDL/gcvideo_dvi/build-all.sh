@@ -22,7 +22,7 @@ fi
 
 VERSION=`make printversion`
 
-mkdir binaries
+mkdir -p binaries
 
 build p2xh-gc
 build p2xh-wii
