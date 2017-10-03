@@ -1,6 +1,6 @@
 # FIXME: Header, make-it-work, etc.
 
-VERSION := 2.3
+VERSION := 2.4
 
 SRC_COMMON := \
 	src/Blanking_Regenerator_Fixed.vhd \

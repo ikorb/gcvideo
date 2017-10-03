@@ -1,3 +1,7 @@
+2017-10-03: GCVideo-DVI version 2.4
+- brightness/contrast/saturation controls in OSD
+- add support for dual video output (DVI+parallel RGB, etc. for a DAC)
+
 2016-09-20: GCVideo-DVI version 2.3
 - enable IR remote in shuriken/shuriken-v3 builds
 - fix a bug that caused OSD CPU hangs on startup
