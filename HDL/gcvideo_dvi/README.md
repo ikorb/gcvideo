@@ -518,6 +518,13 @@ current version of GCVideo-DVI by just changing the pin assignments
 and re-synthesizing.
 
 
+## 3D printed mount ##
+
+A mount has been designed for the Pluto-IIx board by [Collingall](https://www.thingiverse.com/collingall/about) on Thingiverse. [Download the file here.](https://www.thingiverse.com/thing:2332094). If you're looking for somewhere to get it printed, [Shapeways](https://shapeways.com) is great quality and affordable.
+
+In order to use the mount, you'll need to desolder the digital video port, and remove the back flap on the disc drive shielding. The easiest way to do this is to pry it out flat with pliers and then bend it back an forth along the fold. You'll be able to get a nice clean break and it will leave room to mount the board in place of the digital connector.
+
+
 ## Credits ##
 
 Thanks to:
