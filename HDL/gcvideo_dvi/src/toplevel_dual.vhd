@@ -140,6 +140,7 @@ begin
     CSync_out   => CSync_out,
     VSync_out   => video_vsync,
     HSync_out   => video_hsync,
+    ForceYPbPr  => ForceYPbPr,
     Pair_Red    => swap_tmds,
     Pair_Green  => swap_tmds,
     Pair_Blue   => swap_tmds,
