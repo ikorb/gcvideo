@@ -90,6 +90,7 @@ void screen_idle(void) {
 
         osd_drawborder(RESBOX_X, RESBOX_Y, RESBOX_XS, RESBOX_YS);
         osd_gotoxy(RESBOX_X + 1, RESBOX_Y + 1);
+        osd_setattr(true, false);
  
         print_resolution();
       }
