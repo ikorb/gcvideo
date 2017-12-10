@@ -64,17 +64,17 @@ end audio_spdif;
 
 architecture Behavioral of audio_spdif is
   -- fractional clock enable generator for 384fs
-  constant ClockDiv_Num_GC : integer := 32;
-  constant ClockDiv_Den_GC : integer := 281;
   constant ClockDiv_Num_Wii: integer := 128;
   constant ClockDiv_Den_Wii: integer := 1125;
+  constant ClockDiv_Num_GC : integer := 32;
+  constant ClockDiv_Den_GC : integer := 281;
 
-  signal clockdiv_num : integer range 32  to 128  := clockdiv_num_gc;
-  signal clockdiv_den : integer range 281 to 1125 := clockdiv_den_gc;
-
-  signal clock_counter: integer range -clockdiv_num_wii to clockdiv_den_wii := 0;
-  signal clocken_spdif: boolean;
-  signal prev_mode    : console_mode_t := MODE_GC;
+  signal clock_counter_wii: integer range -clockdiv_num_wii to clockdiv_den_wii := 0;
+  signal clock_counter_gc : integer range -clockdiv_num_gc  to clockdiv_den_gc  := 0;
+  signal clocken_spdif_wii: boolean;
+  signal clocken_spdif_gc : boolean;
+  signal clocken_spdif    : boolean;
+  signal prev_mode        : console_mode_t := MODE_GC;
 
   -- cleaned-up versions of the I2S signals
   signal bclock : std_logic;
@@ -155,35 +155,48 @@ begin
     Output      => adata
   );
 
-  -- generate a clock enable signal for audio, 384fs
+  -- generate two clock enable signals for audio, 384fs for Wii and GC modes
   process(Clock)
   begin
     if rising_edge(Clock) then
       consolemode_sync(0 to SYNC_LEVELS-1) <= consolemode_sync(1 to SYNC_LEVELS);
       consolemode_sync(SYNC_LEVELS)        <= ConsoleMode;
-      prev_mode     <= consolemode_sync(0);
-      clocken_spdif <= false;
+      prev_mode         <= consolemode_sync(0);
+      clocken_spdif_wii <= false;
+      clocken_spdif_gc  <= false;
 
       if prev_mode /= consolemode_sync(0) then
-        -- reset counter and update divider settings on mode switch
-        clock_counter <= 0;
-
-        if consolemode_sync(0) = MODE_GC then
-          clockdiv_num <= ClockDiv_Num_GC;
-          clockdiv_den <= ClockDiv_Den_GC;
-        else
-          clockdiv_num <= ClockDiv_Num_Wii;
-          clockdiv_den <= ClockDiv_Den_Wii;
-        end if;
+        -- reset counter on mode switch
+        clock_counter_wii <= 0;
+        clock_counter_gc  <= 0;
 
       else
-
-        if clock_counter < 0 then
-          clock_counter <= clock_counter + clockdiv_den - clockdiv_num;
-          clocken_spdif <= true;
+        if clock_counter_wii < 0 then
+          clock_counter_wii <= clock_counter_wii + ClockDiv_Den_Wii - ClockDiv_Num_Wii;
+          clocken_spdif_wii <= true;
         else
-          clock_counter <= clock_counter - clockdiv_num;
+          clock_counter_wii <= clock_counter_wii - ClockDiv_Num_Wii;
         end if;
+
+        if clock_counter_gc < 0 then
+          clock_counter_gc <= clock_counter_gc + ClockDiv_Den_GC - ClockDiv_Num_GC;
+          clocken_spdif_gc <= true;
+        else
+          clock_counter_gc <= clock_counter_gc - ClockDiv_Num_GC;
+        end if;
+
+      end if;
+    end if;
+  end process;
+
+  -- select one of the clock enable signals based on the current mode
+  process(Clock)
+  begin
+    if rising_edge(Clock) then
+      if consolemode_sync(0) = MODE_WII then
+        clocken_spdif <= clocken_spdif_wii;
+      else
+        clocken_spdif <= clocken_spdif_gc;
       end if;
     end if;
   end process;
