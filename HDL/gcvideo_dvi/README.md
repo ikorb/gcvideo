@@ -513,9 +513,8 @@ Video](http://www.retro-system.com/shuriken%20video.htm). It
 features a smaller footprint which is optimized for mounting it so
 that it sticks out of the original digital video connector hole of the
 Gamecube. The developer has used a smaller FPGA to keep the costs
-down, but it should be possible to use a Spartan 3A-200 and port the
-current version of GCVideo-DVI by just changing the pin assignments
-and re-synthesizing.
+down, but when fitted with a Spartan 3A-200, the full version of
+GCVideo-DVI can run on it and presynthesized bitstreams are available.
 
 
 ## 3D printed mount ##
