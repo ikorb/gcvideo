@@ -1,3 +1,7 @@
+2017-12-10: GCVideo-DVI version 2.4a
+- fix audio issues introduced by 2.4 for some board configurations
+- ensure that the mode popup is always shown with correct colors
+
 2017-10-03: GCVideo-DVI version 2.4
 - brightness/contrast/saturation controls in OSD
 - add support for dual video output (DVI+parallel RGB, etc. for a DAC)
