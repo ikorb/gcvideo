@@ -1,3 +1,6 @@
+2018-09-14: GCVideo-DVI version 2.4b
+- fix a slight chroma shift in YCbCr-to-RGB conversion
+
 2017-12-10: GCVideo-DVI version 2.4a
 - fix audio issues introduced by 2.4 for some board configurations
 - ensure that the mode popup is always shown with correct colors

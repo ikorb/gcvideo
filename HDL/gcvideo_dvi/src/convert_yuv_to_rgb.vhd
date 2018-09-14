@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 -- GCVideo DVI HDL
--- Copyright (C) 2014-2017, Ingo Korb <ingo@akana.de>
+-- Copyright (C) 2014-2018, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -58,6 +58,7 @@ architecture Behavioral of convert_yuv_to_rgb is
   signal rtemp : signed(18 downto 0) := (others => '0'); -- Cr for R
   signal gtempr: signed(18 downto 0) := (others => '0'); -- Cr for G
   signal gtempb: signed(18 downto 0) := (others => '0'); -- Cb for G
+  signal gtmpb2: signed(18 downto 0) := (others => '0'); -- Cb for G, delayed
   signal btemp : signed(18 downto 0) := (others => '0'); -- Cb for B
 
   signal rsum    : signed(18 downto 0) := (others => '0'); -- (Y + rtemp) / 256
@@ -127,11 +128,12 @@ begin
       -- pipeline stage 2: add/subtract
       rsum     <= (ystore + rtemp) / 256;
       gsumtemp <= ystore - gtempr;
+      gtmpb2   <= gtempb;
       bsum     <= (ystore + btemp) / 256;
 
       -- pipeline stage 3: clipping r/b, subtract g
       rout <= clip(rsum);
-      gsum <= (gsumtemp - gtempb) / 256;
+      gsum <= (gsumtemp - gtmpb2) / 256;
       bout <= clip(bsum);
 
       -- pipeline stage 4: clip g, output
