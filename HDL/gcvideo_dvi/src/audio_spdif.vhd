@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 -- GCVideo DVI HDL
--- Copyright (C) 2014-2017, Ingo Korb <ingo@akana.de>
+-- Copyright (C) 2014-2018, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -114,7 +114,7 @@ architecture Behavioral of audio_spdif is
     variable tmp: signed(25 downto 0);
   begin
     tmp := val * factor;
-    return tmp(25 downto 10);
+    return tmp(23 downto 8);
   end function;
 
 begin
