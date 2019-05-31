@@ -1,4 +1,7 @@
-2818-11-20: GCVideo-DVI version 2.4c
+2019-05-31: GCVideo-DVI version 2.4d
+- fix incorrect chroma mixing for Cr-first lines
+
+2018-11-20: GCVideo-DVI version 2.4c
 - fix audio scaling
 
 2018-09-14: GCVideo-DVI version 2.4b
