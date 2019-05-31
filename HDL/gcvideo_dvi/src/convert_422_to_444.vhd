@@ -1,6 +1,6 @@
 ----------------------------------------------------------------------------------
 -- GCVideo DVI HDL
--- Copyright (C) 2014-2017, Ingo Korb <ingo@akana.de>
+-- Copyright (C) 2014-2019, Ingo Korb <ingo@akana.de>
 -- All rights reserved.
 --
 -- Redistribution and use in source and binary forms, with or without
@@ -56,10 +56,13 @@ architecture Behavioral of convert_422_to_444 is
   constant Delayticks: Natural := 3;
 
   -- stored color signals
-  signal current_cr: unsigned(7 downto 0) := (others => '1');
-  signal current_cb: unsigned(7 downto 0) := (others => '1');
-  signal prev_cr   : unsigned(7 downto 0) := (others => '1');
-  signal prev_cb   : unsigned(7 downto 0) := (others => '1');
+  signal current_c1: unsigned(7 downto 0) := (others => '1');
+  signal current_c2: unsigned(7 downto 0) := (others => '1');
+  signal prev_c1   : unsigned(7 downto 0) := (others => '1');
+  signal prev_c2   : unsigned(7 downto 0) := (others => '1');
+
+  signal prev_blanking: boolean;
+  signal is_cbfirst   : boolean;
 
   -- averaging function, also converts output to signed
   function average(a: unsigned(7 downto 0); b: unsigned(7 downto 0))
@@ -79,30 +82,48 @@ begin
 
   -- capture and interpolate colors
   process (PixelClock, PixelClockEnable)
+    variable new_c1: signed(7 downto 0);
+    variable new_c2: signed(7 downto 0);
   begin
     if rising_edge(PixelClock) and PixelClockEnable then
+      -- test if the first pixel on line is Cr
+      prev_blanking <= VideoIn.Blanking;
+
+      if prev_blanking and not VideoIn.Blanking then
+        is_cbfirst <= VideoIn.CurrentIsCb;
+      end if;
+
       -- capture color data
-      if VideoIn.CurrentIsCb then
+      if VideoIn.CurrentIsCb = is_cbfirst then
         -- pixel with start of new chroma information
         if not VideoIn.Blanking then
-          current_cb <= VideoIn.PixelCbCr;
+          current_c1 <= VideoIn.PixelCbCr;
         end if;
 
-        prev_cr <= current_cr;
-        prev_cb <= current_cb;
+        prev_c1 <= current_c1;
+        prev_c2 <= current_c2;
 
         -- output interpolated chroma info for the delayed Y value
-        VideoOut.PixelCb <= average(prev_cb, current_cb);
-        VideoOut.PixelCr <= average(prev_cr, current_cr);
+        new_c1 := average(prev_c1, current_c1);
+        new_c2 := average(prev_c2, current_c2);
       else
         -- pixel with the remainder of the current chroma information
         if not VideoIn.Blanking then
-          current_cr <= VideoIn.PixelCbCr;
+          current_c2 <= VideoIn.PixelCbCr;
         end if;
 
         -- output the previous "full" chroma info to coincide with the delayed Y value
-        VideoOut.PixelCr <= signed(prev_cr xor x"80");
-        VideoOut.PixelCb <= signed(prev_cb xor x"80");
+        new_c1 := signed(prev_c1 xor x"80");
+        new_c2 := signed(prev_c2 xor x"80");
+      end if;
+
+      -- forward to the correct output channels
+      if is_cbfirst then
+        VideoOut.PixelCb <= new_c1;
+        VideoOut.PixelCr <= new_c2;
+      else
+        VideoOut.PixelCb <= new_c2;
+        VideoOut.PixelCr <= new_c1;
       end if;
     end if;
   end process;
