@@ -66,16 +66,19 @@ installation. Programming it before installation requires an external
 power supply, programming it after installation may make it harder to
 access the required pins.
 
-The recommended way to program the board is to use one of the TXDI
+One possible way to program the board is to use one of the TXDI
 interfaces available from KNJN and their FPGAconf program. This also
 requires an RS232 port ("COM port"), although there is at least one
-TXDI interface that integrates an RS232-to-USB converter. In FPGAconf,
+TXDI interface that integrates an RS232-to-USB converter.
+Unfortunately FPGAconf does not support writing straight binary files
+to the board, the current recommended way is to use a faked bitstream
+from (this Github
+issue)[https://github.com/ikorb/gcvideo/issues/24#issuecomment-573460301]
+and use the integrated firmware updater to install a later release if
+needed. In FPGAconf,
 you need to use the "Program boot-PROM" button and select the
-`gcvideo-dvi-p2xh-gc-X.Y-spirom-complete.bin` file from the
-archive `gcvideo-X.Y-p2xh-gc.zip` on the Releases page on Github.
-
-(TODO: Check if FPGAconf actually accepts bin files and figure out
-an alternative if not)
+`gcvideo-dvi-3.0-p2xhgc-fpgaconf.bit` (or p2xhwii) file from the issue
+linked above.
 
 Another option to program the board is over the JTAG pins. This is
 only recommended for advanced users and requires a JTAG interface with
