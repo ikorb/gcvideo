@@ -40,7 +40,9 @@ but some hardware implementations of it feature an additional analog video
 output. This output is strictly treated as a second-class citizen, it cannot
 be configured fully independently of the main digital output. For example,
 if you enable RGB limited range, this will also affect the signal range
-on the analog output if that is set to an RGB mode.
+on the analog output if that is set to an RGB mode. When the analog
+output is set to YPbPr, it will not be affected by the
+brightness/contrast/saturation settings in the picture settings menu.
 
 ### Using with a controller ###
 
