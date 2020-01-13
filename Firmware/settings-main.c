@@ -306,13 +306,14 @@ void settings_save(void) {
   set.st.ir_checksum = sum;
 
   /* check if erase cycle is needed */
-  if (current_setid == 0 ||
+  if (current_setid < 8 || current_setid > 256 ||
       !spiflash_is_blank(SETTINGS_OFFSET + (current_setid - 8) * 256, 2048)) {
     spiflash_erase_sector(SETTINGS_OFFSET);
     current_setid = 256;
   }
 
   /* write data to flash */
+  current_setid -= 8;
   spiflash_write_page(SETTINGS_OFFSET + current_setid * 256, &set, sizeof(set));
 
   unsigned int page_remain = 0;
