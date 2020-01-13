@@ -72,8 +72,7 @@ requires an RS232 port ("COM port"), although there is at least one
 TXDI interface that integrates an RS232-to-USB converter.
 Unfortunately FPGAconf does not support writing straight binary files
 to the board, the current recommended way is to use a faked bitstream
-from (this Github
-issue)[https://github.com/ikorb/gcvideo/issues/24#issuecomment-573460301]
+from the latest release where it is available
 and use the integrated firmware updater to install a later release if
 needed. In FPGAconf,
 you need to use the "Program boot-PROM" button and select the
