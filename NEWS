@@ -1,3 +1,6 @@
+2020-01-13: GCVideo DVI version 3.0a
+- fix flash corruption when saving settings
+
 2020-01-12: GCVideo DVI version 3.0
 - attempted to improve signal compatibility
 - non-standard mode detection
