@@ -118,36 +118,42 @@ ifeq ($(TARGET),p2xh-gc)
   BOARD    := p2xh
   CONSOLE  := GC
   FIRMWARE := gc-dvi
+  GENERICS := SwapGreen=\"YES\" SwapBlue=\"YES\"
 else ifeq ($(TARGET),p2xh-wii)
   SRC      += $(SRC_P2XH)
   TOPLEVEL := toplevel_p2xh
   BOARD    := p2xh
   CONSOLE  := WII
   FIRMWARE := wii-dvi
+  GENERICS := SwapGreen=\"YES\" SwapBlue=\"YES\"
 else ifeq ($(TARGET),shuriken-gc)
   SRC      += $(SRC_SHURIKEN)
   TOPLEVEL := toplevel_shuriken
   BOARD    := shuriken
   CONSOLE  := GC
   FIRMWARE := gc-dvi
+  GENERICS := SwapRed=\"YES\" SwapGreen=\"YES\" SwapBlue=\"YES\"
 else ifeq ($(TARGET),shuriken-wii)
   SRC      += $(SRC_SHURIKEN)
   TOPLEVEL := toplevel_shuriken
   BOARD    := shuriken
   CONSOLE  := WII
   FIRMWARE := wii-dvi
+  GENERICS := SwapRed=\"YES\" SwapGreen=\"YES\" SwapBlue=\"YES\"
 else ifeq ($(TARGET),shuriken-v3-gc)
   SRC      += $(SRC_SHURIKEN)
   TOPLEVEL := toplevel_shuriken
   BOARD    := shuriken-v3
   CONSOLE  := GC
   FIRMWARE := gc-dvi
+  GENERICS := SwapRed=\"YES\" SwapGreen=\"YES\" SwapBlue=\"YES\"
 else ifeq ($(TARGET),shuriken-v3-wii)
   SRC      += $(SRC_SHURIKEN)
   TOPLEVEL := toplevel_shuriken
   BOARD    := shuriken-v3
   CONSOLE  := WII
   FIRMWARE := wii-dvi
+  GENERICS := SwapRed=\"YES\" SwapGreen=\"YES\" SwapBlue=\"YES\"
 else ifeq ($(TARGET),dual-gc)
   SRC      += $(SRC_DUAL)
   TOPLEVEL := toplevel_dual
@@ -155,12 +161,14 @@ else ifeq ($(TARGET),dual-gc)
   CONSOLE  := GC
   FIRMWARE := gc-dual
   FWFLAGS  := DISABLE_CABLEDETECT
+  GENERICS := SwapRed=\"YES\" SwapGreen=\"YES\" SwapBlue=\"YES\"
 else ifeq ($(TARGET),dual-wii)
   SRC      += $(SRC_DUAL)
   TOPLEVEL := toplevel_dual
   BOARD    := dualwii
   CONSOLE  := WII
   FIRMWARE := wii-dual
+  GENERICS := SwapRed=\"YES\" SwapGreen=\"YES\" SwapBlue=\"YES\"
 else
 dummy:
 	@echo "TARGET variable not specified"
@@ -232,7 +240,7 @@ build/%.xst: build/%.prj scripts/template.xst $(BUILDDIR)/$(FIRMWARE_MIF)
 	$(Q)echo -ifn $(TOPLEVEL).prj >> $@
 	$(Q)echo -ofn $(TOPLEVEL)     >> $@
 	$(Q)echo -top $(TOPLEVEL)     >> $@
-	$(Q)echo -generics {TargetConsole=\"$(CONSOLE)\" Firmware=\"$(FIRMWARE_MIF)\" Module=\"$(MODULE)\"} >> $@
+	$(Q)echo -generics {TargetConsole=\"$(CONSOLE)\" Firmware=\"$(FIRMWARE_MIF)\" Module=\"$(MODULE)\" $(GENERICS)} >> $@
 
 $(UCF): src/constraints-common.ucf src/constraints-$(BOARD).ucf src/constraints-$(CONSOLE_LC).ucf $(CONSTRAINTS_MODULE)
 	$(E) "---- GENUCF   $<"

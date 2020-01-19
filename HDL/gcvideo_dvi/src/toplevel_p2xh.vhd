@@ -41,6 +41,9 @@ use work.video_defs.all;
 entity toplevel_p2xh is
   generic (
     TargetConsole: string; -- "GC" or "WII"
+    SwapRed      : string := "NO";
+    SwapGreen    : string := "NO";
+    SwapBlue     : string := "NO";
     Firmware     : string;
     Module       : string
   );
@@ -95,8 +98,15 @@ architecture Behavioral of toplevel_p2xh is
   signal video_vsync    : std_logic;
   signal heartbeat_clock: std_logic;
   signal heartbeat_vsync: std_logic;
+  signal swap_red       : Pair_Swap_t;
+  signal swap_green     : Pair_Swap_t;
+  signal swap_blue      : Pair_Swap_t;
 
 begin
+
+  swap_red   <= Pair_Regular when SwapRed   = "NO" else Pair_Swapped;
+  swap_green <= Pair_Regular when SwapGreen = "NO" else Pair_Swapped;
+  swap_blue  <= Pair_Regular when SwapBlue  = "NO" else Pair_Swapped;
 
   -- data pipe
   Inst_Datapipe: Datapipe generic map (
@@ -122,8 +132,9 @@ begin
     PipeClock   => pipe_clock,
     SPDIF_Out   => SPDIF_Out,
     VSync_out   => video_vsync,
-    Pair_Green  => Pair_Swapped,
-    Pair_Blue   => Pair_Swapped,
+    Pair_Red    => swap_red,
+    Pair_Green  => swap_green,
+    Pair_Blue   => swap_blue,
     DVI_Clock   => DVI_Clock,
     DVI_Red     => DVI_Red,
     DVI_Green   => DVI_Green,

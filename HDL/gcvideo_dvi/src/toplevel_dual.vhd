@@ -41,6 +41,9 @@ use work.video_defs.all;
 entity toplevel_dual is
   generic (
     TargetConsole: string; -- "GC" or "WII"
+    SwapRed      : string := "NO";
+    SwapGreen    : string := "NO";
+    SwapBlue     : string := "NO";
     Firmware     : string;
     Module       : string
   );
@@ -105,7 +108,9 @@ architecture Behavioral of toplevel_dual is
   signal heartbeat_clock: std_logic;
   signal heartbeat_vsync: std_logic;
   signal cable_detect   : std_logic;
-  signal swap_tmds      : Pair_Swap_t;
+  signal swap_red       : Pair_Swap_t;
+  signal swap_green     : Pair_Swap_t;
+  signal swap_blue      : Pair_Swap_t;
   signal dac_rgbmode    : boolean;
   signal out_red        : std_logic_vector(7 downto 0);
   signal out_green      : std_logic_vector(7 downto 0);
@@ -113,8 +118,9 @@ architecture Behavioral of toplevel_dual is
 
 begin
 
-  -- Dual-GC has swapped TMDS pairs, Dual-Wii has unswapped
-  swap_tmds <= Pair_Swapped when TargetConsole = "GC" else Pair_Regular;
+  swap_red   <= Pair_Regular when SwapRed   = "NO" else Pair_Swapped;
+  swap_green <= Pair_Regular when SwapGreen = "NO" else Pair_Swapped;
+  swap_blue  <= Pair_Regular when SwapBlue  = "NO" else Pair_Swapped;
 
   -- data pipe
   Inst_Datapipe: Datapipe generic map (
@@ -148,9 +154,9 @@ begin
     VSync_out   => video_vsync,
     HSync_out   => video_hsync,
     ForceYPbPr  => ForceYPbPr,
-    Pair_Red    => swap_tmds,
-    Pair_Green  => swap_tmds,
-    Pair_Blue   => swap_tmds,
+    Pair_Red    => swap_red,
+    Pair_Green  => swap_green,
+    Pair_Blue   => swap_blue,
     DVI_Clock   => DVI_Clock,
     DVI_Red     => DVI_Red,
     DVI_Green   => DVI_Green,
