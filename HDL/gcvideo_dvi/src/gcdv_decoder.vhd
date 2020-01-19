@@ -63,14 +63,19 @@ architecture Behavioral of gcdv_decoder is
 
   signal vdata_buf: std_logic_vector(7 downto 0);
   signal csel_buf : std_logic;
+
+  signal vdata_buf2: std_logic_vector(7 downto 0);
+  signal csel_buf2 : std_logic;
 begin
 
   process (VClockI)
   begin
     if rising_edge(VClockI) then
       -- buffer incoming data to relax timing
-      vdata_buf <= VData;
-      csel_buf  <= CSel;
+      vdata_buf2 <= VData;
+      csel_buf2  <= CSel;
+      vdata_buf  <= vdata_buf2;
+      csel_buf   <= csel_buf2;
 
       -- read cube signals
       prev_csel <= csel_buf;
