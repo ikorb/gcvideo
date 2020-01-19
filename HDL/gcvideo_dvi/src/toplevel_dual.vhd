@@ -105,7 +105,6 @@ architecture Behavioral of toplevel_dual is
   signal pipe_clock     : std_logic;
   signal video_hsync    : std_logic;
   signal video_vsync    : std_logic;
-  signal heartbeat_clock: std_logic;
   signal heartbeat_vsync: std_logic;
   signal cable_detect   : std_logic;
   signal swap_red       : Pair_Swap_t;
@@ -191,12 +190,11 @@ begin
 
   -- heartbeat on LED
   Inst_Heartbeat: LED_Heartbeat port map (
-    Clock          => pipe_clock,
-    VSync          => video_vsync,
-    HeartbeatClock => heartbeat_clock,
-    HeartbeatVSync => heartbeat_vsync
+    Clock           => pipe_clock,
+    VSync           => video_vsync,
+    HeartbeatVSync2 => heartbeat_vsync
   );
 
-  LED <= heartbeat_clock;
+  LED <= heartbeat_vsync;
 
 end Behavioral;
