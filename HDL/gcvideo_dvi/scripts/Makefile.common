@@ -214,7 +214,7 @@ all: $(BUILDDIR)/$(TOPLEVEL).bin
 
 build/%.bin build/%.bit: build/%.ncd
 	$(E) "---- BITGEN   $<"
-	$(Q)cd $(dir $<) ; bitgen -f ../../scripts/bitgenconfig.ut -g "UserID:$(HWID)" $(TOPLEVEL).ncd
+	$(Q)cd $(dir $<) ; bitgen -f ../../scripts/bitgenconfig-$(CONSOLE).ut -g "UserID:$(HWID)" $(TOPLEVEL).ncd
 
 build/%.ncd: build/%.pcf
 	$(E) "---- PAR      $<"
