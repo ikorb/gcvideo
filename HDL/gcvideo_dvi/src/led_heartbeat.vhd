@@ -40,10 +40,11 @@ use work.video_defs.all;
 
 entity LED_Heartbeat is
   port (
-    Clock         : in  std_logic;
-    VSync         : in  std_logic;
-    HeartbeatClock: out std_logic;
-    HeartbeatVSync: out std_logic
+    Clock          : in  std_logic;
+    VSync          : in  std_logic;
+    HeartbeatClock : out std_logic;
+    HeartbeatVSync : out std_logic;
+    HeartbeatVSync2: out std_logic
   );
 end LED_Heartbeat;
 
@@ -91,7 +92,8 @@ begin
     end if;
   end process;
 
-  HeartbeatClock <= hb_clock;
-  HeartbeatVsync <= hb_vs_capture;
+  HeartbeatClock  <= hb_clock;
+  HeartbeatVsync  <= hb_vs_capture;
+  HeartbeatVsync2 <= hb_vsync;
 
 end Behavioral;
