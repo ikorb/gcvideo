@@ -82,6 +82,16 @@ architecture Behavioral of ClockGen is
   signal adcm_reset_count    : natural range 0 to 7 := 0;
   signal clock_audio_internal: std_logic;
 
+  signal pdcm_clkfb       : std_logic;
+  signal pdcm_clk2x       : std_logic;
+  signal pdcm_clkfx       : std_logic;
+  signal pdcm_locked      : std_logic;
+  signal pdcm_locked_sync : std_logic_vector(2 downto 0) := (others => '0');
+  signal pdcm_status      : std_logic_vector(7 downto 0);
+  signal pdcm_status_sync1: std_logic_vector(7 downto 0);
+  signal pdcm_status_sync2: std_logic_vector(7 downto 0);
+  signal pdcm_reset       : std_logic;
+
 begin
   Locked <= vdcm_locked; --and adcm_locked;
 
@@ -93,6 +103,37 @@ begin
     I => ClockIn);
 
   ClockIn_internal <= not ClockIn_internal_neg;
+
+  -- Clocking primitive 0 - input filtering
+  -----------------------------------------
+  -- basically a 54MHz passthrough using
+  -- the DFS, an attempt to clean glitches
+
+  primary_dcm: DCM_SP
+    generic map (
+      CLKIN_DIVIDE_BY_2  => true,
+      CLKFX_DIVIDE       => 1,
+      CLKFX_MULTIPLY     => 2,
+      CLKOUT_PHASE_SHIFT => "NONE",
+      CLK_FEEDBACK       => "2X",
+      DESKEW_ADJUST      => "SYSTEM_SYNCHRONOUS",
+      PHASE_SHIFT        => 0,
+      STARTUP_WAIT       => TRUE
+    ) port map (
+      CLKIN    => ClockIn_internal,
+      CLKFB    => pdcm_clkfb,
+      CLK2X    => pdcm_clk2x,
+      CLKFX    => pdcm_clkfx,
+      PSCLK    => '0',
+      PSEN     => '0',
+      PSINCDEC => '0',
+      LOCKED   => pdcm_locked,
+      STATUS   => pdcm_status,
+      RST      => '0',
+      DSSEN    => '0'
+    );
+
+  pdcm_clkfb <= pdcm_clk2x;
 
   -- Clocking primitive 1 - System+Video
   --------------------------------------
@@ -110,7 +151,7 @@ begin
     STARTUP_WAIT          => TRUE)
   port map
    -- Input clock
-   (CLKIN                 => ClockIn_internal,
+   (CLKIN                 => pdcm_clkfx,
     CLKFB                 => vdcm_clkfb,
     -- Output clocks
     CLK0                  => vdcm_clk0,
