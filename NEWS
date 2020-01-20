@@ -1,4 +1,8 @@
-2020-01-19: GCVideo DVO version 3.0b
+2020-01-25: GCVideo DVI version 3.0c
+- fix stuck display disable on mode change
+- attempt to fix a rare audio glitch
+
+2020-01-19: GCVideo DVI version 3.0b
 - fix inverted colors on WiiDual
 - fix flasher->main reboot failure on some Wiis
 
