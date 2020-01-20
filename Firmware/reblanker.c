@@ -83,37 +83,35 @@ static void check_modechange(uint32_t cur_xres, uint32_t cur_yres,
     outmode_changed = true;
   }
 
-  if (inmode_changed || outmode_changed) {
-    if (disable_frames > 0) {
-      /* still disabled, count down */
-      disable_frames--;
+  if (disable_frames > 0) {
+    /* still disabled, count down */
+    disable_frames--;
 
-      if (disable_frames == 0) {
-        /* done, reenable */
-        if (inmode_changed) {
-          pad_set_irq(PAD_VIDEOCHANGE);
-        }
-
-        if (outmode_changed) {
-          update_infoframe(outmode);
-        }
-
-        prev_inmode  = inmode;
-        prev_outmode = outmode;
-        /* enable output again */
-        if ((video_settings_global & VIDEOIF_SET_COLORMODE_MASK) ==
-            VIDEOIF_SET_COLORMODE_Y422) {
-          VIDEOIF->osd_bg = 0;
-        } else {
-          VIDEOIF->osd_bg = osdbg_settings;
-        }
+    if (disable_frames == 0) {
+      /* done, reenable */
+      if (inmode_changed) {
+        pad_set_irq(PAD_VIDEOCHANGE);
       }
-    } else {
-      /* first detection of mode change, disable output for three frames */
-      /* (avoids missed mode switches on some TVs, e.g. from 480i to 240p) */
-      disable_frames = 3;
-      VIDEOIF->osd_bg = VIDEOIF_OSDBG_DISABLE_OUTPUT;
+
+      if (outmode_changed) {
+        update_infoframe(outmode);
+      }
+
+      prev_inmode  = inmode;
+      prev_outmode = outmode;
+      /* enable output again */
+      if ((video_settings_global & VIDEOIF_SET_COLORMODE_MASK) ==
+          VIDEOIF_SET_COLORMODE_Y422) {
+        VIDEOIF->osd_bg = 0;
+      } else {
+        VIDEOIF->osd_bg = osdbg_settings;
+      }
     }
+  } else if (inmode_changed || outmode_changed) {
+    /* first detection of mode change, disable output for three frames */
+    /* (avoids missed mode switches on some TVs, e.g. from 480i to 240p) */
+    disable_frames = 3;
+    VIDEOIF->osd_bg = VIDEOIF_OSDBG_DISABLE_OUTPUT;
   } else if (prev_xres != cur_xres || prev_yres != cur_yres) {
     /* input resolution changed, just set videochange to trigger resbox */
     pad_set_irq(PAD_VIDEOCHANGE);
