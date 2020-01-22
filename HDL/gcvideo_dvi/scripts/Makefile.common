@@ -105,9 +105,10 @@ SRC_SHURIKEN := src/toplevel_shuriken.vhd
 SRC_DUAL     := src/toplevel_dual.vhd
 BMM          := src/zpu_bootram.bmm
 PART         := xc3s200a-vq100-4
+COST_TABLE   ?= 2
 
-MAP_OPTS := -timing -logic_opt on -ol high -xe n -t 1 -register_duplication on -cm balanced -detail -ir off -ignore_keep_hierarchy -pr b -bp -power off
-PAR_OPTS := -ol high -xe n -t 1
+MAP_OPTS := -timing -logic_opt on -ol high -xe n -t $(COST_TABLE) -register_duplication on -cm balanced -detail -ir off -ignore_keep_hierarchy -pr b -bp -power off
+PAR_OPTS := -ol high -xe n -t $(COST_TABLE)
 OBJCOPY  := zpu-elf-objcopy
 
 SRC = $(SRC_COMMON) $(SRC_MODULE)
