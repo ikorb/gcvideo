@@ -130,7 +130,7 @@ architecture Behavioral of dvid is
          sub3_eccbits, sub4_eccbits: std_logic_vector(1 downto 0);
 
   -- audio
-  type enable_syncer_t is array(2 downto 0) of boolean;
+  type enable_syncer_t is array(3 downto 0) of boolean;
 
   signal channel_status    : std_logic_vector(191 downto 0) := x"00000000000000000000000000000000000000d202000104";
   signal channel_bit       : natural range 0 to 191 := 0;
@@ -345,12 +345,12 @@ begin
       blank_d <= blank_delay(0);
 
       -- assemble audio data
-      left_en_sync(1 downto 0)  <= left_en_sync(2 downto 1);
-      left_en_sync(2)           <= Audio.LeftEnable;
+      left_en_sync(2 downto 0)  <= left_en_sync(3 downto 1);
+      left_en_sync(3)           <= Audio.LeftEnable;
       left_enable               <= left_en_sync(0) and not left_en_sync(1); -- falling edge
 
-      right_en_sync(1 downto 0) <= right_en_sync(2 downto 1);
-      right_en_sync(2)          <= Audio.RightEnable;
+      right_en_sync(2 downto 0) <= right_en_sync(3 downto 1);
+      right_en_sync(3)          <= Audio.RightEnable;
       right_enable              <= right_en_sync(0) and not right_en_sync(1);
 
       if left_enable then
