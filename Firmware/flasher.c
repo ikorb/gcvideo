@@ -472,6 +472,8 @@ static bool try_update(void) {
           osd_puts("Compressed data is corrupted.\n   Please power-cycle and try again.");
           while (1) ;
         }
+      } else {
+        memcpy(decrunchbuffer, decodebuf_readptr, UNCOMPRESSED_CHUNK_SIZE);
       }
 
       decodebuf_readptr += chunklen;
