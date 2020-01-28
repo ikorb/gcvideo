@@ -160,9 +160,19 @@ sub compress_firmware {
         }
         close $compr;
 
-        if ($len >= BLOCKSIZE) {
-            # compression did not gain anything, replace with original
-            $cdata = substr($indata, $i * BLOCKSIZE, BLOCKSIZE);
+        # Workaround for a stupid flasher bug in 3.0-3.0c
+        #if ($len >= BLOCKSIZE) {
+        #    # compression did not gain anything, replace with original
+        #    $cdata = substr($indata, $i * BLOCKSIZE, BLOCKSIZE);
+        #}
+        if ($len == BLOCKSIZE) {
+            # append a dummy byte in front (ignored by decruncher) to
+            # make sure the flasher does not think this chunk is uncompressed
+            printf "%02x %02x %02x\n\n", ord(substr($cdata, 0, 1)), ord(substr($cdata, 1,1)), ord(substr($cdata, 2, 1));
+            $cdata = pack("Ca*", 0, $cdata);
+
+            say "\nnew cdata len: ", length($cdata);
+            printf "%02x %02x %02x\n\n", ord(substr($cdata, 0, 1)), ord(substr($cdata, 1,1)), ord(substr($cdata, 2, 1));
         }
 
         unlink $tempdir . "/input.bin";
@@ -360,7 +370,9 @@ if (scalar(@ARGV) < 2) {
 
 
 if (!have_exomizer()) {
-    say STDERR "exomizer not available, writing uncompressed update";
+    # due to a bug in flashers from 3.0-3.0c, chunks must always be compressed
+    say STDERR "exomizer not available, cannot proceed";
+    exit 2;
 }
 
 my $updater_in  = shift;
