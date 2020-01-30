@@ -85,6 +85,12 @@ else ifeq ($(TARGET),dual-wii)
   TOPLEVEL := toplevel_dual
   BOARD    := dualwii
   CONSOLE  := WII
+else ifeq ($(TARGET),gcplug)
+  # PLUG
+  HWID     := 0x504c5547
+  TOPLEVEL := toplevel_shuriken
+  BOARD    := gcplug
+  CONSOLE  := GC
 else
 dummy:
 	@echo "TARGET variable not specified"
@@ -98,6 +104,7 @@ dummy:
 	@echo "  - shuriken-v3-wii"
 	@echo "  - dual-gc"
 	@echo "  - dual-wii"
+	@echo "  - gcplug"
 	@false
 endif
 

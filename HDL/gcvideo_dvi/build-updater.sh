@@ -23,7 +23,8 @@ fi
                          build/main-shuriken-v3-gc/toplevel_shuriken.tagmain \
                          build/main-shuriken-v3-wii/toplevel_shuriken.tagmain \
                          build/main-dual-gc/toplevel_dual.tagmain \
-                         build/main-dual-wii/toplevel_dual.tagmain
+                         build/main-dual-wii/toplevel_dual.tagmain \
+                         build/main-gcplug/toplevel_shuriken.tagmain
 
 ./scripts/buildupdate.pl $UPDATER_WII binaries/updater-$VERSION-wii.dol \
                          build/main-p2xh-wii/toplevel_p2xh.tagmain \

@@ -170,6 +170,13 @@ else ifeq ($(TARGET),dual-wii)
   CONSOLE  := WII
   FIRMWARE := wii-dual
   GENERICS := SwapRed=\"YES\" SwapGreen=\"YES\" SwapBlue=\"YES\"
+else ifeq ($(TARGET),gcplug)
+  SRC      += $(SRC_SHURIKEN)
+  TOPLEVEL := toplevel_shuriken
+  BOARD    := gcplug
+  CONSOLE  := GC
+  FIRMWARE := gc-dvi
+  GENERICS := SwapRed=\"YES\" SwapGreen=\"YES\" SwapBlue=\"YES\"
 else
 dummy:
 	@echo "TARGET variable not specified"
@@ -183,6 +190,7 @@ dummy:
 	@echo "  - shuriken-v3-wii"
 	@echo "  - dual-gc"
 	@echo "  - dual-wii"
+	@echo "  - gcplug"
 	@false
 endif
 
