@@ -149,9 +149,36 @@ static void show_failure(void) {
   }
 }
 
+static void plot(unsigned int x, unsigned int y, uint16_t color) {
+  unsigned int offset = (y * rmode.fbWidth + x) / 2;
+
+  uint32_t pixel = xfb[offset];
+
+  if (x & 1) {
+    pixel &= 0xffff0000;
+    pixel |= color;
+  } else {
+    pixel &= 0x0000ffff;
+    pixel |= color << 16;
+  }
+  xfb[offset] = pixel;
+}
+
 static void display_updatedata(void) {
   memcpy(updversion, updatedata + 2, 8);
   screenoffsets = updatedata + 5;
+
+  /* draw a special pattern for diagnostics in the first two lines */
+  for (unsigned int x = 0; x < 220; x++) {
+    uint16_t color = x + 16;
+    color = (color << 8) | color;
+
+    for (unsigned int y = 0; y < 2; y++) {
+      plot(x +   1, y, color);
+      plot(x + 221, y, color);
+      plot(x + 441, y, color);
+    }
+  }
 
   printf("\n\n"
          "      GCVideo Firmware Updater v" VERSION ", containing GCVideo %s\n"
