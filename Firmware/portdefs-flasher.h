@@ -44,6 +44,21 @@
 
 #define HAVE_SPI_HWCRC
 
+/* --- Signal Diagnostics device --- */
+
+typedef struct {
+  __I uint32_t stuck_0;
+  __I uint32_t stuck_1;
+  __I uint32_t audio_active;
+  __I uint32_t bclock_glitches;
+  __I uint32_t lrclock_glitches;
+  __I uint32_t adata_glitches;
+} SIGNALDIAG_TypeDef;
+
+#define SIGNALDIAG_ACTIVE_BCLOCK  (1 << 0)
+#define SIGNALDIAG_ACTIVE_LRCLOCK (1 << 1)
+#define SIGNALDIAG_ACTIVE_ADATA   (1 << 2)
+
 /* --- Line capture RAM --- */
 
 typedef struct {
@@ -62,8 +77,10 @@ typedef struct {
 
 /* --- mixing it all together --- */
 
+#define SIGNALDIAG_BASE  ((uint32_t)0xffff8000UL)
 #define LINECAPTURE_BASE ((uint32_t)0xffffe000UL)
 
+#define SIGNALDIAG  ((SIGNALDIAG_TypeDef *)SIGNALDIAG_BASE)
 #define LINECAPTURE ((LINECAPTURE_TypeDef *)LINECAPTURE_BASE)
 
 #endif

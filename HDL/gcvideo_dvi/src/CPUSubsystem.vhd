@@ -52,6 +52,9 @@ entity CPUSubsystem is
     PadData          : in  std_logic;
     IRReceiver       : in  std_logic;
     IRButton         : in  std_logic;
+    I2S_BClock       : in  std_logic;
+    I2S_LRClock      : in  std_logic;
+    I2S_Data         : in  std_logic;
     SPI_MOSI         : out std_logic;
     SPI_MISO         : in  std_logic;
     SPI_SCK          : out std_logic;
@@ -308,6 +311,22 @@ begin
       );
   end generate;
 
+  -- signal diagnostics device
+  SignalDiag: if Module = "flasher" generate
+    Inst_SignalDiag: ZPUSignalDiag port map (
+      -- replaces InfoFrameRAM in flasher
+      Clock            => Clock,
+      ZSelect          => IFRSel,
+      ZPUBusIn         => ZPUIn,
+      ZPUBusOut        => IFROut,
+      VideoIn          => VideoIn,
+      PixelClockEnable => PixelClockEnable,
+      I2S_BClock       => I2S_BClock,
+      I2S_LRClock      => I2S_LRClock,
+      I2S_Data         => I2S_Data
+    );
+  end generate;
+
   -- CPU-to-device signals
   ZPUIn.Reset           <= cpu_reset;
   ZPUIn.mem_write       <= cpu_mem_write;
@@ -334,7 +353,7 @@ begin
       case cpu_mem_addr(31 downto 28) is
         when x"f" => -- peripheral space
           if cpu_mem_addr(15 downto 13) = "100" then
-            -- 0xffff8000-9fff
+            -- 0xffff8000-9fff, reused for signal diag in flasher
             IFRSel <= '1';
           elsif cpu_mem_addr(13) = '0' then
             -- OSD RAM needs 8k: 0xffffc000-dfff

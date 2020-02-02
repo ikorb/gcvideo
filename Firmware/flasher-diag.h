@@ -25,20 +25,12 @@
    THE POSSIBILITY OF SUCH DAMAGE.
 
 
-   flasher.h: Exported buffers from the flash updater module
+   flasher-diag.h: Diagnostics mode for flasher
 */
 
-#ifndef FLASHER_H
-#define FLASHER_H
+#ifndef FLASHER_DIAG_H
+#define FLASHER_DIAG_H
 
-#include <stdint.h>
-
-#define DECODEBUFFER_SIZE       1320 // 1254 is enough for flashing, diag needs 1320
-#define UNCOMPRESSED_CHUNK_SIZE 1024
-
-extern uint8_t __attribute__((aligned(4))) decodebuffer[DECODEBUFFER_SIZE];
-extern char    __attribute__((aligned(4))) decrunchbuffer[UNCOMPRESSED_CHUNK_SIZE];
-
-void set_capture_range(unsigned int start, unsigned int end);
+void flasher_diag(void);
 
 #endif

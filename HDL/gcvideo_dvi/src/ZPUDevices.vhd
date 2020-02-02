@@ -214,6 +214,22 @@ package ZPUDevices is
     );
   end component;
 
+  component ZPUSignalDiag is
+    port (
+      Clock           : in  std_logic;
+      ZSelect         : in  std_logic;
+      ZPUBusIn        : in  ZPUDeviceIn;
+      ZPUBusOut       : out ZPUDeviceOut;
+
+      -- diagnosed signals
+      VideoIn         : in  VideoY422;
+      PixelClockEnable: in  boolean;
+      I2S_BClock      : in  std_logic;
+      I2S_LRClock     : in  std_logic;
+      I2S_Data        : in  std_logic
+    );
+  end component;
+
 end ZPUDevices;
 
 package body ZPUDevices is

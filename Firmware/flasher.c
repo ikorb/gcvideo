@@ -33,6 +33,7 @@
 #include <string.h>
 #include "crc32mpeg.h"
 #include "exodecr.h"
+#include "flasher-diag.h"
 #include "flashviewer.h"
 #include "icap.h"
 #include "menu-lite.h"
@@ -70,7 +71,7 @@ static imageheader_t mainheader;
 
 static uint32_t target_hardware_id;
 static uint8_t *decodebuf_readptr;
-uint8_t __attribute__((aligned(4))) decodebuffer[1254];
+uint8_t __attribute__((aligned(4))) decodebuffer[DECODEBUFFER_SIZE];
 char    __attribute__((aligned(4))) decrunchbuffer[UNCOMPRESSED_CHUNK_SIZE];
 
 typedef enum {
@@ -187,7 +188,7 @@ static void nospin(unsigned int attr) {
   osd_putcharat(3, 9, ' ', attr);
 }
 
-static void set_capture_range(unsigned int start, unsigned int end) {
+void set_capture_range(unsigned int start, unsigned int end) {
   for (unsigned int i = 0; i < 255; i++) {
     if (i >= start && i <= end) {
       LINECAPTURE->needed_lines[i] = 1;
@@ -258,7 +259,8 @@ static bool capture_line(void) {
     LINECAPTURE->arm = 0; // value does not matter
 
     while (LINECAPTURE->linedata[0] & LINECAPTURE_FLAG_BUSY) {
-      if (pad_buttons & (IRBUTTON_LONG | IR_BACK | IR_LEFT | PAD_START | PAD_Z)) {
+      if (pad_buttons & (IRBUTTON_LONG | IR_BACK | IR_LEFT | IR_RIGHT |
+                         PAD_START | PAD_Z | PAD_R )) {
         return false;
       }
 
@@ -418,7 +420,8 @@ static bool try_update(void) {
         (pad_buttons & IR_OK)) {
       pad_clear(PAD_X | PAD_Y);
       break;
-    } else if (pad_buttons & (PAD_START | PAD_Z | IR_BACK | IR_LEFT | IRBUTTON_LONG)) {
+    } else if (pad_buttons & (PAD_START | PAD_Z | PAD_R |
+                              IR_BACK | IR_LEFT | IR_RIGHT | IRBUTTON_LONG)) {
       /* user requested exit */
       return false;
     }
@@ -620,6 +623,10 @@ void run_mainloop(void) {
       } else if (pad_buttons & (PAD_Z | IR_LEFT)) {
         pad_clear(PAD_ALL);
         flash_viewer();
+
+      } else if (pad_buttons & (PAD_R | IR_RIGHT)) {
+        pad_clear(PAD_ALL);
+        flasher_diag();
       }
 
       pad_clear(PAD_ALL);

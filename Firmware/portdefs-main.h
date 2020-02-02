@@ -42,6 +42,12 @@
 #define __O  volatile
 #define __IO volatile
 
+/* --- InfoFrame RAM --- */
+
+typedef struct {
+  __IO uint32_t data[2048];
+} IFRAM_TypeDef;
+
 /* --- Scanline RAM --- */
 
 #define SCANLINERAM_ENTRIES (256 * 4)
@@ -54,8 +60,10 @@ typedef struct {
 
 /* --- mixing it all together --- */
 
+#define IFRAM_BASE       ((uint32_t)0xffff8000UL)
 #define SCANLINERAM_BASE ((uint32_t)0xffffe000UL)
 
+#define IFRAM       ((IFRAM_TypeDef *)IFRAM_BASE)
 #define SCANLINERAM ((SCANLINERAM_TypeDef *)SCANLINERAM_BASE)
 
 #endif

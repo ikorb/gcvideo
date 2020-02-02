@@ -494,6 +494,51 @@ In practice it is an observed phenomenon that theory and practice can differ,
 so there are no guarantees that everything will work as described here.
 
 
+## Diagnostics mode ##
+
+The firmware update mode also includes a diagnostics tool that can be used
+to check that certain aspects of a GCVideo installation are wired correctly.
+It is accessed by choosing the "Update firmware..." option in the About menu
+and hitting the R trigger on a Gamepad or Right on an IR remote. It is
+currently only usable if you get a picture at all.
+
+(TODO: Add screenshot)
+
+The diagnostics mode checks if all eight video lines are working and if there is
+activity on the three audio lines. The video line check needs a special test
+pattern on screen which is integrated in the updater.dol starting from
+GCVideo-DVI version 3.0d, a specific color gradient at the top of the screen.
+The audio line check just needs any audio playing, for example the background
+music of the console's main menu screen. The updater.dol currently does not
+provide any audio.
+
+When the diagnostics mode has detected the test pattern, it will confirm by
+displaying "Test pattern detected". If everything is correct, the three lines
+just below should all say "None". If not, they will show the number(s) of the
+VData line(s) which appear to have issues. Lines listed as "stuck at 0/1" are
+likely unconnected or shorted to an unrelated signal. Anything listed in
+"Unexpected bits" may be swapped or shorted with another line or an unrelated
+signal.
+
+Please note that the "Unexpected bits" output is almost certain to be "01234567"
+even with a fully working install if the test pattern is not shown on screen.
+The "Bits stuck" test may still give a valid result even without the test
+pattern, but it is known to result in misdetections depending on the screen
+content - for example, a fully black screen may mistakenly detect "0123 56" in
+the "stick at 0" diagnostic.
+
+The audio diagnostic checks if the three audio signals are toggling and if
+they have unexpected glitches, e.g. due to crosstalk. If a signal is
+not toggling at all, it will be listed as "Missing" - but please note that
+this will also be shows for AData if the audio from the console is silent.
+
+If glitches are detected, the number of glitches per frame is shown in
+parenthesis - for AData, even a perfect install may show a small number of
+glitches due to unknown circumstances. Glitches can result from interference
+between multiple signals, re-routing the wires with more separation or
+just with a different angle between them can sometimes have a major effect on
+the number of detected glitches.
+
 ## Glossary ##
 
 This section contains explanations about some concepts that are

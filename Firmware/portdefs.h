@@ -212,15 +212,9 @@ typedef struct {
   __IO uint32_t data[2048];
 } OSDRAM_TypeDef;
 
-/* --- InfoFrame RAM --- */
-
-typedef struct {
-  __IO uint32_t data[2048];
-} IFRAM_TypeDef;
-
 /* --- mixing it all together --- */
 
-#define IFRAM_BASE         ((uint32_t)0xffff8000UL)
+// ffff8000: module-specific
 #define OSDRAM_BASE        ((uint32_t)0xffffc000UL)
 // ffffe000: module-specific
 #define PERIPH_BASE        ((uint32_t)0xfffff000UL)
@@ -234,7 +228,6 @@ typedef struct {
 #define VIDEOIF       ((VideoInterface_TypeDef *)VIDEOIF_BASE)
 #define PADREADER     ((PadReader_TypeDef *)PADREADER_BASE)
 #define OSDRAM        ((OSDRAM_TypeDef *)OSDRAM_BASE)
-#define IFRAM         ((IFRAM_TypeDef *)IFRAM_BASE)
 #define SPICAP        ((SPICAP_TypeDef *)SPICAP_BASE)
 #define IRRX          ((IRRX_TypeDef *)IRRX_BASE)
 

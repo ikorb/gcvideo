@@ -325,6 +325,9 @@ package component_defs is
       PadData         : in  std_logic;
       IRReceiver      : in  std_logic;
       IRButton        : in  std_logic;
+      I2S_BClock      : in  std_logic;
+      I2S_LRClock     : in  std_logic;
+      I2S_Data        : in  std_logic;
       SPI_MOSI        : out std_logic;
       SPI_MISO        : in  std_logic;
       SPI_SCK         : out std_logic;
