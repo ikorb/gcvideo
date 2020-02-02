@@ -581,6 +581,8 @@ void run_mainloop(void) {
     if (bad_main_id) {
       osd_putsat(3, 3, "!!! Updater hardware ID is invalid !!!");
       osd_putsat(3, 4, "--> YOU must choose the correct ID <--");
+    } else {
+      osd_putsat(30, 3, "v" VERSION);
     }
 
     osd_gotoxy(3, 5);
