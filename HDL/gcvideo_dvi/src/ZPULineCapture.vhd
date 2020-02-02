@@ -61,8 +61,11 @@ architecture Behavioral of ZPULineCapture is
   signal addr_capture : natural range 0 to 1023 := 0;
   signal data_capture : std_logic_vector(15 downto 0);
   signal selected_page: std_logic_vector(7 downto 0);
+  signal use_marker   : boolean;
 
   signal prev_blanking: boolean;
+  signal prev_vsync   : boolean;
+  signal current_line : VerticalLines;
 
 begin
 
@@ -102,6 +105,9 @@ begin
           if ZPUBusIn.mem_addr(11 downto 2) = "11" & x"ff" then
             -- last word is page select
             selected_page <= ZPUBusIn.mem_write(7 downto 0);
+
+            -- page 0 is markerless capture
+            use_marker <= (ZPUBusIn.mem_write(7 downto 0) /= x"00");
           end if;
 
         elsif capture_state = STATE_IDLE then
@@ -121,6 +127,14 @@ begin
       -- line capture
       if PixelClockEnable then
         prev_blanking <= VideoIn.Blanking;
+        prev_vsync    <= VideoIn.VSync;
+
+        if prev_vsync and not VideoIn.VSync then
+          current_line <= 0;
+        elsif not prev_blanking and VideoIn.Blanking then
+          -- increment at end of line
+          current_line <= current_line + 1;
+        end if;
 
         case capture_state is
           when STATE_IDLE =>
@@ -128,16 +142,19 @@ begin
             null;
 
           when STATE_WAIT =>
-            if prev_blanking and not VideoIn.Blanking and
-              VideoIn.PixelY = x"55" and VideoIn.PixelCbCr = x"aa" then
-              -- at start of line, marker found
-              capture_state <= STATE_SYNCFOUND;
-              addr_capture  <= 0;
+            if prev_blanking and not VideoIn.Blanking then
+              -- at start of line
+              if not use_marker or (VideoIn.PixelY = x"55" and VideoIn.PixelCbCr = x"aa") then
+                -- marker found (or markerless capture)
+                capture_state <= STATE_SYNCFOUND;
+                addr_capture  <= 0;
+              end if;
             end if;
 
           when STATE_SYNCFOUND =>
-            if lines_to_capture(to_integer(VideoIn.PixelY)) = '1' and
-              std_logic_vector(VideoIn.PixelCbCr) = selected_page then
+            if (use_marker and lines_to_capture(to_integer(VideoIn.PixelY)) = '1' and
+                std_logic_vector(VideoIn.PixelCbCr) = selected_page) or
+               (not use_marker and lines_to_capture(current_line) = '1') then
               -- line is wanted, start capturing from this pixel
               capture_state <= STATE_CAPTURE;
               addr_capture  <= 0;
