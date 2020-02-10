@@ -144,9 +144,9 @@ begin
     PipeClock   => pipe_clock,
     DAC_RGBMode => dac_rgbmode,
     SPDIF_Out   => SPDIF_Out,
-    DAC_Red     => out_red,
-    DAC_Green   => out_green,
-    DAC_Blue    => out_blue,
+    DAC_Red     => DAC_Red,
+    DAC_Green   => DAC_Green,
+    DAC_Blue    => DAC_Blue,
     DAC_SyncN   => DAC_SyncN,
     DAC_Clock   => DAC_Clock,
     CSync_out   => CSync_out,
@@ -172,20 +172,6 @@ begin
   -- GCDual cable detect is actually INIT_B, keep high
   cdetect_gc: if TargetConsole = "GC" generate
     CableDetect <= '1';
-  end generate;
-
-  -- Wii uses a weird RGB assignment on its AV port
-  dac_wii: if TargetConsole = "WII" generate
-    -- swap in RGB mode because Y needs the sync-capable green pin of the DAC
-    DAC_Red   <= out_blue  when dac_rgbmode else out_red;
-    DAC_Green <= out_red   when dac_rgbmode else out_green;
-    DAC_Blue  <= out_green when dac_rgbmode else out_blue;
-  end generate;
-
-  dac_gc: if TargetConsole = "GC" generate
-    DAC_Red   <= out_red;
-    DAC_Green <= out_green;
-    DAC_Blue  <= out_blue;
   end generate;
 
   -- heartbeat on LED
