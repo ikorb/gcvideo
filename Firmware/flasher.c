@@ -114,6 +114,18 @@ static menu_t firmware_menu = {
 };
 
 
+static void convert_signature(char* destbuffer, const uint32_t hwid) {
+  memcpy(destbuffer, &hwid, 4);
+  destbuffer[4] = 0;
+
+  /* restrict chars to printable ASCII */
+  for (unsigned int i = 0; i < 4; i++) {
+    if (destbuffer[i] < 32 || destbuffer[i] > 126) {
+      destbuffer[i] = '?';
+    }
+  }
+}
+
 static void boot_main(void) {
   osd_clrscr();
 
@@ -293,20 +305,11 @@ static bool choose_update(unsigned int fwcount) {
 
   for (unsigned int i = 1; i <= fwcount; i++) {
     uint32_t signature_word = getu32();
-    char signature_chars[4];
-
-    /* restrict chars to printable ASCII */
-    memcpy(signature_chars, &signature_word, sizeof(signature_chars));
-    for (unsigned int j = 0; j < sizeof(signature_chars); j++) {
-      if (signature_chars[j] < 32 || signature_chars[j] > 126) {
-        signature_chars[j] = '?';
-      }
-    }
+    char signature_chars[5];
+    convert_signature(signature_chars, target_hardware_id);
 
     int len = snprintf(stringptr, sizeof(decrunchbuffer) - (stringptr - decrunchbuffer),
-                       "%08x (%c%c%c%c)", signature_word,
-                       signature_chars[0], signature_chars[1],
-                       signature_chars[2], signature_chars[3]);
+                       "%08x (%s)", signature_word, signature_chars);
 
     if (mainheader.hardware_id == signature_word) {
       initial_item = i;
@@ -340,6 +343,8 @@ static bool choose_update(unsigned int fwcount) {
 }
 
 static bool look_for_update(void) {
+  bool notice_showing = false;
+
   while (1) {
     /* grab info line */
     set_capture_range(INFO_LINE, INFO_LINE);
@@ -355,6 +360,7 @@ static bool look_for_update(void) {
       osd_gotoxy(3, 7);
       osd_clearline(7, 0);
       osd_puts("Unable to parse firmware list.");
+      notice_showing = false;
       continue;
     }
 
@@ -374,9 +380,16 @@ static bool look_for_update(void) {
         return true;
       }
 
-      osd_gotoxy(3, 7);
-      osd_clearline(7, 0);
-      osd_puts("No compatible firmware found.");
+      if (!notice_showing) {
+        char signature_chars[5];
+        convert_signature(signature_chars, target_hardware_id);
+
+        osd_gotoxy(3, 7);
+        osd_clearline(7, 0);
+        printf("No firmware for \"%s\" found.", signature_chars);
+
+        notice_showing = true;
+      }
     } else {
       return choose_update(fwcount);
     }
