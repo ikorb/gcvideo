@@ -26,8 +26,15 @@ fi
                          build/main-dual-wii/toplevel_dual.tagmain \
                          build/main-gcplug/toplevel_shuriken.tagmain
 
-./scripts/buildupdate.pl $UPDATER_WII binaries/updater-$VERSION-wii.dol \
+HBCDIR=build/GCVideo-Updater-$VERSION
+mkdir $HBCDIR
+
+./scripts/buildupdate.pl $UPDATER_WII $HBCDIR/boot.dol \
                          build/main-p2xh-wii/toplevel_p2xh.tagmain \
                          build/main-shuriken-wii/toplevel_shuriken.tagmain \
                          build/main-shuriken-v3-wii/toplevel_shuriken.tagmain \
                          build/main-dual-wii/toplevel_dual.tagmain
+
+./scripts/xmlgen.pl $VERSION $HBCDIR/meta.xml
+cd build
+zip -9Xr ../binaries/updater-$VERSION-wii.zip GCVideo-Updater-$VERSION
