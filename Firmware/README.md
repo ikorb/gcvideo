@@ -255,7 +255,7 @@ non-standard video modes.
 
 ### OSD settings ###
 
-![OSD settings menu](doc/osd.png)(FIXME: Needs update)
+![OSD settings menu](doc/osd.png)
 
 The OSD settings menu has an option to disable the mode popup that shows for
 five secends whenever the console changes its output resolution as well
@@ -505,7 +505,7 @@ It is accessed by choosing the "Update firmware..." option in the About menu
 and hitting the R trigger on a Gamepad or Right on an IR remote. It is
 currently only usable if you get a picture at all.
 
-(TODO: Add screenshot)
+![Diagnostics mode](doc/diagmode.png)
 
 The diagnostics mode checks if all eight video lines are working and if there is
 activity on the three audio lines. The video line check needs a special test
