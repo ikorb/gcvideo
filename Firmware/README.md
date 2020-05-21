@@ -509,8 +509,9 @@ activity on the three audio lines. The video line check needs a special test
 pattern on screen which is integrated in the updater.dol starting from
 GCVideo-DVI version 3.0d, a specific color gradient at the top of the screen.
 The audio line check just needs any audio playing, for example the background
-music of the console's main menu screen. The updater.dol currently does not
-provide any audio.
+music of the console's main menu screen. The updater.dol plays an
+extremely quiet white noise starting from GCVideo release 3.0e
+(updater version 1.2) to make sure this signal can be tested.
 
 When the diagnostics mode has detected the test pattern, it will confirm by
 displaying "Test pattern detected". If everything is correct, the three lines

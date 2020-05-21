@@ -32,8 +32,10 @@
 #include <malloc.h>
 #include <stdint.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <ogcsys.h>
 #include <gccore.h>
+#include <asndlib.h>
 #include <string.h>
 
 #ifdef TARGET_WII
@@ -205,6 +207,25 @@ static void display_updatedata(void) {
   }
 }
 
+static uint16_t __attribute__((aligned(32))) soundbuf[48000];
+
+static void sound_callback(s32 voice) {
+  ASND_AddVoice(voice, soundbuf, sizeof(soundbuf));
+}
+
+static void init_sound(void) {
+  // generate very faint white noise so there is traffic on ADATA
+  for (int i = 0; i < sizeof(soundbuf) / sizeof(soundbuf[0]); i++) {
+    soundbuf[i] = (rand() & 1) ? 1 : -1;
+  }
+
+  ASND_Init(INIT_RATE_48000);
+  ASND_Pause(0);
+  int noiseVoice = ASND_GetFirstUnusedVoice();
+  ASND_SetVoice(noiseVoice, VOICE_MONO_16BIT_BE, 48000, 0, soundbuf,
+                sizeof(soundbuf), MAX_VOLUME, MAX_VOLUME, sound_callback);
+}
+
 int main(int argc, char **argv) {
   VIDEO_Init();
   init_console();
@@ -230,7 +251,9 @@ int main(int argc, char **argv) {
   if (updatedata[0] != signature[0] || updatedata[1] != signature[1]) {
     show_failure();
   } else {
+    init_sound();
     display_updatedata();
+    ASND_End();
   }
 
   printf("\e[2J\n\n     Exiting...");

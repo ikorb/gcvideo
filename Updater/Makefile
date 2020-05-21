@@ -28,16 +28,16 @@
 # Makefile: program construction rules
 #
 
-VERSION := 1.1
+VERSION := 1.2
 
 ifeq ($(TARGET),gc)
   MACHINE := cube
   TARGET_CFLAGS := -mogc -DTARGET_GC
-  TARGET_LIBS := -logc
+  TARGET_LIBS := -lasnd -logc
 else ifeq ($(TARGET),wii)
   MACHINE := wii
   TARGET_CFLAGS := -mrvl -DTARGET_WII
-  TARGET_LIBS := -lwiiuse -lbte -logc
+  TARGET_LIBS := -lwiiuse -lbte -lasnd -logc
 else
 dummy:
 	@echo "TARGET variable not specified"
