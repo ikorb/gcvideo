@@ -76,13 +76,13 @@ else ifeq ($(TARGET),shuriken-v3-wii)
 else ifeq ($(TARGET),dual-gc)
   # GCDU
   HWID     := 0x47434455
-  TOPLEVEL := toplevel_dual
+  TOPLEVEL := toplevel_gcdual
   BOARD    := dualgc
   CONSOLE  := GC
 else ifeq ($(TARGET),dual-wii)
   # WIID
   HWID     := 0x57494944
-  TOPLEVEL := toplevel_dual
+  TOPLEVEL := toplevel_wiidual
   BOARD    := dualwii
   CONSOLE  := WII
 else ifeq ($(TARGET),gcplug)

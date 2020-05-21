@@ -69,13 +69,12 @@ NET "DAC_Blue[7]"  LOC = P13 | IOSTANDARD = LVCMOS33;
 NET "DAC_Clock"    LOC = P12 | IOSTANDARD = LVCMOS33;
 NET "DAC_SyncN"    LOC = P40 | IOSTANDARD = LVCMOS33;
 NET "CSync_out"    LOC = P19 | IOSTANDARD = LVCMOS33;
-NET "HSync_out"    LOC = P15 | IOSTANDARD = LVCMOS33;
-NET "VSync_out"    LOC = P10 | IOSTANDARD = LVCMOS33;
 
 # Gamecube digital video port
 NET "CableDetect"  LOC = P20;
 NET "CSel"         LOC = P3;
-NET "VData[0]"     LOC = P21;
+NET "VData0New"    LOC = P21 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | IOSTANDARD = LVCMOS18 | PULLDOWN = TRUE;
+NET "VData0Old"    LOC = P10 | OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW | IOSTANDARD = LVCMOS18 | PULLDOWN = TRUE;
 NET "VData[1]"     LOC = P9;
 NET "VData[2]"     LOC = P7;
 NET "VData[3]"     LOC = P6;
@@ -100,6 +99,3 @@ NET "SPDIF_Out"   LOC = P70;
 
 # LED
 NET "LED"         LOC = P65 | IOSTANDARD = LVCMOS33;
-
-# analog mode input
-NET "ForceYPbPr"  LOC = P16 | IOSTANDARD = LVCMOS33 | PULLUP = TRUE;

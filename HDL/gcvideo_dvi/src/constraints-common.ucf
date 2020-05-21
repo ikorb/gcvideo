@@ -41,7 +41,9 @@ NET "DVI_Blue[1]"  IOSTANDARD = TMDS_33;
 # Gamecube/Wii digital video port
 NET "CableDetect" IOSTANDARD = LVCMOS33;
 NET "CSel"        OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+#ifndef dual-wii
 NET "VData[0]"    OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
+#endif
 NET "VData[1]"    OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
 NET "VData[2]"    OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;
 NET "VData[3]"    OFFSET = IN 5 ns VALID 12 ns BEFORE "VClockN" LOW;

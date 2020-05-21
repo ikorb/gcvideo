@@ -255,7 +255,7 @@ build/%.xst: build/%.prj scripts/template.xst $(BUILDDIR)/$(FIRMWARE_MIF)
 
 $(UCF): src/constraints-common.ucf src/constraints-$(BOARD).ucf src/constraints-$(CONSOLE_LC).ucf $(CONSTRAINTS_MODULE)
 	$(E) "---- GENUCF   $<"
-	$(Q)cat $^ > $@
+	$(Q)scripts/minipp.pl -D$(TARGET) $^ > $@
 
 $(BUILDDIR)/$(FIRMWARE_MIF):
 	$(MAKE) -C ../../Firmware TARGET=$(FIRMWARE) VERSION=$(VERSION) FEATURE_FLAGS="$(FWFLAGS)" MODULE=$(MODULE) COPYDIR=$(BUILDDIR)

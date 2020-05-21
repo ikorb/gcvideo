@@ -31,7 +31,9 @@
 # Gamecube digital video port
 NET "CableDetect" PULLDOWN = TRUE;
 NET "CSel"        IOSTANDARD = LVCMOS18 | PULLUP = FALSE;
+#ifndef dual-wii
 NET "VData[0]"    IOSTANDARD = LVCMOS18 | PULLUP = FALSE;
+#endif
 NET "VData[1]"    IOSTANDARD = LVCMOS18 | PULLUP = FALSE;
 NET "VData[2]"    IOSTANDARD = LVCMOS18 | PULLUP = FALSE;
 NET "VData[3]"    IOSTANDARD = LVCMOS18 | PULLUP = FALSE;

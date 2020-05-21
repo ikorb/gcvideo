@@ -24,7 +24,7 @@
 -- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 -- THE POSSIBILITY OF SUCH DAMAGE.
 --
--- toplevel_dual.vhd: top level module for the GCDual board
+-- toplevel_gcdual.vhd: top level module for the GCDual board
 --
 ----------------------------------------------------------------------------------
 
@@ -38,9 +38,9 @@ use UNISIM.VComponents.all;
 use work.Component_Defs.all;
 use work.video_defs.all;
 
-entity toplevel_dual is
+entity toplevel_gcdual is
   generic (
-    TargetConsole: string; -- "GC" or "WII"
+    TargetConsole: string; -- "GC"
     SwapRed      : string := "NO";
     SwapGreen    : string := "NO";
     SwapBlue     : string := "NO";
@@ -99,9 +99,9 @@ entity toplevel_dual is
     -- analog mode fallback select
     ForceYPbPr : in    std_logic
   );
-end toplevel_dual;
+end toplevel_gcdual;
 
-architecture Behavioral of toplevel_dual is
+architecture Behavioral of toplevel_gcdual is
   signal pipe_clock     : std_logic;
   signal video_hsync    : std_logic;
   signal video_vsync    : std_logic;
@@ -164,15 +164,8 @@ begin
   VSync_out <= video_vsync;
   HSync_out <= video_hsync;
 
-  -- cable detect output only exists on WiiDual
-  cdetect_wii: if TargetConsole = "WII" generate
-    CableDetect <= cable_detect;
-  end generate;
-
   -- GCDual cable detect is actually INIT_B, keep high
-  cdetect_gc: if TargetConsole = "GC" generate
-    CableDetect <= '1';
-  end generate;
+  CableDetect <= '1';
 
   -- heartbeat on LED
   Inst_Heartbeat: LED_Heartbeat port map (
