@@ -54,6 +54,26 @@ static uint32_t paddata[3];
 volatile tick_t   pad_last_change;
 volatile uint32_t pad_buttons;
 
+void pad_set(uint32_t which) {
+  IRQController->TempDisable = IRQ_TempDisable;
+  pad_buttons |= which;
+  IRQController->TempDisable = 0;
+}
+
+void pad_clear(uint32_t which) {
+  IRQController->TempDisable = IRQ_TempDisable;
+  pad_buttons &= ~which;
+  IRQController->TempDisable = 0;
+}
+
+void pad_set_irq(uint32_t which) {
+  pad_buttons |= which;
+}
+
+void pad_clear_irq(uint32_t which) {
+  pad_buttons &= ~which;
+}
+
 void pad_wait_for_release(void) {
   /* wait until all controller buttons are released */
   while (pad_buttons & PAD_ALL_GC)

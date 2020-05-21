@@ -77,26 +77,12 @@ extern volatile uint32_t pad_buttons;
 extern volatile tick_t   pad_last_change;
 
 /* these two functions shouldn't be used in an interrupt handler! */
-static inline void pad_set(uint32_t which) {
-  IRQController->TempDisable = IRQ_TempDisable;
-  pad_buttons |= which;
-  IRQController->TempDisable = 0;
-}
-
-static inline void pad_clear(uint32_t which) {
-  IRQController->TempDisable = IRQ_TempDisable;
-  pad_buttons &= ~which;
-  IRQController->TempDisable = 0;
-}
+void pad_set(uint32_t which);
+void pad_clear(uint32_t which);
 
 /* same functions without disabling IRQ for atomicity */
-static inline void pad_set_irq(uint32_t which) {
-  pad_buttons |= which;
-}
-
-static inline void pad_clear_irq(uint32_t which) {
-  pad_buttons &= ~which;
-}
+void pad_set_irq(uint32_t which);
+void pad_clear_irq(uint32_t which);
 
 void pad_wait_for_release(void);
 void pad_handler(void);
