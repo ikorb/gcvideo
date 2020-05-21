@@ -43,6 +43,7 @@ enum {
   MENUITEM_ALPHA,
   MENUITEM_TINTCB,
   MENUITEM_TINTCR,
+  MENUITEM_IRCONFIG,
   MENUITEM_EXIT
 };
 
@@ -62,23 +63,39 @@ static valueitem_t value_tint_cr = { VALTYPE_SBYTE_99, true,
 /* --- menu definition --- */
 
 static menuitem_t osdset_items[] = {
-  { "Mode popup",      &value_resbox,   1, 0 }, // 0
-  { "BG Transparency", &value_alpha,    2, 0 }, // 1
-  { "BG Tint Blue",    &value_tint_cb,  3, 0 }, // 2
-  { "BG Tint Red",     &value_tint_cr,  4, 0 }, // 3
-  { "Exit",            NULL,            6, 0 }, // 4
+  { "Mode popup",       &value_resbox,   1, 0 }, // 0
+  { "BG Transparency",  &value_alpha,    2, 0 }, // 1
+  { "BG Tint Blue",     &value_tint_cb,  3, 0 }, // 2
+  { "BG Tint Red",      &value_tint_cr,  4, 0 }, // 3
+  { "IR key config...", NULL,            5, 0 }, // 4
+  { "Exit",             NULL,            7, 0 }, // 5
 };
 
 static menu_t osdset_menu = {
   11, 11,
-  23, 8,
+  23, 9,
   NULL,
   sizeof(osdset_items) / sizeof(*osdset_items),
   osdset_items
 };
 
 void screen_osdsettings(void) {
-  osd_clrscr();
-  menu_draw(&osdset_menu);
-  menu_exec(&osdset_menu, 0);
+  int current_item = 0;
+
+  while (1) {
+    osd_clrscr();
+    menu_draw(&osdset_menu);
+    current_item = menu_exec(&osdset_menu, current_item);
+
+    switch (current_item) {
+      case MENU_ABORT:
+      case MENUITEM_EXIT:
+      default:
+        return;
+
+      case MENUITEM_IRCONFIG:
+        screen_irconfig(true);
+        break;
+    }
+  }
 }

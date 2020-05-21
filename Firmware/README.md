@@ -75,7 +75,7 @@ a Gamecube controller. The other two are "Enter" and "Back", which are
 used to enter or leave submenus, similar to the X and Y buttons when
 a Gamecube controller is used for navigating the OSD.
 
-Since there are no interferences between the Ir remote and a game
+Since there are no interferences between the IR remote and a game
 running on the system, calling up the main menu with an IR remote just
 needs a press on the "Enter" button instead of a complicated button
 combination. You can also hold down the IR button when you enter the
@@ -88,7 +88,8 @@ button assignments to their defaults.
 Since I don't know what remote you want to use with GCVideo, it can be
 configured to accept any IR remote buttons as long as the remote uses
 the so-called NEC protocol. To enter the button configuration screen,
-hold down the IR button until the configuration screen appears.
+hold down the IR button until the configuration screen appears or select
+the "IR key config..." option in the OSD settings submenu.
 
 ![IR config menu](doc/irconfig.png)
 
@@ -254,7 +255,7 @@ non-standard video modes.
 
 ### OSD settings ###
 
-![OSD settings menu](doc/osd.png)
+![OSD settings menu](doc/osd.png)(FIXME: Needs update)
 
 The OSD settings menu has an option to disable the mode popup that shows for
 five secends whenever the console changes its output resolution as well
@@ -274,6 +275,8 @@ color. The defaults are 27 and -8, which result in a dark blue background.
 As usual, the settings chosen in this menu can be stored as power-up default
 using the "Store settings" entry on the main menu.
 
+Additionally, you can enter the IR button configuration screen from this
+menu by selecting the "IR key config..." entry.
 
 ### Output settings ###
 
