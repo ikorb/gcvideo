@@ -33,12 +33,16 @@ use IEEE.STD_LOGIC_1164.ALL;
 
 library UNISIM;
 use UNISIM.VComponents.all;
+use work.component_defs.all;
 
 
 entity ClockGen is
+  generic (
+    TargetConsole: string  -- "GC" or "WII"
+  );
   port (
     ClockIn   : in  std_logic;
-    Reset     : in  std_logic;
+    BClock    : in  std_logic;
     Clock54M  : out std_logic;
     ClockAudio: out std_logic;
     DVIClockP : out std_logic;
@@ -48,7 +52,7 @@ entity ClockGen is
 end ClockGen;
 
 architecture Behavioral of ClockGen is
-	-- Input clock buffering
+  -- Input clock buffering
   signal ClockIn_internal     : std_logic;
   signal ClockIn_internal_neg : std_logic;
 
@@ -62,12 +66,8 @@ architecture Behavioral of ClockGen is
   signal vdcm_clkfx180    : std_logic;
   signal vdcm_clkfbout    : std_logic;
   signal vdcm_locked      : std_logic;
-  signal vdcm_locked_sync : std_logic_vector(2 downto 0) := (others => '0');
-  signal vdcm_reset       : std_logic;
+  signal vdcm_reset       : std_logic := '1';
   signal vdcm_status      : std_logic_vector(7 downto 0);
-  signal vdcm_status_sync1: std_logic_vector(7 downto 0);
-  signal vdcm_status_sync2: std_logic_vector(7 downto 0);
-  signal vdcm_reset_count : natural range 0 to 7 := 0;
   signal clock_54_internal: std_logic;
 
   signal adcm_clkfb          : std_logic;
@@ -75,25 +75,39 @@ architecture Behavioral of ClockGen is
   signal adcm_clkfx          : std_logic;
   signal adcm_locked         : std_logic;
   signal adcm_locked_sync    : std_logic_vector(2 downto 0) := (others => '0');
-  signal adcm_reset          : std_logic;
+  signal adcm_reset          : std_logic := '1';
   signal adcm_status         : std_logic_vector(7 downto 0);
   signal adcm_status_sync1   : std_logic_vector(7 downto 0);
   signal adcm_status_sync2   : std_logic_vector(7 downto 0);
   signal adcm_reset_count    : natural range 0 to 7 := 0;
   signal clock_audio_internal: std_logic;
 
-  signal pdcm_clkfb       : std_logic;
-  signal pdcm_clk2x       : std_logic;
-  signal pdcm_clkfx       : std_logic;
-  signal pdcm_locked      : std_logic;
-  signal pdcm_locked_sync : std_logic_vector(2 downto 0) := (others => '0');
-  signal pdcm_status      : std_logic_vector(7 downto 0);
-  signal pdcm_status_sync1: std_logic_vector(7 downto 0);
-  signal pdcm_status_sync2: std_logic_vector(7 downto 0);
-  signal pdcm_reset       : std_logic;
+  -- clock reset logic
+  type reset_state_t is (WAIT_FOR_BCLOCK, RESET_RELEASE, RUNNING);
+
+  signal reset_state      : reset_state_t := WAIT_FOR_BCLOCK;
+
+  signal vdcm_locked_sync : std_logic_vector(2 downto 0) := (others => '0');
+  signal vdcm_status_sync1: std_logic_vector(7 downto 0);
+  signal vdcm_status_sync2: std_logic_vector(7 downto 0);
+
+  signal bclock_deglitched: std_logic;
+  signal prev_bclock      : std_logic;
+  signal reset_count      : natural range 0 to 7 := 7;
 
 begin
   Locked <= vdcm_locked; --and adcm_locked;
+
+  Deglitch_BClock: Deglitcher GENERIC MAP (
+    SyncBits    => 3,
+    CompareBits => 2
+  ) PORT MAP (
+    Clock       => ClockIn_internal,
+    ClockEnable => true,
+    Input       => BClock,
+    Output      => bclock_deglitched
+  );
+
 
   -- Input buffering
   --------------------------------------
@@ -103,37 +117,6 @@ begin
     I => ClockIn);
 
   ClockIn_internal <= not ClockIn_internal_neg;
-
-  -- Clocking primitive 0 - input filtering
-  -----------------------------------------
-  -- basically a 54MHz passthrough using
-  -- the DFS, an attempt to clean glitches
-
-  primary_dcm: DCM_SP
-    generic map (
-      CLKIN_DIVIDE_BY_2  => true,
-      CLKFX_DIVIDE       => 1,
-      CLKFX_MULTIPLY     => 2,
-      CLKOUT_PHASE_SHIFT => "NONE",
-      CLK_FEEDBACK       => "2X",
-      DESKEW_ADJUST      => "SYSTEM_SYNCHRONOUS",
-      PHASE_SHIFT        => 0,
-      STARTUP_WAIT       => TRUE
-    ) port map (
-      CLKIN    => ClockIn_internal,
-      CLKFB    => pdcm_clkfb,
-      CLK2X    => pdcm_clk2x,
-      CLKFX    => pdcm_clkfx,
-      PSCLK    => '0',
-      PSEN     => '0',
-      PSINCDEC => '0',
-      LOCKED   => pdcm_locked,
-      STATUS   => pdcm_status,
-      RST      => '0',
-      DSSEN    => '0'
-    );
-
-  pdcm_clkfb <= pdcm_clk2x;
 
   -- Clocking primitive 1 - System+Video
   --------------------------------------
@@ -148,10 +131,10 @@ begin
     CLK_FEEDBACK          => "1X",
     DESKEW_ADJUST         => "SYSTEM_SYNCHRONOUS",
     PHASE_SHIFT           => 0,
-    STARTUP_WAIT          => TRUE)
+    STARTUP_WAIT          => FALSE)
   port map
    -- Input clock
-   (CLKIN                 => pdcm_clkfx,
+   (CLKIN                 => ClockIn_internal,
     CLKFB                 => vdcm_clkfb,
     -- Output clocks
     CLK0                  => vdcm_clk0,
@@ -178,31 +161,95 @@ begin
   -- feedback
   vdcm_clkfb <= clock_54_internal;
 
-  -- auto-reset on clock trouble
-  process(ClockIn_internal)
-  begin
-    if rising_edge(ClockIn_internal) then
-      -- sync DCM signals
-      vdcm_locked_sync  <= vdcm_locked_sync(1 downto 0) & vdcm_locked;
-      vdcm_status_sync2 <= vdcm_status_sync1;
-      vdcm_status_sync1 <= vdcm_status;
 
-      -- ensure reset is held for a few clocks
-      vdcm_reset <= '0';
-      if vdcm_reset_count > 0 then
-        vdcm_reset_count <= vdcm_reset_count - 1;
-        vdcm_reset       <= '1';
-      else
-        -- check failure indicators
-        if Reset = '1' or
-           vdcm_status_sync2(1) = '1' or -- CLKIN not toggling
-           vdcm_status_sync2(2) = '1' or -- CLKFX not toggling
-          (vdcm_locked_sync(2) = '1' and vdcm_locked_sync(1) = '0') then
-          vdcm_reset_count <= 7;
-        end if;
+  wii_startdelay: if TargetConsole = "WII" generate
+    -- hold DCMs in reset until Wii clock stabilizes
+    --
+    -- Wii clock switches to 27MHz for part of the boot process,
+    -- this procedure delays GCVideo boot until the input is back to 54MHz.
+    process(ClockIn_internal)
+    begin
+      if rising_edge(ClockIn_internal) then
+        -- sync DCM signals
+        vdcm_locked_sync  <= vdcm_locked_sync(1 downto 0) & vdcm_locked;
+        vdcm_status_sync2 <= vdcm_status_sync1;
+        vdcm_status_sync1 <= vdcm_status;
+
+        prev_bclock <= bclock_deglitched;
+
+        case reset_state is
+          when WAIT_FOR_BCLOCK =>
+            -- wait for a few edges on bclock before starting to release reset
+            if bclock_deglitched /= prev_bclock then
+              if reset_count = 0 then
+                reset_state <= RESET_RELEASE;
+                reset_count <= 7;
+              else
+                reset_count <= reset_count - 1;
+              end if;
+            end if;
+
+          when RESET_RELEASE =>
+            -- hold reset for seven more input clocks
+            if reset_count = 0 then
+              reset_state <= RUNNING;
+            else
+              reset_count <= reset_count - 1;
+            end if;
+
+          when RUNNING =>
+            if vdcm_status_sync2(1) = '1' or -- CLKIN not toggling
+               vdcm_status_sync2(2) = '1' or -- CLKFX not toggling
+              (vdcm_locked_sync(2) = '1' and vdcm_locked_sync(1) = '0') then -- DCM lock lost
+              reset_state <= WAIT_FOR_BCLOCK;
+              reset_count <= 7;
+              vdcm_reset  <= '1';
+            else
+              vdcm_reset  <= '0';
+            end if;
+
+        end case;
       end if;
-    end if;
-  end process;
+    end process;
+
+  end generate;
+
+  gc_lockreset: if TargetConsole = "GC" generate
+    -- Gamecube turns on 54MHz and stays there
+    process(ClockIn_internal)
+    begin
+      if rising_edge(ClockIn_internal) then
+        -- sync DCM signals
+        vdcm_locked_sync  <= vdcm_locked_sync(1 downto 0) & vdcm_locked;
+        vdcm_status_sync2 <= vdcm_status_sync1;
+        vdcm_status_sync1 <= vdcm_status;
+
+        case reset_state is
+          when WAIT_FOR_BCLOCK | RESET_RELEASE =>
+            -- hold reset for seven more input clocks
+            if reset_count = 0 then
+              reset_state <= RUNNING;
+            else
+              reset_count <= reset_count - 1;
+            end if;
+
+          when RUNNING =>
+            if vdcm_status_sync2(1) = '1' or -- CLKIN not toggling
+               vdcm_status_sync2(2) = '1' or -- CLKFX not toggling
+              (vdcm_locked_sync(2) = '1' and vdcm_locked_sync(1) = '0') then -- DCM lock lost
+              reset_state <= WAIT_FOR_BCLOCK;
+              reset_count <= 7;
+              vdcm_reset  <= '1';
+            else
+              vdcm_reset  <= '0';
+            end if;
+
+        end case;
+      end if;
+    end process;
+
+  end generate;
+
 
   -- Clocking primitive 2 - Audio
   --   needs a fast clock to keep the SPDIF
@@ -218,7 +265,7 @@ begin
     CLK_FEEDBACK          => "1X",
     DESKEW_ADJUST         => "SYSTEM_SYNCHRONOUS",
     PHASE_SHIFT           => 0,
-    STARTUP_WAIT          => TRUE)
+    STARTUP_WAIT          => FALSE)
   port map
    -- Input clock
    (CLKIN                 => ClockIn_internal,
@@ -241,7 +288,7 @@ begin
    -- Other control and status signals
     LOCKED                => adcm_locked,
     STATUS                => adcm_status,
-    RST                   => adcm_reset,
+    RST                   => adcm_reset or vdcm_reset,
    -- Unused pin, tie low
     DSSEN                 => '0');
 
@@ -249,7 +296,6 @@ begin
   adcm_clkfb <= adcm_clk0;
 
   -- auto-reset on clock trouble
-  -- (same as VDCM above)
   process(ClockIn_internal)
   begin
     if rising_edge(ClockIn_internal) then
@@ -265,8 +311,7 @@ begin
         adcm_reset       <= '1';
       else
         -- check failure indicators
-        if Reset = '1' or
-           adcm_status_sync2(1) = '1' or -- CLKIN not toggling
+        if adcm_status_sync2(1) = '1' or -- CLKIN not toggling
            adcm_status_sync2(2) = '1' or -- CLKFX not toggling
           (adcm_locked_sync(2) = '1' and adcm_locked_sync(1) = '0') then
           adcm_reset_count <= 7;

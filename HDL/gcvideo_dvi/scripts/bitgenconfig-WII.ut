@@ -3,7 +3,7 @@
 -g Binary:Yes
 -g CRC:Enable
 -g Reset_on_err:No
--g ConfigRate:1
+-g ConfigRate:17
 -g ProgPin:PullUp
 -g DonePin:PullUp
 -g TckPin:PullUp
@@ -15,7 +15,7 @@
 -g DONE_cycle:4
 -g GTS_cycle:5
 -g GWE_cycle:6
--g LCK_cycle:6
+-g LCK_cycle:NoWait
 -g Security:None
 -g DonePipe:Yes
 -g DriveDone:Yes

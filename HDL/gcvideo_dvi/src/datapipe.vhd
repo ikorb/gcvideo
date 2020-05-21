@@ -307,9 +307,11 @@ begin
 
   -- master clock generator
   Inst_ClockGen: ClockGen
-    port map (
+    generic map (
+      TargetConsole => TargetConsole
+    ) port map (
       ClockIn    => VClockN,
-      Reset      => '0',
+      BClock     => I2S_BClock,
       Clock54M   => Clock54M,
       ClockAudio => ClockAudio,
       DVIClockP  => DVIClockP,

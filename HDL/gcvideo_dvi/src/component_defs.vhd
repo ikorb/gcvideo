@@ -226,9 +226,12 @@ package component_defs is
   END COMPONENT;
 
   component ClockGen is
-    PORT (
+    generic (
+      TargetConsole: string  -- "GC" or "WII"
+    );
+    port (
       ClockIn   : in  std_logic;
-      Reset     : in  std_logic;
+      BClock    : in  std_logic;
       Clock54M  : out std_logic;
       ClockAudio: out std_logic;
       DVIClockP : out std_logic;
