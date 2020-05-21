@@ -1,3 +1,9 @@
+2020-05-21: GCVideo DVI version 3.0e
+- support another WiiDual board version
+- fix clock-related black screen on Wii
+- add menu entry for IR key config
+- package Wii updater with XML file for Homebrew Channel
+
 2020-02-02: GCVideo DVI version 3.0d
 - add GCPlug hardware configuration
 - add diagnostics mode in flasher
