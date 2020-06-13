@@ -404,16 +404,16 @@ standards-compliant. There is little reason to turn this off, it is here
 mostly for completeness reasons. If this option is off, the X/Y position
 options in the picture menu have no effect.
 
-"Regenerate CSync" is off by default and only relevant for hardware with an
-analog output. It determines if the CSync signal (either discrete or included
-in Y for YPbPr or G for RGsB) is passed through from the console while the
-linedoubler is off or if it is always regenerated from HSync and VSync.
+"Regenerate CSync" is off by default and only available on GCVideo hardware
+with an analog output. It determines if the CSync signal (either discrete or
+included in Y for YPbPr or G for RGsB) is passed through from the console while
+the linedoubler is off or if it is always regenerated from HSync and VSync.
 A regenerated signal does not have serration and equalization pulses, which
 may result in a distortion at the top of the picture. The X/Y position options
-in the picture menu may not have an effect on the analog output of this
+in the picture menu may not have an effect on the analog output if this
 option is set to off.
 
-"Digital color format" is only avaiable if "Enhanced DVI mode" is enabled
+"Digital color format" is only available if "Enhanced DVI mode" is enabled
 in the output settings menu. When it is available, the options are "RGB-F",
 "RGB-L", "YC444" and "YC422". The first two stand for full-range and
 limited-range RGB and have the same effect as the RGB limited range toggle

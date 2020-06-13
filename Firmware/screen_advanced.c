@@ -45,8 +45,14 @@ enum {
   MENUITEM_SPOOFINTERLACE,
   MENUITEM_COLORMODE,
   MENUITEM_SAMPLERATEHACK,
-  MENUITEM_EXIT
+  // _EXIT as #define because REGENCSYNC doesn't always exist
 };
+
+#ifdef OUTPUT_DUAL
+#  define MENUITEM_EXIT (MENUITEM_SAMPLERATEHACK + 1)
+#else
+#  define MENUITEM_EXIT (MENUITEM_SAMPLERATEHACK)
+#endif
 
 /* --- valueitems --- */
 
@@ -70,6 +76,7 @@ static valueitem_t value_sampleratehack = { VALTYPE_BOOL, true,
 
 static void advanced_draw(menu_t *menu);
 
+#ifdef OUTPUT_DUAL
 static menuitem_t advanced_items[] = {
   { "Chroma Interpolation", &value_chromainterpol, 1, 0 },
   { "Fix resolution",       &value_reblanking,     2, 0 },
@@ -88,6 +95,25 @@ static menu_t advanced_menu = {
   sizeof(advanced_items) / sizeof(*advanced_items),
   advanced_items
 };
+#else
+static menuitem_t advanced_items[] = {
+  { "Chroma Interpolation", &value_chromainterpol, 1, 0 },
+  { "Fix resolution",       &value_reblanking,     2, 0 },
+  { "Fix sync timing",      &value_resync,         3, 0 },
+  { "Digital color format", &value_colormode,      4, 0 },
+  { "Report 240p as 480i",  &value_spoofinterlace, 5, 0 },
+  { "Sample rate hack",     &value_sampleratehack, 6, 0 },
+  { "Exit",                 NULL,                  8, 0 },
+};
+
+static menu_t advanced_menu = {
+  7, 9,
+  31, 10,
+  advanced_draw,
+  sizeof(advanced_items) / sizeof(*advanced_items),
+  advanced_items
+};
+#endif
 
 static void advanced_draw(menu_t *menu) {
 #ifdef CONSOLE_WII
