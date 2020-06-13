@@ -109,6 +109,13 @@ static void advanced_draw(menu_t *menu) {
   } else {
     advanced_items[MENUITEM_COLORMODE].flags = MENU_FLAG_DISABLED;
   }
+
+  if ((video_settings_global & VIDEOIF_SET_COLORMODE_MASK) ==
+        VIDEOIF_SET_COLORMODE_Y422) {
+    advanced_items[MENUITEM_CHROMAINTERPOL].flags = MENU_FLAG_DISABLED;
+  } else {
+    advanced_items[MENUITEM_CHROMAINTERPOL].flags = 0;
+  }
 }
 
 void screen_advanced(void) {

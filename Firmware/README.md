@@ -385,9 +385,10 @@ with displays. On the other hand, changing some settings here may allow you to
 use a display that refuses to cooperate with the default settings, although
 possibly at reduced output quality.
 
-"Chroma Interpolation" is on by default. If you turn it off, the output image
-will have a slight color shift as well as stronger staircasing/pixelation
-on color transitions.
+"Chroma Interpolation" is on by default, and is only available when the
+"Digital color format" option is set to anything other than "YC422". If you turn
+it off, the output image will have a slight color shift as well as stronger
+staircasing/pixelation on color transitions.
 
 "Fix resolution" is on by default. When it is on, GCVideo applies black borders
 to the console's image to extend it to a standard-conforming resolution. Many
