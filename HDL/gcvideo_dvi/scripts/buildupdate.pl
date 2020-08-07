@@ -521,8 +521,11 @@ foreach my $screen (@screens) {
     $outdata .= $screen;
 }
 
+# pad injected data to multiple of 32 bytes
+$outdata .= "\x00" while length($outdata) % 32;
+
 # patch updater and write to file
-$updaterdol .= "\x00" while length($updaterdol) % 4; # pad to word size
+$updaterdol .= "\x00" while length($updaterdol) % 32; # pad DOL to multiple of 32 bytes
 
 substr($updaterdol, $targetsection * 4, 4) = pack("N", length($updaterdol));
 substr($updaterdol, $targetsection * 4 + 0x48, 4) = pack("N", TARGET_ADDR);
