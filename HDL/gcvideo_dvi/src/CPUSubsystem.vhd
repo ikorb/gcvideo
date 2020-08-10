@@ -55,10 +55,10 @@ entity CPUSubsystem is
     I2S_BClock       : in  std_logic;
     I2S_LRClock      : in  std_logic;
     I2S_Data         : in  std_logic;
-    SPI_MOSI         : out std_logic;
-    SPI_MISO         : in  std_logic;
+    SPI_COPI         : out std_logic;
+    SPI_CIPO         : in  std_logic;
     SPI_SCK          : out std_logic;
-    SPI_SSEL         : out std_logic;
+    SPI_SEL          : out std_logic;
     ScanlineRamAddr  : in  std_logic_vector(7 downto 0);
     ScanlineRamData  : out std_logic_vector(8 downto 0);
     InfoFrameRAMAddr : in  std_logic_vector(8 downto 0);
@@ -276,10 +276,10 @@ begin
     ZSelect   => SPISel,
     ZPUBusIn  => ZPUIn,
     ZPUBusOut => SPIOut,
-    MOSI      => SPI_MOSI,
-    MISO      => SPI_MISO,
+    SCOPI     => SPI_COPI,
+    SCIPO     => SPI_CIPO,
     SClock    => SPI_SCK,
-    SSelect   => SPI_SSEL
+    SSelect   => SPI_SEL
   );
 
   -- IR Receiver

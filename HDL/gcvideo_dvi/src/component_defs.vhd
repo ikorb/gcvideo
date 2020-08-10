@@ -331,10 +331,10 @@ package component_defs is
       I2S_BClock      : in  std_logic;
       I2S_LRClock     : in  std_logic;
       I2S_Data        : in  std_logic;
-      SPI_MOSI        : out std_logic;
-      SPI_MISO        : in  std_logic;
+      SPI_COPI        : out std_logic;
+      SPI_CIPO        : in  std_logic;
       SPI_SCK         : out std_logic;
-      SPI_SSEL        : out std_logic;
+      SPI_SEL         : out std_logic;
       ScanlineRamAddr : in  std_logic_vector(7 downto 0);
       ScanlineRamData : out std_logic_vector(8 downto 0);
       InfoFrameRAMAddr: in  std_logic_vector(8 downto 0);
@@ -420,10 +420,10 @@ package component_defs is
       IRButton   : in  std_logic;
 
       -- flash chip
-      Flash_MOSI : out std_logic;
-      Flash_MISO : in  std_logic;
+      Flash_COPI : out std_logic;
+      Flash_CIPO : in  std_logic;
       Flash_SCK  : out std_logic;
-      Flash_SSEL : out std_logic;
+      Flash_SEL  : out std_logic;
 
       -- exported internal signals
       ConsoleMode: out console_mode_t;

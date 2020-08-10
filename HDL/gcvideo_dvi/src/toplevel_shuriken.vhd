@@ -69,10 +69,10 @@ entity toplevel_shuriken is
     IRButton   : in  std_logic;
 
     -- flash chip
-    Flash_MOSI : out std_logic;
-    Flash_MISO : in  std_logic;
+    Flash_COPI : out std_logic;
+    Flash_CIPO : in  std_logic;
     Flash_SCK  : out std_logic;
-    Flash_SSEL : out std_logic;
+    Flash_SEL  : out std_logic;
 
     -- audio out
     SPDIF_Out  : out   std_logic;
@@ -111,10 +111,10 @@ begin
     PadData     => PadData,
     IRReceiver  => IRReceiver,
     IRButton    => IRButton,
-    Flash_MOSI  => Flash_MOSI,
-    Flash_MISO  => Flash_MISO,
+    Flash_COPI  => Flash_COPI,
+    Flash_CIPO  => Flash_CIPO,
     Flash_SCK   => Flash_SCK,
-    Flash_SSEL  => Flash_SSEL,
+    Flash_SEL   => Flash_SEL,
     SPDIF_Out   => SPDIF_Out,
     Pair_Red    => swap_red,
     Pair_Green  => swap_green,

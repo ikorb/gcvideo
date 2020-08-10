@@ -1,4 +1,4 @@
-The file `osdfont.ctm` is the "master" file from which osdfont.bin is
+The file `osdfont.ctm` is the "primary" file from which osdfont.bin is
 generated. It is a project file from
 [Char Pad](http://www.coder.pwp.blueyonder.co.uk/charpad.htm).
 

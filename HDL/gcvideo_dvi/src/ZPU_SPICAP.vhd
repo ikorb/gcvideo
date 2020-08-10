@@ -43,20 +43,20 @@ entity ZPU_SPI is
   );
   port (
     Clock    : in  std_logic;
-    ZSelect  : in  std_logic;
+    ZSelect  : in  std_logic; -- ZPU peripheral select
     ZPUBusIn : in  ZPUDeviceIn;
     ZPUBusOut: out ZPUDeviceOut;
-    MOSI     : out std_logic;
-    MISO     : in  std_logic;
-    SClock   : out std_logic;
-    SSelect  : out std_logic
+    SCOPI    : out std_logic; -- SPI controller out, peripheral in
+    SCIPO    : in  std_logic; -- SPI controller in, peripheral out
+    SClock   : out std_logic; -- SPI clock
+    SSelect  : out std_logic  -- SPI select
   );
 end ZPU_SPI;
 
 architecture Behavioral of ZPU_SPI is
   signal spi_clockcounter: natural range 0 to SPIClockDiv-1 := 0;
   signal spi_clock       : std_logic                        := '1';
-  signal spi_ssel        : std_logic                        := '1';
+  signal spi_sel         : std_logic                        := '1';
   signal spi_data        : std_logic_vector(7 downto 0)     := (others => '0');
   signal spi_state       : natural range 0 to 9             := 0;
   signal spi_active      : boolean                          := false;
@@ -69,7 +69,7 @@ architecture Behavioral of ZPU_SPI is
   signal icap_busy : std_logic;
 
 begin
-  SSelect <= spi_ssel;
+  SSelect <= spi_sel;
   SClock  <= spi_clock;
 
   ZPUBusOut.mem_busy <= '1' when spi_active else '0'; -- hold CPU while busy
@@ -90,8 +90,8 @@ begin
       if ZPUBusIn.Reset = '1' then
         spi_state        <= 0;
         spi_active       <= false;
-        MOSI             <= '1';
-        spi_ssel         <= '1';
+        SCOPI            <= '1';
+        spi_sel          <= '1';
         spi_clock        <= '1';
         spi_clockcounter <= 0;
         spi_data         <= (others => '0');
@@ -106,11 +106,11 @@ begin
                 spi_data         <= ZPUBusIn.mem_write(7 downto 0);
                 spi_state        <= 0;
                 spi_active       <= true;
-                MOSI             <= ZPUBusIn.mem_write(7); -- output first bit immediately
+                SCOPI            <= ZPUBusIn.mem_write(7); -- output first bit immediately
                 spi_clockcounter <= SPIClockDiv - 1;
 
               when "001" =>
-                spi_ssel  <= ZPUBusIn.mem_write(0);
+                spi_sel <= ZPUBusIn.mem_write(0);
 
               -- ICAP
               when "100" =>
@@ -136,7 +136,7 @@ begin
                 ZPUBusOut.mem_read(7 downto 0) <= spi_data;
 
               when "001" =>
-                ZPUBusOut.mem_read(0) <= spi_ssel;
+                ZPUBusOut.mem_read(0) <= spi_sel;
                 if spi_active then
                   ZPUBusOut.mem_read(1) <= '1';
                 end if;
@@ -170,17 +170,17 @@ begin
               else
                 -- at the rising edge, sample input
                 spi_clock <= '1';
-                spi_data  <= spi_data(6 downto 0) & MISO;
+                spi_data  <= spi_data(6 downto 0) & SCIPO;
                 spi_state <= spi_state + 1;
               end if;
             else
               -- at the falling edge, change output
               spi_clock <= '0';
               if spi_state = 8 then
-                MOSI      <= '1';
+                SCOPI     <= '1';
                 spi_state <= 9;
               else
-                MOSI <= spi_data(7);
+                SCOPI <= spi_data(7);
               end if;
             end if;
           end if;

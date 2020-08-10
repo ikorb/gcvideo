@@ -52,9 +52,9 @@
 
 static void set_cs(bool state) {
   if (state)
-    SPICAP->spi_flags |=  SPI_FLAG_SSEL;
+    SPICAP->spi_flags |=  SPI_FLAG_CSEL;
   else
-    SPICAP->spi_flags &= ~SPI_FLAG_SSEL;
+    SPICAP->spi_flags &= ~SPI_FLAG_CSEL;
 }
 
 unsigned int spiflash_send_byte(unsigned int byte) {

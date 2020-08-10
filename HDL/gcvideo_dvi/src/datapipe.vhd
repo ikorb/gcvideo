@@ -66,10 +66,10 @@ entity Datapipe is
     IRButton   : in  std_logic;
 
     -- flash chip
-    Flash_MOSI : out std_logic;
-    Flash_MISO : in  std_logic;
+    Flash_COPI : out std_logic;
+    Flash_CIPO : in  std_logic;
     Flash_SCK  : out std_logic;
-    Flash_SSEL : out std_logic;
+    Flash_SEL  : out std_logic;
 
     -- exported internal signals
     ConsoleMode: out console_mode_t;
@@ -241,10 +241,10 @@ begin
     I2S_BClock       => I2S_BClock,
     I2S_LRClock      => I2S_LRClock,
     I2S_Data         => I2S_Data,
-    SPI_MOSI         => Flash_MOSI,
-    SPI_MISO         => Flash_MISO,
+    SPI_COPI         => Flash_COPI,
+    SPI_CIPO         => Flash_CIPO,
     SPI_SCK          => Flash_SCK,
-    SPI_SSEL         => Flash_SSEL,
+    SPI_SEL          => Flash_SEL,
     ScanlineRamAddr  => scanline_ram_addr,
     ScanlineRamData  => scanline_ram_data,
     InfoFrameRAMAddr => infoframeram_addr,
@@ -305,7 +305,7 @@ begin
     vs_rebuildcsync   <= false;
   end generate;
 
-  -- master clock generator
+  -- main clock generator
   Inst_ClockGen: ClockGen
     generic map (
       TargetConsole => TargetConsole

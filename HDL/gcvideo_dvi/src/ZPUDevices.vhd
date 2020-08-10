@@ -166,13 +166,13 @@ package ZPUDevices is
     );
     port (
       Clock    : in  std_logic;
-      ZSelect  : in  std_logic;
+      ZSelect  : in  std_logic; -- ZPU peripheral select
       ZPUBusIn : in  ZPUDeviceIn;
       ZPUBusOut: out ZPUDeviceOut;
-      MOSI     : out std_logic;
-      MISO     : in  std_logic;
-      SClock   : out std_logic;
-      SSelect  : out std_logic
+      SCOPI    : out std_logic; -- SPI controller out, peripheral in
+      SCIPO    : in  std_logic; -- SPI controller in, peripheral out
+      SClock   : out std_logic; -- SPI clock
+      SSelect  : out std_logic  -- SPI select
     );
   end component;
 

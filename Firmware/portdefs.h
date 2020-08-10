@@ -187,7 +187,7 @@ typedef struct {
   __O  uint32_t icap_flags;
 } SPICAP_TypeDef;
 
-#define SPI_FLAG_SSEL     (1 << 0)
+#define SPI_FLAG_CSEL     (1 << 0)
 #define SPI_FLAG_BUSY     (1 << 1)
 #define ICAP_FLAG_CLOCK   (1 << 0)
 #define ICAP_FLAG_CE      (1 << 1)
