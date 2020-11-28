@@ -5,7 +5,8 @@
 GCVideo DVI interfaces from the signals on the Digital Video Port of the
 Gamecube to a DVI video signal. It targets a few FPGA boards specially developed
 for it by third parties as well as the Pluto IIx HDMI FPGA board from
-[KNJN](http://www.knjn.com). The available features may differ depending on the
+[KNJN](http://www.knjn.com), which is only recommended for development purposes
+and not for end-users. The available features may differ depending on the
 board.
 
 For those who don't mind extremely fine pitch soldering, it is also possible to
@@ -38,16 +39,6 @@ use GCVideo in a Wii.
   possible to set the output to something that the display does not support,
   resulting in a corrupted or no picture.
 
-## Requirements ##
-
-- A suitable FPGA board, this documentation assumes the Pluto IIx HDMI. If you
-  use a custom board specifically designed for GCVideo DVI, please check with
-  your supplier for additional information.
-- programmer suitable for the Pluto board board, e.g. KNJN TXDI interface or a
-  JTAG programmer with software that can handle a Spartan 3A
-- For Pluto IIx board revisions D or earlier: 100 ohm resistor,
-  watt rating does not matter
-
 ## Directory structure ##
 
 There are five subdirectories:
@@ -61,47 +52,45 @@ There are five subdirectories:
 
 ## Programming the Pluto IIx HDMI ##
 
+Please note: Using the Pluto IIx HDMI board is NOT RECOMMENDED for
+end users as there is a high chance that the installation will not
+work without debugging signal integrity issues. I do not provide any
+support if you run into problems with a Pluto IIx HDMI-based
+installation. The following instructions are only meant for people
+who want to use such a board for development purposes as it provides
+convenient access to almost all FPGA pins, which is useful for
+connecting to a logic analyzer.
+
 The Pluto IIx HDMI board can be programmed either before or after
 installation. Programming it before installation requires an external
 power supply, programming it after installation may make it harder to
 access the required pins.
 
-One possible way to program the board is to use one of the TXDI
-interfaces available from KNJN and their FPGAconf program. This also
-requires an RS232 port ("COM port"), although there is at least one
-TXDI interface that integrates an RS232-to-USB converter.
-Unfortunately FPGAconf does not support writing straight binary files
-to the board, the current recommended way is to use a faked bitstream
-from the latest release where it is available
-and use the integrated firmware updater to install a later release if
-needed. In FPGAconf,
-you need to use the "Program boot-PROM" button and select the
-`gcvideo-dvi-3.0-p2xhgc-fpgaconf.bit` (or p2xhwii) file from the issue
-linked above.
+Although the official method for programming the Pluto board is to use
+KNJN's TXDI interface, it is not recommended to do so as their
+software can only write a bitstream file to the flash chip (last time
+I checked), while GCVideo requires that a complete flash image with
+multiple bitstreams and additional firmware data is written to the
+chip. Please use another programming method, e.g. a JTAG programmer or
+a SPI flash writer instead.
 
-Another option to program the board is over the JTAG pins. This is
-only recommended for advanced users and requires a JTAG interface with
-software that is either able to use indirect programming of an SPI
-flash chip connected to a Spartan 3A (e.g. Xilinx's own Impact) or
-that can play an SVF file. This way of programming the SPI flash on
+A recommended option is to use a JTAG programmer that can either
+indirectly write to the SPI flash connected to the Spartan 3A or that
+is capable of playing an SVF file. This way of programming the SPI flash on
 the board requires the `gcvideo-dvi-p2xh-gc-X.Y-spirom-impact.mcs` or
 `gcvideo-dvi-p2xh-gc-X.Y-M25P40-complete.xsvf` files in the `bin`
 subdirectory,
 depending on the software you use. The SVF file has been created
-assuming that there is a M25P40 chip on the board. KNJN does not
-specify which chip they ship, only that it will be at least 4 MBit in
-size - if your board has a different flash chip (located on the bottom
-side), contact me and I'll try to generate an SVF for it if it's
-supported by Xilinx' tools.
-
-KNJN now also sells a version of the board preprogrammed with
-GCVideo-DVI, which is probably the easier option for normal users.
+assuming that there is a M25P40 chip on the board.
 
 ## Connecting the Pluto board to a Wii ##
 
-Use of GCVideo-DVI on a Wii is not recommended since the installation
+Use of GCVideo-DVI on a Wii using the Pluto board
+is even less recommended since the installation
 requires very fine-pitch soldering. The connection information is
-available in a [separate file](README-Wii.md) if you want to try anyway.
+available in a [separate file](README-Wii.md) if you want to try
+anyway, but please be aware that you are on your own and I will not
+give any support if you run into problems.
 
 Please note that you need to use the Wii-specific firmware files if you
 install the board in a Wii instead of a Gamecube.
@@ -115,6 +104,13 @@ the connections need to be made on the Pluto board (click for a larger
 version):
 
 [![Preview of Pluto IIx HDMI connection diagram](doc/connections-thumb.jpg)](doc/connections.jpg)
+
+Remember that signal integrity is critical, especially for the clock
+signal. There have been reports that an installation failed just
+because the Pluto board was oriented in a way that required all the
+VData signals to cross each other and it was fixed by flipping the
+FPGA board upside-down so the VData wires did not have to cross over
+each other anymore.
 
 ### Power ###
 
@@ -391,7 +387,10 @@ The firmware sources can be found in the [Firmware](../../Firmware)
 directory at the top level of the repository.
 
 
-## Alternative target boards ##
+## Recommended target boards ##
+
+I do not recommend any specific hardware for GCVideo because there are
+too many variants on the market and I don't have access to all of them.
 
 GCVideo-DVI should be easily portable to other FPGA boards that have a
 DVI or HDMI connector directly connected to the FPGA's pins and use a
@@ -399,14 +398,6 @@ Spartan 3A-200 (or larger) or a Spartan 6 (necessary size unknown,
 probably a 9 minimum). Ports to FPGAs from other vendors should be
 possible, only the clock generator and DDR outputs use Xilinx-specific
 components.
-
-At least one alternative board has been designed, the [Shuriken
-Video](http://www.retro-system.com/shuriken%20video.htm). It
-features a smaller footprint which is optimized for mounting it so
-that it sticks out of the original digital video connector hole of the
-Gamecube. The developer has used a smaller FPGA to keep the costs
-down, but when fitted with a Spartan 3A-200, the full version of
-GCVideo-DVI can run on it and presynthesized bitstreams are available.
 
 
 ## Note about modifications ##
