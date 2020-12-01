@@ -185,8 +185,8 @@ typedef struct {
 typedef struct {
   __IO uint32_t spi_data;
   __IO uint32_t spi_flags;
-  __IO uint32_t unused_word_1;
-  __IO uint32_t unused_word_2;
+  __IO uint32_t spi_crc;
+  __IO uint32_t spi_data32;
   __IO uint32_t icap_data;
   __O  uint32_t icap_flags;
 } SPICAP_TypeDef;

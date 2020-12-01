@@ -449,6 +449,16 @@ package component_defs is
     );
   end component;
 
+  component crc32 is
+    port (
+      Clock      : in  std_logic;
+      DataIn     : in  std_logic;
+      DataInValid: in  boolean;
+      ResetCRC   : in  boolean;
+      DataOut    : out std_logic_vector(31 downto 0)
+    );
+  end component;
+
 end component_defs;
 
 package body component_defs is

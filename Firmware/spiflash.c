@@ -149,3 +149,16 @@ void spiflash_write_page(uint32_t address, void* buffer, uint32_t length) {
     spiflash_end_write();
   }
 }
+
+#ifdef HAVE_SPI_HWCRC
+uint32_t spiflash_crc32(uint32_t address, uint32_t length) {
+  spiflash_start_read(address);
+
+  SPICAP->spi_crc = 0; // reset CRC, value does not matter
+  for (unsigned int i = 0; i < length / 4; i++)
+    SPICAP->spi_data32 = 0;
+
+  set_cs(true);
+  return SPICAP->spi_crc;
+}
+#endif
