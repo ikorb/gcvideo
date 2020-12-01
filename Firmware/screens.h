@@ -43,4 +43,6 @@ void screen_outputsettings(void);
 void screen_picturesettings(void);
 void screen_scanlines(void);
 
+void run_mainloop(void);
+
 #endif

@@ -325,9 +325,4 @@ void settings_init(void) {
   SCANLINERAM->profiles[3 * 256 + 251] = scanline_strength;
   SCANLINERAM->profiles[3 * 256 + 252] = scanline_hybrid;
   update_scanlines();
-
-  VIDEOIF->settings       = video_settings[current_videomode] | video_settings_global;
-  VIDEOIF->osd_bg         = osdbg_settings;
-  VIDEOIF->audio_volume   = 255;
-  VIDEOIF->image_controls = 0x00800080;
 }

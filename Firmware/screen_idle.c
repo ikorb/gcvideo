@@ -100,3 +100,17 @@ void screen_idle(void) {
     }
   }
 }
+
+void run_mainloop(void) {
+  /* force initial mode change */
+  pad_set(PAD_VIDEOCHANGE);
+
+  while (1) {
+    screen_idle();
+    if (pad_buttons & IRBUTTON_LONG) {
+      pad_clear(IRBUTTON_LONG);
+      screen_irconfig();
+    } else
+      screen_mainmenu();
+  }
+}

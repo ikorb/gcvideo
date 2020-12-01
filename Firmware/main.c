@@ -75,15 +75,14 @@ int main(int argc, char **argv) {
   osd_init();
   settings_load();
 
+  /* update hardware to current settings */
   VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
   VIDEOIF->osd_bg   = osdbg_settings;
-
-  while (1) {
-    screen_idle();
-    if (pad_buttons & IRBUTTON_LONG) {
-      pad_clear(IRBUTTON_LONG);
-      screen_irconfig();
-    } else
-      screen_mainmenu();
+  if (audio_mute) {
+    VIDEOIF->audio_volume = 0;
+  } else {
+    VIDEOIF->audio_volume = audio_volume;
   }
+
+  run_mainloop();
 }
