@@ -25,6 +25,7 @@
 -- THE POSSIBILITY OF SUCH DAMAGE.
 --
 -- Blanking_Regenerator_Fixed: Regenerate the blanking signal using fixed windows
+--                             and fix lengths of HSync/VSync
 --
 ----------------------------------------------------------------------------------
 
@@ -38,7 +39,11 @@ entity Blanking_Regenerator_Fixed is
   port (
     PixelClock       : in  std_logic;
     PixelClockEnable : in  boolean;
+
+    -- input video
     VideoIn          : in  VideoYCbCr;
+
+    -- output video
     VideoOut         : out VideoYCbCr
   );
 end Blanking_Regenerator_Fixed;
@@ -59,6 +64,10 @@ architecture Behavioral of Blanking_Regenerator_Fixed is
   signal vert_active_start: natural range  18 to  41 :=  18;
   signal vert_active_end  : natural range 258 to 617 := 258;
 
+  -- sync regen
+  signal hsync_remain     : natural range 0 to 63;
+  signal vsync_remain     : natural range 0 to 864*6;
+
 begin
 
   -- generate a new blanking signal according to CEA timing
@@ -70,9 +79,7 @@ begin
     variable at_vsync_end  : boolean := false;
   begin
     if rising_edge(PixelClock) and PixelClockEnable then
-      -- copy everything except blanking and pixels
-      VideoOut.HSync         <= VideoIn.HSync;
-      VideoOut.VSync         <= VideoIn.VSync;
+      -- copy flags and CSync
       VideoOut.CSync         <= VideoIn.CSync;
       VideoOut.IsEvenField   <= VideoIn.IsEvenField;
       VideoOut.IsProgressive <= VideoIn.IsProgressive;
@@ -107,6 +114,54 @@ begin
       else
         at_vsync_start := false;
         at_vsync_end   := false;
+      end if;
+
+      ---- recreate syncs with corrent lengths
+      if hsync_remain > 0 then
+        hsync_remain <= hsync_remain - 1;
+      else
+        VideoOut.HSync <= false;
+      end if;
+
+      if at_hsync_start then
+        VideoOut.HSync <= true;
+
+        if VideoIn.IsPAL then
+          if VideoIn.Is30kHz then
+            -- 576p
+            hsync_remain <= 64 -1;
+          else
+            -- 576i
+            hsync_remain <= 63 -1;
+          end if;
+        else
+          -- 480p/480i
+          hsync_remain <= 62 -1;
+        end if;
+      end if;
+
+      if vsync_remain > 0 then
+        vsync_remain <= vsync_remain - 1;
+      else
+        VideoOut.VSync <= false;
+      end if;
+
+      if at_vsync_start then
+        VideoOut.VSync <= true;
+
+        if VideoIn.IsPAL then
+          if VideoIn.Is30kHz then
+            vsync_remain <= 5 * 864 - 1;
+          else
+            vsync_remain <= 3 * 864 - 1;
+          end if;
+        else
+          if VideoIn.Is30kHz then
+            vsync_remain <= 6 * 858 - 1;
+          else
+            vsync_remain <= 3 * 858 - 1;
+          end if;
+        end if;
       end if;
 
       ---- count non-sync pixels/lines as reference
