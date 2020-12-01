@@ -34,6 +34,7 @@
 #include "crc32mpeg.h"
 #include "exodecr.h"
 #include "icap.h"
+#include "menu-lite.h"
 #include "osd.h"
 #include "pad.h"
 #include "portdefs.h"
@@ -77,6 +78,38 @@ typedef enum {
   STATE_BADCRC,
   STATE_FORCEFLASHER,
 } flashstate_t;
+
+/* blank items for choosing a firmware version */
+static menuitem_t menu_items[] = {
+  { "Abort" },
+
+  { NULL },
+  { NULL },
+  { NULL },
+  { NULL },
+
+  { NULL },
+  { NULL },
+  { NULL },
+  { NULL },
+
+  { NULL },
+  { NULL },
+  { NULL },
+  { NULL },
+
+  { NULL },
+  { NULL },
+  { NULL },
+  { NULL },
+};
+
+static menu_t firmware_menu = {
+  13, 7, // xpos, ypos
+  19, 0, // xsize, ysize
+  0,     // entries
+  menu_items
+};
 
 
 static void boot_main(void) {
@@ -147,6 +180,10 @@ static void spin(void) {
     if (spinpos >= 4)
       spinpos = 0;
   }
+}
+
+static void nospin(unsigned int attr) {
+  osd_putcharat(3, 9, ' ', attr);
 }
 
 static void set_capture_range(unsigned int start, unsigned int end) {
@@ -238,6 +275,67 @@ static bool capture_line(void) {
   }
 }
 
+static bool choose_update(unsigned int fwcount) {
+  uint8_t *orig_readptr = decodebuf_readptr;
+
+  if (fwcount >= sizeof(menu_items) / sizeof(menu_items[0])) {
+    fwcount = sizeof(menu_items) / sizeof(menu_items[0]) - 1;
+  }
+
+  /* build menu */
+  firmware_menu.entries = fwcount + 1;
+  firmware_menu.ysize   = fwcount + 3;
+  char *stringptr = decrunchbuffer;
+  unsigned int initial_item = 0;
+
+  for (unsigned int i = 1; i <= fwcount; i++) {
+    uint32_t signature_word = getu32();
+    char signature_chars[4];
+
+    /* restrict chars to printable ASCII */
+    memcpy(signature_chars, &signature_word, sizeof(signature_chars));
+    for (unsigned int j = 0; j < sizeof(signature_chars); j++) {
+      if (signature_chars[j] < 32 || signature_chars[j] > 126) {
+        signature_chars[j] = '?';
+      }
+    }
+
+    int len = snprintf(stringptr, sizeof(decrunchbuffer) - (stringptr - decrunchbuffer),
+                       "%08x (%c%c%c%c)", signature_word,
+                       signature_chars[0], signature_chars[1],
+                       signature_chars[2], signature_chars[3]);
+
+    if (mainheader.hardware_id == signature_word) {
+      initial_item = i;
+    }
+
+    menu_items[i].text = stringptr;
+    stringptr += len + 1;
+    if (stringptr >= decrunchbuffer + sizeof(decrunchbuffer)) {
+      break;
+    }
+
+    decodebuf_readptr += 2 + 2 + 8;
+  }
+
+  nospin(0);
+  menu_draw(&firmware_menu);
+  int selection = menu_exec(&firmware_menu, initial_item);
+
+  if (selection <= 0) {
+    return false;
+  }
+
+  /* adjust pointer to start of selected entry */
+  decodebuf_readptr = orig_readptr + (selection - 1) * 16;
+
+  osd_clearline(4, 0);
+  osd_gotoxy(7, 4);
+  printf(" Chosen hardware ID: %08x ", getu32());
+
+  return true;
+}
+
 static bool look_for_update(void) {
   while (1) {
     /* grab info line */
@@ -277,7 +375,7 @@ static bool look_for_update(void) {
       osd_clearline(7, 0);
       osd_puts("No compatible firmware found.");
     } else {
-      return false;
+      return choose_update(fwcount);
     }
   }
 }
