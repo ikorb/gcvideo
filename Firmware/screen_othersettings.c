@@ -147,7 +147,7 @@ static valueitem_t value_volume      = { get_volume,      set_volume,      VALTY
 static valueitem_t value_mute        = { get_mute,        set_mute,        VALTYPE_BOOL };
 
 static valueitem_t __attribute__((unused)) value_analogmode =
-  { get_analogmode, set_analogmode, VALTYPE_RGBMODE };
+  { get_analogmode, set_analogmode, VALTYPE_ANALOGMODE };
 
 /* --- menu definition --- */
 
