@@ -43,7 +43,7 @@
 enum {
   MENUITEM_OSDSET = MODESET_COMMON_MENUITEM_COUNT,
   MENUITEM_PICTURESET,
-  MENUITEM_OTHERSET,
+  MENUITEM_OUTPUTSET,
   MENUITEM_VIEWALL,
   MENUITEM_STORE,
   MENUITEM_ABOUT,
@@ -62,7 +62,7 @@ static menuitem_t mainmenu_items[] = {
   { " Alternating scanlines", &modeset_value_slalt,       6, 0 }, // 4
   { "OSD settings...",        NULL,                       8, 0 }, // 5
   { "Picture settings...",    NULL,                       9, 0 }, // 6
-  { "Other settings...",      NULL,                      10, 0 }, // 7
+  { "Output settings...",     NULL,                      10, 0 }, // 7
   { "View all modes...",      NULL,                      11, 0 }, // 8
   { "Store settings",         NULL,                      13, 0 }, // 9
   { "About...",               NULL,                      14, 0 }, // 10
@@ -152,8 +152,8 @@ void screen_mainmenu(void) {
       screen_picturesettings();
       break;
 
-    case MENUITEM_OTHERSET:
-      screen_othersettings();
+    case MENUITEM_OUTPUTSET:
+      screen_outputsettings();
       break;
 
     case MENUITEM_VIEWALL:

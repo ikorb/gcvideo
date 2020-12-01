@@ -25,7 +25,7 @@
    THE POSSIBILITY OF SUCH DAMAGE.
 
 
-   screen_othersettings.c: Screen for misc. settings
+   screen_outputsettings.c: Screen for output-related settings
 
 */
 
@@ -125,10 +125,10 @@ static valueitem_t __attribute__((unused)) value_analogmode =
 
 /* --- menu definition --- */
 
-static void otherset_draw(menu_t *menu);
+static void outputset_draw(menu_t *menu);
 
 #ifdef OUTPUT_DUAL
-static menuitem_t otherset_items[] = {
+static menuitem_t outputset_items[] = {
   { "Allow 480p mode",   &value_cabledetect,  1, 0 }, // 0
   { "RGB Limited Range", &value_rgblimited,   2, 0 }, // 1
   { "Enhanced DVI mode", &value_dvienhanced,  3, 0 }, // 2
@@ -140,15 +140,15 @@ static menuitem_t otherset_items[] = {
   { "Exit",              NULL,               10, 0 }, // 8
 };
 
-static menu_t otherset_menu = {
+static menu_t outputset_menu = {
   9, 9,
   26, 12,
-  otherset_draw,
-  sizeof(otherset_items) / sizeof(*otherset_items),
-  otherset_items
+  outputset_draw,
+  sizeof(outputset_items) / sizeof(*outputset_items),
+  outputset_items
 };
 #else
-static menuitem_t otherset_items[] = {
+static menuitem_t outputset_items[] = {
   { "Allow 480p mode",   &value_cabledetect, 1, 0 }, // 0
   { "RGB Limited Range", &value_rgblimited,  2, 0 }, // 1
   { "Enhanced DVI mode", &value_dvienhanced, 3, 0 }, // 2
@@ -159,38 +159,38 @@ static menuitem_t otherset_items[] = {
   { "Exit",              NULL,               9, 0 }, // 7
 };
 
-static menu_t otherset_menu = {
+static menu_t outputset_menu = {
   9, 9,
   26, 11,
-  otherset_draw,
-  sizeof(otherset_items) / sizeof(*otherset_items),
-  otherset_items
+  outputset_draw,
+  sizeof(outputset_items) / sizeof(*outputset_items),
+  outputset_items
 };
 #endif
 
-static void otherset_draw(menu_t *menu) {
+static void outputset_draw(menu_t *menu) {
   if (video_settings_global & VIDEOIF_SET_DVIENHANCED) {
-    otherset_items[MENUITEM_169].flags = 0;
+    outputset_items[MENUITEM_169].flags = 0;
   } else {
-    otherset_items[MENUITEM_169].flags = MENU_FLAG_DISABLED;
+    outputset_items[MENUITEM_169].flags = MENU_FLAG_DISABLED;
   }
 
   if (HAVE_DUAL) {
     if (VIDEOIF->flags & VIDEOIF_FLAG_FORCE_YPBPR) {
-      otherset_items[MENUITEM_ANALOGOUT].flags = MENU_FLAG_DISABLED;
+      outputset_items[MENUITEM_ANALOGOUT].flags = MENU_FLAG_DISABLED;
     } else {
-      otherset_items[MENUITEM_ANALOGOUT].flags = 0;
+      outputset_items[MENUITEM_ANALOGOUT].flags = 0;
     }
   }
 
   /* some boards do not have cable detect connected */
 #ifdef DISABLE_CABLEDETECT
-  otherset_items[MENUITEM_CABLEDETECT].flags = MENU_FLAG_DISABLED;
+  outputset_items[MENUITEM_CABLEDETECT].flags = MENU_FLAG_DISABLED;
 #endif
 }
 
-void screen_othersettings(void) {
+void screen_outputsettings(void) {
   osd_clrscr();
-  menu_draw(&otherset_menu);
-  menu_exec(&otherset_menu, 0);
+  menu_draw(&outputset_menu);
+  menu_exec(&outputset_menu, 0);
 }
