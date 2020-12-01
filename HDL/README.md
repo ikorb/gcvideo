@@ -16,6 +16,6 @@ board. There are currently three project subdirectories:
 
     This directory contains the HDL sources and Xilinx ISE project for
     a DVI-output version of GCVideo. It can currently run on the Pluto
-    IIx HDMI board as well as Shuriken Video.
+    IIx HDMI board as well a few others.
     Please see the [README.md](gcvideo_dvi/README.md) file
     in there for more details.

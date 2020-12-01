@@ -2,58 +2,66 @@
 
 ## Introduction ##
 
-GCVideo DVI interfaces from the signals on the Digital Video Port of
-the Gamecube to a DVI video signal. It currently targets the Pluto
-IIx HDMI FPGA board from [KNJN](http://www.knjn.com) as the board is
-easily available and small enough to integrate it in the existing
-Gamecube casing.
+GCVideo DVI interfaces from the signals on the Digital Video Port of the
+Gamecube to a DVI video signal. It targets a few FPGA boards specially developed
+for it by third parties as well as the Pluto IIx HDMI FPGA board from
+[KNJN](http://www.knjn.com). The available features may differ depending on the
+board.
 
-For those who don't mind extremely fine pitch soldering, a Wii version
-is also available.
+For those who don't mind extremely fine pitch soldering, it is also possible to
+use GCVideo in a Wii.
 
 ## Features ##
 
-- direct digital video output with no analog intermediate for best
-    quality
-- optional linedoubler to convert 240p/288p/480i/576i modes to
-    480p/576i
-- optional scanline overlay with selectable strength
+- direct digital video output with no analog intermediate for best quality
+- optional linedoubler to convert 240p/288p/480i/576i modes to 480p/576p
+- optional scanline overlay with selectable strength hybrid factor
 - SPDIF digital audio output
 - user-friendly on-screen configuration
 - on-screen menus controlled with a Gamecube controller or an IR
-    remote
+    remote control
+- (certain boards only) auxillary analog video output
 
 ## Limitations ##
 
-- Linedoubling of 480i/576i modes looks very ugly, if your display
+- Linedoubling of 480i/576i modes looks very ugly. If your display
     accepts these modes directly, it is recommended to not use
     linedoubling for them.
-- Only works on DOL-001 Gamecubes, which are the ones that still have
-    the digital video port. It may or may not be possible to adapt the
-    project to DOL-101 systems with some changes in the source code, but
-    as I do not have access to such a Gamecube I cannot provide help
-    with that at this time.
+- The primary target of the project is the DVI output, the analog output (if
+  available) is purely a "bonus feature". Some DVI output settings may disable
+  certain analog output options.
+- Although GCVideo tries to make the output signal as standards-compliant as
+  possible, some homebrew software uses video parameters that are too far away
+  from normal video standards to correct them. Such homebrew software may not
+  work with some displays.
+- GCVideo does not attempt to read the capabilities of the display, so it is
+  possible to set the output to something that the display does not support,
+  resulting in a corrupted or no picture.
 
 ## Requirements ##
 
-- Pluto IIx HDMI FPGA board
-- programmer suitable for this board, e.g. KNJN TXDI interface or a
-    JTAG programmer with software that can handle a Spartan 3A
-- 100 ohm resistor, watt rating does not matter
+- A suitable FPGA board, this documentation assumes the Pluto IIx HDMI. If you
+  use a custom board specifically designed for GCVideo DVI, please check with
+  your supplier for additional information.
+- programmer suitable for the Pluto board board, e.g. KNJN TXDI interface or a
+  JTAG programmer with software that can handle a Spartan 3A
+- For Pluto IIx board revisions D or earlier: 100 ohm resistor,
+  watt rating does not matter
 
 ## Directory structure ##
 
-There are four subdirectories:
+There are five subdirectories:
 
-- `src` contains the VHDL sources
+- `src` contains the VHDL sources and Xilinx ISE project files
 - `bin` contains the synthesized bit stream in various formats
 - `doc` contains a few images showing the necessary connections
 - `codegens` contains two code generators that generate VHDL source
     for two ROMs in the enhanced DVI encoder
+- `scripts` contains various scripts used during the build process
 
-## Programming the board ##
+## Programming the Pluto IIx HDMI ##
 
-The board can be programmed either before or after
+The Pluto IIx HDMI board can be programmed either before or after
 installation. Programming it before installation requires an external
 power supply, programming it after installation may make it harder to
 access the required pins.
@@ -63,16 +71,20 @@ interfaces available from KNJN and their FPGAconf program. This also
 requires an RS232 port ("COM port"), although there is at least one
 TXDI interface that integrates an RS232-to-USB converter. In FPGAconf,
 you need to use the "Program boot-PROM" button and select the
-`gcvideo-dvi-p2xh-gc-2.3.bit` file from the `bin` subdirectory.
+`gcvideo-dvi-p2xh-gc-X.Y-spirom-complete.bin` file from the
+archive `gcvideo-X.Y-p2xh-gc.zip` on the Releases page on Github.
+
+(TODO: Check if FPGAconf actually accepts bin files and figure out
+an alternative if not)
 
 Another option to program the board is over the JTAG pins. This is
 only recommended for advanced users and requires a JTAG interface with
 software that is either able to use indirect programming of an SPI
 flash chip connected to a Spartan 3A (e.g. Xilinx's own Impact) or
-that can play an SVF file. Please not that I did not have much success
-with the SVF file route yet. This way of programming the SPI flash on
-the board requires the `gcvideo-dvi-p2xh-gc-2.3-spiprom.mcs` or
-`gcvideo-dvi-p2xh-gc-2.3-m25p40.svf` files in the `bin` subdirectory,
+that can play an SVF file. This way of programming the SPI flash on
+the board requires the `gcvideo-dvi-p2xh-gc-X.Y-spirom-impact.mcs` or
+`gcvideo-dvi-p2xh-gc-X.Y-M25P40-complete.xsvf` files in the `bin`
+subdirectory,
 depending on the software you use. The SVF file has been created
 assuming that there is a M25P40 chip on the board. KNJN does not
 specify which chip they ship, only that it will be at least 4 MBit in
@@ -81,16 +93,18 @@ side), contact me and I'll try to generate an SVF for it if it's
 supported by Xilinx' tools.
 
 KNJN now also sells a version of the board preprogrammed with
-GCVideo-DVI, but unfortunately they do not specify which version they
-provide.
+GCVideo-DVI, which is probably the easier option for normal users.
 
-## Connecting the board to a Wii ##
+## Connecting the Pluto board to a Wii ##
 
 Use of GCVideo-DVI on a Wii is not recommended since the installation
 requires very fine-pitch soldering. The connection information is
-available in a [separate file](README-Wii.md).
+available in a [separate file](README-Wii.md) if you want to try anyway.
 
-## Connecting the board to a Gamecube ##
+Please note that you need to use the Wii-specific firmware files if you
+install the board in a Wii instead of a Gamecube.
+
+## Connecting the Pluto board to a Gamecube ##
 
 Multiple connections need to be made from the Gamecube to the Pluto
 IIx HDMI board to connect all the signals and power lines necessary to
@@ -116,27 +130,33 @@ Gamecube's board) must be connected to the *VUNREG* solder pad on the Pluto
 board. If the image is unclear, the two 5V pins of the power connector
 are the two pins closest to the heat sink.
 
-### DDC resistor ###
+### DDC power ###
 
-The Pluto IIx HDMI board also has a design flaw that reduces its
-compatibility with various displays significantly. To rectify this
-problem, you need to connect a 100 ohm resistor from the solder pad
+Early revisions of the Pluto IIx HDMI board had a design flaw that reduced its
+compatibility with various displays significantly. As far as I know, this has
+fixed in board revision E or higher. If you have a revision E board, you need
+to bridge the pads pads marked in [this document](https://www.knjn.com/docs/Pluto-IIx%20HDMI%20rev.%20E.pdf)
+to enable an identification signal on the HDMI port that is used by some
+displays to detect if an input is used.
+
+Unfortunately, Pluto IIx-HDMI board revisions D and earlier need a bit more
+work. You need to connect a 100 ohm resistor from the solder pad
 behind the HDMI connector (labelled *DDC +5V* on the bottom) to the
 *VUNREG* pin at the side of the board. Please make absolutely sure that
 you do not create a short between *VUNREG* and *VCC* when you do this as
 this will likely destroy both the FPGA board and the Gamecube it is
 attached to.
 
-Without this resistor, most of my monitors and other devices with an
-HDMI input claimed that they were receiving no signal from the Pluto
-board, even though it was actually generating a valid video signal.
+Without this resistor (or equivalently, bridging the pads on newer boards),
+most of my monitors and other devices with an HDMI input claimed that they
+were receiving no signal from the Pluto board, even though it was actually
+generating a valid video signal.
 
-Some people have reported that most of their TVs did not recognize the
+Some users have reported that most of their TVs did not recognize the
 signal from the Pluto board with the 100 ohm resistor installed. If
-you also suffer from this problem, first check that the resistor you
+you also suffer from this problem, please check that the resistor you
 installed is really a 100 ohm resistor and not a 100 kiloohm
-resistor. You can also try to use a direct wire connection from *VUNREG*
-to *DDC +5V* instead of a resistor, but this is not recommended.
+resistor.
 
 ### Gamecube digital port ###
 
@@ -241,176 +261,18 @@ will be called "IR button" in this manual. This button allows you to
 choose which buttons of your IR remote you want to use to control
 GCVideo without getting in a chicken-and-egg situation.
 
+By holding down the IR button while turning on the console, you can force
+the firmware flasher to start looking for an update instead of handing
+over control to the main firmware.
 
 ## OSD ##
 
-It is possible to navigate in the OSD with both a Gamecube controller
-and an IR remote, even at the same time.
+GCVideo-DVI features an on-screen display for configuring its numerous
+settings which can be navigated using a Gamecube controller in port 1
+or an infrared remote if a suitable receiver is connected.
 
-### Using with a controller ###
-
-The on-screen display uses the controller in port 1. It has only been
-tested with a genuine Nintendo controller and a Hama clone pad. As I
-do not have any other Gamecube controllers, I have no idea what will
-happen if you for example connect a Bongo controller instead.
-
-To activate the OSD, hold the L, R, X and Y buttons down until the
-menu appears - this should take about one second. If you also hold
-down the start button together with these four, all setting will be
-returned to their default values.
-
-The OSD is controlled using the D-pad and the X and Y buttons. The X
-button activates a menu item, the Y button jumps back to the previous
-menu if you are in a submenu or closes the OSD completely if you use
-it on the main menu. Please be aware that the Gamecube will still
-receive all inputs even when the OSD is active! This can be
-problematic for example on the boot screen of the Gamecube because the
-cube will rotate doe to the D-pad inputs. If you want to use the OSD
-on the Gamecube's main menu, you can do so without causing
-interference by going into the cube's option menu first.
-
-### Using with an IR remote ###
-
-To keep the code simple, GCVideo only needs six buttons on an IR
-remote. The first four of them have been named "Up", "Down", "Left"
-and "Right" which allow navigation in the menus just like the D-Pad on
-a Gamecube controller. The other two are "Enter" and "Back", which are
-used to enter or leave submenus, similar to the X and Y buttons when
-a Gamecube controller is used for navigating the OSD.
-
-Since there are no interferences between the Ir remote and a game
-running on the system, calling up the main menu with an IR remote just
-needs a press on the "Enter" button instead of a complicated button
-combination. You can also hold down the IR button when you enter the
-main menu of GCVideo's OSD to reset all settings except the remote
-button assignments to their defaults.
-
-
-#### Button configuration ####
-
-Since I don't know what remote you want to use with GCVideo, it can be
-configured to accept any IR remote buttons as long as the remote uses
-the so-called NEC protocol. To enter the button configuration screen,
-hold down the button connected to pin 83 of the Pluto board ("IR
-button") until the configuration screen appears.
-
-On the configuration screen, you need to push six buttons on your
-remote for each of the functions highlighted on the screen, one after
-the other. GCVideo will tell you if you accidentally try to assign the
-same button to two different functions. If a button press is not
-acknowledged with either "Ok" or "Dupe" on this screen, the remote you
-are trying to use might not be compatible (or you have a wiring error
-or my code is too strict).
-
-If you decide to abort the button assignment, hit the IR button once
-to restore your previous button configuration.
-
-The IR remote button assignments are saved together with all the other
-settings when you select "Save settings" on the main menu.
-
-
-### General OSD usage ###
-
-GCVideo remembers six sets of settings, one for each basic video mode
-(240p, 288p, 480i, 576i, 480p, 576p). When you enter the OSD, the
-current mode is shown on the first line and the exact input and output
-resolutions are shown in the bottom right corner of the menu.
-The linedoubler- and scanline-settings on the main menu always change
-the settings for the current mode, if you want to change the settings
-for a mode that is not currently displaying, use the "View all
-modes..." menu item.
-
-The OSD pops up a box with the current resolution in the top right
-corner showing the current resolution for five seconds. If you think
-this box is annoying, you can disable it in the "OSD settings"
-submenu, where you can also choose the transparency and tint of the
-OSD windows.
-
-If in doubt, experiment with the settings. You can always reset to the
-defaults by using L+R+X+Y+Start to call up the OSD menu. This reset
-function is temporary - if you want to revert setting that have been
-stored, make sure to use the "Store settings" menu item.
-
-### Picture Settings ###
-
-The Picture Settings submenu has controls to change the brightness,
-contrast and saturation of the picture.
-
-Each of the controls has a range from -128 to +127. When all
-three controls are set to 0, the picture is output exactly as produced
-by the console, without any modification. The picture settings are
-saved together with all the other settings by selecting "Store
-settings" in the main menu.
-
-Please note that some extreme combinations of settings in this menu
-can result in errorneous color output, e.g. bright white flipping to
-black or shifted tint in highly-saturated colors. If you encounter
-this, the recommended workaround is to use less extreme picture
-settings in GCVideo, prefereably neutral.
-
-### Other settings submenu ###
-
-In the "Other settings" submenu, you can enable or disable a few
-additional settings. All of these settings are independent of the
-current video mode and can be stored permanently using the "Store
-settings" menu item in the main menu.
-
-The first setting selects whether GCVideo should
-tell the Gamecube that a 480p-capable cable is connected. By default
-it is enabled and unless you know what you are doing, there is little
-reason to disable it.
-
-The second option selects if GCVideo should output full-range
-or limited-range RGB levels. Full-range is usually
-associated with computer graphics and limited-range with TV
-signals. The default is full-range as GCVideo outputs a DVI signal
-where full-range RGB is more common.
-
-The third option enables enhanced DVI mode. Since this mode may not be
-acceptable to all displays, it is disabled by default. If it is on,
-GCVideo transmits additional data to the display to signal the current
-video mode. Enabling this option may increase compatibility with some
-displays, especially in non-linedoubled 480i/576i modes.
-
-When enhanced DVI mode is enabled, the `Display as 16:9` option
-becomes available. If it is turned on, GCVideo tells the monitor that
-it should display the image in widescreen format (16:9 aspect ratio),
-if it is off then the display is told that standard format (4:3 aspect
-ratio) is preferred. The default setting is 4:3, since most Gamecube
-games assume this as standard, but some have an option to switch to
-widescreen. Please note that this setting may not do anything as some
-displays ignore the aspect ratio information sent by GCVideo.
-
-Another option in this submenu is `Mode switch delay`. If it is set
-to zero (the default value), it is inactive. Otherwise, the number set
-in this option controls for how many frames GCVideo should completely
-disable its output when the Gamecube changes to a different
-resolution. This has been found useful for a small number of displays
-which did not correctly recognize a change in resolution, for example
-when a game switches to progressive mode while it boots. If your
-display has such problems, you could try to set this option to 10 or
-50 - higher values disable the output for a longer time and a value of
-50 or 60 (PAL or NTSC) corresponds to one second. Trying every single
-number in this option will generally be useless - instead try a
-relatively high value and work your way back to zero to find a setting
-that is high enough so your display recognizes the mode change, but
-that also blanks your screen for as short a time as possible. It is
-expected that few to no displays that can accept enhanced DVI mode
-will need a setting other than 0 for the mode switch delay, but this
-has not yet been comprehensively tested.
-
-(TLDR: Set `Mode switch delay` to 255 for a Framemeister-like
-experience during video mode changes ;) )
-
-Finally, the audio volume can be lowered in this menu. The option
-`Volume` can be set between 0 (silent) and 255 (original volume) and
-the `Mute` option can be used to turn off the sound completely without
-changing the current Volume setting. Please note that this setting
-uses a simple multiplication of sample values to lower the volume
-which means that any setting except 255 reduces audio quality
-slightly. Also, it only changes ony the volume of the audio outputs of
-GCVideo, but not the volume at the Gamecube's Analog AV output.
-
+The operation of the OSD can be found in the
+[Firmware README.md](../../Firmware/README.md) file.
 
 ## Possible issues ##
 
@@ -447,12 +309,9 @@ blinking at about 0.5 Hz with an NTSC video signal or slightly slower
 with a PAL signal - this means that it should be on for about one
 second, then off for about one second and so forth.
 
-If only a single heartbeat LED is available, it shows the quick
-pulsing of the clock heartbeat pattern, but the short on/long off
-pattern is changed to a short off/long on pattern and back about every
-second if VSync signals are detected. (Or more technical, the clock
-heartbeat pattern is XORed with the VSync pattern, so every second
-second the pattern is inverted)
+For boards that have only a single LED (currently the dual-output
+versions), it only shows the quick pulsing of the clock heartbeat
+pattern.
 
 ### XRGB Mini ###
 
@@ -484,12 +343,44 @@ Notes about other issues will be added as time permits.
 
 ## Running synthesis ##
 
-You can run the full
-synthesis and bitstream generation steps using the `Makefile` in this
-directory. It has only been tested on Linux and assumes that the
-Xilinx synthesis tools are reachable via the `PATH` environment
-variable. The output as well as all temporary files will be stored in
-the subdirectory `build`.
+GCVideo-DVI cannot be built using the Xilinx ISE Project Navigator,
+is has to be built using the included Makefile and Perl scripts.
+This process has only been tested on Linux and requires GNU Make
+as well as Perl 5.10 or later in addition to Xilinx ISE version 14.7.
+Forthermore, you will need a version of zpu-gcc to build the firmware,
+please check the [Firmware README](../../Firmware/README.md) for details.
+
+If you want to modify certain parts of GCVideo-DVI, you may need
+additional tools. It is recommended (but not required) to have
+[exomizer](https://bitbucket.org/magli143/exomizer/wiki/Home)
+installed to create a firmware updater. The build process should work
+without it, but the resulting updater is much smaller if exomizer is
+available. It has only been tested using version 3.0.2 and it may or may
+not work with later versions.
+
+The build process of GCVideo-DVI creates two bitstreams (one for the flasher,
+one for the main firmware) and combines them into one binary file ready
+for flashing to the SPI memory chip using either a direct flashing tool,
+an XSVF player or Xilinx Impact. To run it, ensure that the Xilinx
+synthesis tools are reachable via the `PATH` environment variable and
+use `make CONFIG=...` in the `gcvideo_dvi` directory to start the process.
+You need to supply a target configuration (board+console) using the
+`CONFIG=` parameter. Currently, there are 8 supported target configurations:
+- `p2xh-gc`: Pluto IIx-HDMI board for installation in a Gamecube
+- `p2xh-wii`: same, but for Wii
+- `shuriken-gc`: Shuriken Video board for installation in a Gamecube
+- `shuriken-wii`: same, but for Wii
+- `shuriken-v3-gc`: Shuriken Video v3 board for installation in a Gamecube
+- `shuriken-v3-wii`: same, but for Wii
+- `dual-gc`: GC Dual board
+- `dual-wii`: Wii Dual board
+
+The output as well as all temporary files will be stored in
+the subdirectory `build`. If you want to build all target configurations,
+you can use the `build-all.sh` script in the same directory as this README.
+It creates release-ready zip files for each configuration in the
+`binaries` subdirectory. Furthermore, `build-updater.sh` is available to
+build a firmware updater from the individual firmware binaries.
 
 
 ## Firmware sources ##
@@ -516,6 +407,28 @@ down, but when fitted with a Spartan 3A-200, the full version of
 GCVideo-DVI can run on it and presynthesized bitstreams are available.
 
 
+## Note about modifications ##
+
+The firmware update process identifies a compatible update using a 4 byte
+identification code, e.g. "P2XG" for the p2xh-gc target. If you plan to
+release a board that requires a bitstream that is not compatible with one
+of the existing boards, please add your own target configuration to the
+top-level `Makefile` and choose a different identification code (HWID).
+This ensures that users do not accidentally flash an incompatible bit stream
+to their board, possibly bricking it. Identification codes should consist
+of four ASCII characters. All existing ones use G as the last character if
+they target a Gamecube and W if they target a Wii, but this is just a
+guideline and not a strict requirement.
+
+If everything works as planned, just changing the HWID should be enough
+to build a compatible flasher and firmware image. To include it into
+the updater alongside the other firmware versions, you'll also need to
+edit `build-all.sh` and `build-updater.sh`.
+
+Also, please consider contributing any bug fixes or changes back to the
+original project.
+
+
 ## 3D printed mount ##
 
 A mount has been designed for the Pluto-IIx board by
@@ -532,27 +445,28 @@ You should be able to get a nice clean break and
 it will leave room to mount the board in place of the digital connector.
 
 
+## Theory of Operation ##
+
+FIXME: Actually write this section
+
+
 ## Credits ##
 
 Thanks to:
 
 - Mike Field for releasing his [DVI encoder](http://hamsterworks.co.nz/mediawiki/index.php/Dvid_test) under an open-source license
 - bobrocks95 on gc-forever for pointing me towards the Pluto IIx HDMI board
-- Artemio for his incredible [240p test suite](http://junkerhq.net/xrgb/index.php/240p_test_suite) which has been extremely
+- Artemio for his incredible [240p test suite](http://junkerhq.net/xrgb/index.php/240p_test_suite)
+    which has been extremely
     useful for quickly switching between modes during development
 - Nintendo for filing such a detailed patent for their console
 - Alastair M. Robinson for the ZPUFlex core
-- meneerbeer on the gc-video forums for suggesting a simple fix that reduces occasional image corruption and the 16:9 option
+- meneerbeer on the gc-video forums for suggesting the 16:9 option and a simple
+    fix that reduces occasional image corruption
 - Antti Siponen for his hdmi_proto project, which was really useful
     for figuring out many details about data transmission during blanking
 - Andrew "bunnie" Huang for releasing the NeTV code, which was a
     very helpful code base for hacking a simple DVI signal analyzer
 - Alexios Chouchoulas for [mcasm](http://www.bedroomlan.org/projects/mcasm)
-
-## Changes ##
-
-Version 1.0 - initial release
-Version 1.1 - added OSD and SPDIF output
-Version 1.2 - improved pad snoop timing
-Version 1.3 - improved SPDIF compatibility
-Version 2.0 - Enhanced DVI mode
+- Magnus Lind for his great compression tool [exomizer](https://bitbucket.org/magli143/exomizer/wiki/Home)
+- Borti and others for working out the formulas for good-looking hybrid scanlines
