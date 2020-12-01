@@ -31,6 +31,7 @@
 
 #include <stdio.h>
 #include "colormatrix.h"
+#include "infoframe.h"
 #include "modeset_common.h"
 #include "osd.h"
 #include "pad.h"
@@ -120,6 +121,9 @@ static bool set_value(const valueitem_t *value, int newval) {
 
     if (value->field.flags & VIFLAG_ALLMODES) {
       set_all_modes(mask, newval);
+      if (value->field.width == VIDEOIF_BIT_SPOOFINTERLACE) {
+        update_infoframe(detect_output_videomode());
+      }
 
     } else if (value->field.flags & VIFLAG_MODESET) {
       if (newval) {

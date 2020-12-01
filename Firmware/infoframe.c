@@ -155,6 +155,12 @@ static void build_one_set(uint32_t offset, uint8_t aspect, uint8_t vic, uint8_t 
 
 
 void update_infoframe(video_mode_t outmode) {
+  if ((video_settings_global & VIDEOIF_SET_SPOOFINTERLACE) &&
+      outmode <= 1) {
+    /* use 480i/576i VIC for 240p/288p */
+    outmode += 2;
+  }
+
   uint8_t vic = mode_to_vic[outmode];
 
   if (video_settings_global & VIDEOIF_SET_169)
