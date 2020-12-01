@@ -109,7 +109,7 @@ void run_mainloop(void) {
     screen_idle();
     if (pad_buttons & IRBUTTON_LONG) {
       pad_clear(IRBUTTON_LONG);
-      screen_irconfig();
+      screen_irconfig(true);
     } else
       screen_mainmenu();
   }

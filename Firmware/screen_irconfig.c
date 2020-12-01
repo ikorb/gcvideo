@@ -45,12 +45,14 @@ static const char* keynames[] = {
   "Up", "Down", "Left", "Right", "Enter", "Back"
 };
 
-void screen_irconfig(void) {
+void screen_irconfig(bool in_box) {
   ir_command_t newcmds[NUM_IRCODES];
 
-  osd_clrscr();
-  osd_fillbox(6, 8, 32, 13, ' ' | ATTRIB_DIM_BG);
-  osd_drawborder(6, 8, 32, 13);
+  if (in_box) {
+    osd_clrscr();
+    osd_fillbox(6, 8, 32, 13, ' ' | ATTRIB_DIM_BG);
+    osd_drawborder(6, 8, 32, 13);
+  }
 
   osd_setattr(true, false);
   osd_putsat(12,  9, "IR Remote key config");
