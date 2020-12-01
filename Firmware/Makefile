@@ -89,7 +89,7 @@ SRCFILES_main := modeset_common.c screen_about.c screen_allmodes.c \
 	screen_picturesettings.c screen_advanced.c screen_scanlines.c settings-main.c \
 	reblanker.c infoframe.c menu.c colormatrix.c
 
-SRCFILES_flasher := flasher.c settings-flasher.c crc32mpeg.c exodecr.c
+SRCFILES_flasher := flasher.c settings-flasher.c crc32mpeg.c exodecr.c menu-lite.c
 
 COPYDIR     := build/$(MODULE)
 BASENAME    := gcvideo-sw-$(TARGET)
