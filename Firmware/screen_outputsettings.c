@@ -43,7 +43,6 @@ enum {
   MENUITEM_LIMITEDRGB,
   MENUITEM_DVIENHANCED,
   MENUITEM_169,
-  MENUITEM_SWITCHDELAY,
   MENUITEM_VOLUME,
   MENUITEM_MUTE,
   MENUITEM_ANALOGOUT
@@ -61,7 +60,6 @@ enum {
 /* --- getters and setters --- */
 
 static int get_dvienhanced(void) { return video_settings_global & VIDEOIF_SET_DVIENHANCED; }
-static int get_switchdelay(void) { return mode_switch_delay;                               }
 static int get_volume(void)      { return audio_volume;                                    }
 static int get_mute(void)        { return audio_mute;                                      }
 
@@ -77,11 +75,6 @@ static int get_analogmode(void) {
 static bool set_dvienhanced(int value) {
   set_all_modes(VIDEOIF_SET_DVIENHANCED, value);
   return true;
-}
-
-static bool set_switchdelay(int value) {
-  mode_switch_delay = value;
-  return false;
 }
 
 static bool set_volume(int value) {
@@ -115,7 +108,6 @@ static valueitem_t value_rgblimited  = { VALTYPE_BOOL, true,
 static valueitem_t value_169         = { VALTYPE_BOOL, true,
                                          { .field = { NULL, VIDEOIF_BIT_169, 0, VIFLAG_ALLMODES }} };
 static valueitem_t value_dvienhanced = { VALTYPE_BOOL, false, {{ get_dvienhanced, set_dvienhanced }} };
-static valueitem_t value_switchdelay = { VALTYPE_BYTE, false, {{ get_switchdelay, set_switchdelay }} };
 static valueitem_t value_volume      = { VALTYPE_BYTE, false, {{ get_volume,      set_volume      }} };
 static valueitem_t value_mute        = { VALTYPE_BOOL, false, {{ get_mute,        set_mute        }} };
 
@@ -129,15 +121,14 @@ static void outputset_draw(menu_t *menu);
 
 #ifdef OUTPUT_DUAL
 static menuitem_t outputset_items[] = {
-  { "Allow 480p mode",   &value_cabledetect,  1, 0 }, // 0
-  { "RGB Limited Range", &value_rgblimited,   2, 0 }, // 1
-  { "Enhanced DVI mode", &value_dvienhanced,  3, 0 }, // 2
-  { "  Display as 16:9", &value_169,          4, 0 }, // 3
-  { "Mode switch delay", &value_switchdelay,  5, 0 }, // 4
-  { "Volume",            &value_volume,       6, 0 }, // 5
-  { "Mute",              &value_mute,         7, 0 }, // 6
-  { "Analog output",     &value_analogmode,   8, 0 }, // 7
-  { "Exit",              NULL,               10, 0 }, // 8
+  { "Allow 480p mode",   &value_cabledetect, 1, 0 }, // 0
+  { "RGB Limited Range", &value_rgblimited,  2, 0 }, // 1
+  { "Enhanced DVI mode", &value_dvienhanced, 3, 0 }, // 2
+  { "  Display as 16:9", &value_169,         4, 0 }, // 3
+  { "Volume",            &value_volume,      5, 0 }, // 4
+  { "Mute",              &value_mute,        6, 0 }, // 5
+  { "Analog output",     &value_analogmode,  7, 0 }, // 6
+  { "Exit",              NULL,               9, 0 }, // 7
 };
 
 static menu_t outputset_menu = {
@@ -153,10 +144,9 @@ static menuitem_t outputset_items[] = {
   { "RGB Limited Range", &value_rgblimited,  2, 0 }, // 1
   { "Enhanced DVI mode", &value_dvienhanced, 3, 0 }, // 2
   { "  Display as 16:9", &value_169,         4, 0 }, // 3
-  { "Mode switch delay", &value_switchdelay, 5, 0 }, // 4
-  { "Volume",            &value_volume,      6, 0 }, // 5
-  { "Mute",              &value_mute,        7, 0 }, // 6
-  { "Exit",              NULL,               9, 0 }, // 7
+  { "Volume",            &value_volume,      5, 0 }, // 4
+  { "Mute",              &value_mute,        6, 0 }, // 5
+  { "Exit",              NULL,               8, 0 }, // 6
 };
 
 static menu_t outputset_menu = {

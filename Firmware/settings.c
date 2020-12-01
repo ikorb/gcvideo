@@ -49,7 +49,6 @@ typedef struct {
   uint8_t  volume;
   uint32_t video_settings[VIDMODE_COUNT];
   uint32_t osdbg_settings;
-  uint32_t mode_switch_delay;
   uint32_t ir_codes[NUM_IRCODES];
   int8_t   brightness;
   int8_t   contrast;
@@ -76,7 +75,6 @@ const char *mode_names[VIDMODE_COUNT] = {
 uint32_t     video_settings[VIDMODE_COUNT];
 uint32_t     video_settings_global;
 uint32_t     osdbg_settings;
-uint32_t     mode_switch_delay;
 bool         resbox_enabled;
 video_mode_t current_videomode;
 uint8_t      audio_volume;
@@ -195,7 +193,6 @@ void settings_load(void) {
       video_settings[i] = set.video_settings[i];
 
     osdbg_settings    = set.osdbg_settings;
-    mode_switch_delay = set.mode_switch_delay;
 
     if (set.flags & SET_FLAG_RESBOX)
       resbox_enabled = true;
@@ -232,7 +229,6 @@ void settings_save(void) {
     set.video_settings[i] = video_settings[i];
 
   set.osdbg_settings    = osdbg_settings;
-  set.mode_switch_delay = mode_switch_delay;
 
   if (resbox_enabled)
     set.flags |= SET_FLAG_RESBOX;
@@ -282,7 +278,6 @@ void settings_init(void) {
 
   audio_mute        = false;
   audio_volume      = 255;
-  mode_switch_delay = 0;
   current_videomode = detect_inputmode();
 
   VIDEOIF->settings       = video_settings[current_videomode] | video_settings_global;

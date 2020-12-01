@@ -57,7 +57,6 @@ extern uint32_t     osdbg_settings;
 extern int8_t       picture_brightness;
 extern int8_t       picture_contrast;
 extern int8_t       picture_saturation;
-extern uint32_t     mode_switch_delay;
 extern bool         resbox_enabled;
 extern video_mode_t current_videomode;
 extern uint8_t      audio_volume;
