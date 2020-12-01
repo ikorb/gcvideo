@@ -39,25 +39,30 @@
 #include "vsync.h"
 #include "settings.h"
 
-#define SETTINGS_VERSION 5
-#define SETTINGS_SIZE_V4 60
-#define SETTINGS_SIZE_V5 63
+#define SETTINGS_VERSION 6 // bump if current reader cannot read older settings anymore
 
 typedef struct {
-  uint8_t  checksum;
   uint8_t  version;
-  uint8_t  flags;
-  uint8_t  volume;
-  uint32_t video_settings[VIDMODE_COUNT];
-  uint32_t osdbg_settings;
+  uint8_t  checksum;
+  // sub-structure to ensure future compatibility for flasher
+  uint8_t  ir_checksum; // only codecount and codes
+  uint8_t  ir_codecount;
   uint32_t ir_codes[NUM_IRCODES];
+  // end of flasher compatibility section
+  uint8_t  size;
+  uint8_t  resbox_enabled;
+  uint8_t  volume;
+  uint8_t  mute;
+  uint32_t video_settings[VIDMODE_COUNT];
+  uint32_t video_settings_global;
+  uint32_t osdbg_settings;
   int8_t   brightness;
   int8_t   contrast;
   int8_t   saturation;
+  int8_t   xshift;
+  int8_t   yshift;
+  // scanline settings are stored seperately
 } storedsettings_t;
-
-#define SET_FLAG_RESBOX (1<<0)
-#define SET_FLAG_MUTE   (1<<1)
 
 
 /* number of lines per frame in each video mode */
@@ -184,115 +189,147 @@ void print_resolution(void) {
 
 
 void settings_load(void) {
-  storedsettings_t set;
-  unsigned int i;
+  union {
+    storedsettings_t st;
+    uint8_t          byteset[sizeof(storedsettings_t)];
+  } set;
+
+  unsigned int setid;
   bool valid = false;
 
   /* scan for the first valid settings record */
-  for (i = 0; i < 256; i++) {
-    spiflash_read_block(&set, SETTINGS_OFFSET + 256 * i, sizeof(storedsettings_t));
-    if (set.version == SETTINGS_VERSION ||
-        set.version == 4) {
-      /* found a record with the expected version, verify checksum */
-      uint8_t *byteset = (uint8_t *)&set;
-      uint8_t sum = 0;
-      uint8_t size = 0;
-
-      switch (set.version) {
-      case 4: size = SETTINGS_SIZE_V4; break;
-      case 5: size = SETTINGS_SIZE_V5; break;
-      }
-
-      for (unsigned int j = 1; j < size; j++)
-        sum += byteset[j];
-
-      if (size != 0 && sum == set.checksum) {
-        /* found a valid setting record */
-        valid = true;
-        break;
-      }
+  /* Note: This ignores partially-filled records due to increased record size, */
+  /*       but this is handled when storing to save time.                      */
+  for (setid = 0; setid < 256; setid += 8) {
+    spiflash_read_block(&set, SETTINGS_OFFSET + setid * 256, sizeof(storedsettings_t));
+    if (set.st.version == 0xff) {
+      /* looks blank */
+      continue;
     }
 
-    if (set.version  != 0xff ||
-        set.checksum != 0xff) {
-      /* found an invalid, but non-empty record */
-      /* stop here because we can only write to empty records */
+    if (set.st.version != SETTINGS_VERSION) {
+      /* invalid, but not blank - stop here, anything above should also be in use */
       break;
     }
-  }
 
-  current_setid = i;
-  if (valid) {
-    /* valid settings found, copy to main vars */
-    for (i = 0; i < VIDMODE_COUNT; i++)
-      video_settings[i] = set.video_settings[i];
+    /* found a record with the expected version, verify checksum */
+    uint8_t sum = 0;
 
-    osdbg_settings    = set.osdbg_settings;
-
-    if (set.flags & SET_FLAG_RESBOX)
-      resbox_enabled = true;
-    else
-      resbox_enabled = false;
-
-    audio_volume = set.volume & 0xff;
-    if (set.flags & SET_FLAG_MUTE)
-      audio_mute = true;
-    else
-      audio_mute = false;
-
-    memcpy(ir_codes, set.ir_codes, sizeof(ir_codes));
-
-    if (set.version >= 5) {
-      picture_brightness = set.brightness;
-      picture_contrast   = set.contrast;
-      picture_saturation = set.saturation;
-      update_colormatrix();
+    for (unsigned int i = offsetof(storedsettings_t, ir_codecount);
+         i < sizeof(storedsettings_t); i++) {
+      sum += set.byteset[i];
     }
+
+    if (sum == set.st.checksum) {
+      valid = true;
+    }
+
+    /* Don't attempt to find another usable record,
+     * saving assumes that the one before the current is blank. */
+    break;
   }
+
+  current_setid = setid;
+
+  if (!valid) {
+    return;
+  }
+
+  /* valid settings found, copy to main vars */
+  memcpy(ir_codes, set.st.ir_codes, sizeof(ir_codes));
+
+  resbox_enabled = set.st.resbox_enabled;
+  audio_volume   = set.st.volume;
+  audio_mute     = set.st.mute;
+
+  memcpy(video_settings, set.st.video_settings, sizeof(video_settings));
+  video_settings_global = set.st.video_settings_global;
+
+  osdbg_settings     = set.st.osdbg_settings;
+  picture_brightness = set.st.brightness;
+  picture_contrast   = set.st.contrast;
+  picture_saturation = set.st.saturation;
+  screen_x_shift     = set.st.xshift;
+  screen_y_shift     = set.st.yshift;
+
+  spiflash_start_read(SETTINGS_OFFSET + ((current_setid + 2) << 8));
+  for (unsigned int i = 256; i < SCANLINERAM_ENTRIES; i ++) {
+    uint16_t val = spiflash_send_byte(0) << 8;
+    val |= spiflash_send_byte(0);
+    SCANLINERAM->profiles[i] = val;
+  }
+  spiflash_end_read();
 }
 
 void settings_save(void) {
-  storedsettings_t set;
-  uint8_t *byteset = (uint8_t *)&set;
-  uint8_t sum = 0;
+  union {
+    storedsettings_t st;
+    uint8_t          byteset[sizeof(storedsettings_t)];
+  } set;
 
   /* create settings record */
-  memset(&set, 0, sizeof(storedsettings_t));
-  set.version = SETTINGS_VERSION;
+  memset(&set, 0, sizeof(set));
+  set.st.size                  = sizeof(storedsettings_t);
+  set.st.version               = SETTINGS_VERSION;
+  set.st.ir_codecount          = NUM_IRCODES;
+  set.st.video_settings_global = video_settings_global;
+  set.st.osdbg_settings        = osdbg_settings;
+  set.st.resbox_enabled        = resbox_enabled;
+  set.st.volume                = audio_volume;
+  set.st.mute                  = audio_mute;
+  set.st.brightness            = picture_brightness;
+  set.st.contrast              = picture_contrast;
+  set.st.saturation            = picture_saturation;
+  set.st.xshift                = screen_x_shift;
+  set.st.yshift                = screen_y_shift;
 
-  for (unsigned int i = 0; i < VIDMODE_COUNT; i++)
-    set.video_settings[i] = video_settings[i];
+  memcpy(set.st.ir_codes, ir_codes, sizeof(ir_codes));
+  memcpy(set.st.video_settings, video_settings, sizeof(video_settings));
 
-  set.osdbg_settings    = osdbg_settings;
+  /* calculate global checksum */
+  uint8_t sum = 0;
 
-  if (resbox_enabled)
-    set.flags |= SET_FLAG_RESBOX;
+  for (unsigned int i = offsetof(storedsettings_t, ir_codecount);
+       i < sizeof(storedsettings_t); i++) {
+    sum += set.byteset[i];
+  }
 
-  set.volume = audio_volume;
-  if (audio_mute)
-    set.flags |= SET_FLAG_MUTE;
+  set.st.checksum = sum;
 
-  memcpy(set.ir_codes, ir_codes, sizeof(ir_codes));
+  /* calculate IR checksum */
+  sum = 0;
+  for (unsigned int i = offsetof(storedsettings_t, ir_codecount);
+       i < offsetof(storedsettings_t, size); i++) {
+    sum += set.byteset[i];
+  }
 
-  set.brightness = picture_brightness;
-  set.contrast   = picture_contrast;
-  set.saturation = picture_saturation;
-
-  /* calculate checksum */
-  for (unsigned int i = 1; i < sizeof(storedsettings_t); i++)
-    sum += byteset[i];
-
-  set.checksum = sum;
+  set.st.ir_checksum = sum;
 
   /* check if erase cycle is needed */
-  if (current_setid == 0) {
+  if (current_setid == 0 ||
+      !spiflash_is_blank(SETTINGS_OFFSET + (current_setid - 8) * 256, 2048)) {
     spiflash_erase_sector(SETTINGS_OFFSET);
     current_setid = 256;
   }
 
   /* write data to flash */
-  current_setid--;
-  spiflash_write_page(SETTINGS_OFFSET + 256 * current_setid, &set, sizeof(storedsettings_t));
+  spiflash_write_page(SETTINGS_OFFSET + current_setid * 256, &set, sizeof(set));
+
+  unsigned int page_remain = 0;
+  // note: first 256 word block of scanline RAM is unused
+  for (unsigned int i = 256; i < SCANLINERAM_ENTRIES; i++) {
+    if (page_remain == 0) {
+      spiflash_end_write();
+      spiflash_start_write(SETTINGS_OFFSET + current_setid * 256 + i * 2);
+      page_remain = 128;
+    }
+
+    spiflash_send_byte((SCANLINERAM->profiles[i] >> 8) & 0xff);
+    spiflash_send_byte(SCANLINERAM->profiles[i] & 0xff);
+    page_remain--;
+  }
+
+  spiflash_end_write();
 }
 
 

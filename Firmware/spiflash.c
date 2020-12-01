@@ -30,6 +30,7 @@
 */
 
 #include <stdbool.h>
+#include <stddef.h>
 #include <string.h>
 #include "irrx.h"
 #include "portdefs.h"
@@ -77,6 +78,20 @@ static void wait_write_done(void) {
     result = spiflash_send_byte(0x00);
     set_cs(true);
   } while (result & STATUSREG_WIP);
+}
+
+bool spiflash_is_blank(uint32_t address, unsigned int length) {
+  spiflash_start_read(address);
+
+  while (length-- > 0) {
+    if (spiflash_send_byte(0) != 0xff) {
+      set_cs(true);
+      return false;
+    }
+  }
+
+  set_cs(true);
+  return true;
 }
 
 static void start_command_addr(uint8_t command, uint32_t address) {

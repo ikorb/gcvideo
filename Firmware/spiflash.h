@@ -38,6 +38,7 @@
 void spiflash_erase_sector(uint32_t address);
 void spiflash_read_block(void* buffer, uint32_t address, uint32_t length);
 void spiflash_write_page(uint32_t address, void* buffer, uint32_t length);
+bool spiflash_is_blank(uint32_t address, unsigned int length);
 void spiflash_start_read(uint32_t address);
 void spiflash_start_write(uint32_t address);
 unsigned int spiflash_send_byte(unsigned int byte);
