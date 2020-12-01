@@ -3,7 +3,7 @@
 -g Binary:no
 -g CRC:Enable
 -g Reset_on_err:No
--g ConfigRate:1
+-g ConfigRate:17
 -g ProgPin:PullUp
 -g DonePin:PullUp
 -g TckPin:PullUp
