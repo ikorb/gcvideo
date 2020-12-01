@@ -25,19 +25,50 @@
    THE POSSIBILITY OF SUCH DAMAGE.
 
 
-   reblanker.h: Reblanker setup
+   settings.c: video-settings-related things
 
 */
 
-#ifndef REBLANKER_H
-#define REBLANKER_H
+#include <stdio.h>
+#include <stdint.h>
+#include <string.h>
+#include "irrx.h"
+#include "portdefs.h"
+#include "spiflash.h"
+#include "utils.h"
+#include "vsync.h"
+#include "settings.h"
 
-#include <stdbool.h>
+#define SETTINGS_MINVERSION 6
 
-#ifdef MODULE_main
-void update_reblanker(void);
-#else
-static inline void update_reblanker(void) {}
-#endif
+typedef struct {
+  uint8_t  version;
+  uint8_t  checksum;
+  // sub-structure to ensure future compatibility for flasher
+  uint8_t  ir_checksum; // only codecount and codes
+  uint8_t  ir_codecount;
+  uint32_t ir_codes[63]; // theoretical maximum for 256 bytes of storage
+  // end of flasher compatibility section
+} storedsettings_flasher_t;
 
-#endif
+
+/* dummy variables */
+uint32_t     video_settings[VIDMODE_COUNT];
+uint32_t     video_settings_global;
+video_mode_t current_videomode;
+uint32_t     osdbg_settings;
+uint8_t      audio_volume;
+bool         audio_mute;
+
+/* dummy functions */
+void update_colormatrix(void) {}
+
+
+void settings_init(void) {
+  video_settings[0] = VIDEOIF_SET_LD_ENABLE;
+  VIDEOIF->settings = VIDEOIF_SET_LD_ENABLE;
+}
+
+void settings_load(void) {
+  // temporary dummy
+}

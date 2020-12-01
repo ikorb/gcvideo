@@ -240,6 +240,18 @@ begin
     scanline_ram_addr_ext <= vid_settings.ScanlineProfile & ScanlineRAMAddr;
   end generate;
 
+  ramdevice_flasher: if Module = "flasher" generate
+    -- line capture RAM instead of scanline RAM
+    Inst_LineCapture: ZPULineCapture port map (
+      Clock            => Clock,
+      ZSelect          => ScanlineRAMSel,
+      ZPUBusIn         => ZPUIn,
+      ZPUBusOut        => ScanlineRAMOut,
+      VideoIn          => VideoIn,
+      PixelClockEnable => PixelClockEnable
+    );
+  end generate;
+
   -- OSD RAM
   Inst_OSDRAM: ZPU_DPRAM GENERIC MAP (
     AddressBits => 11,
@@ -329,7 +341,7 @@ begin
             OSDRAMSel <= '1';
           elsif cpu_mem_addr(12) = '0' then
             -- 0xffffe000-efff
-            ScanlineRAMSel <= '1';
+            ScanlineRAMSel <= '1'; -- used for linecapture in flasher
           else -- 0xffff f_00
             case cpu_mem_addr(11 downto 8) is -- select with 256-byte granularity
               when x"0"   => IRQControllerSel <= '1';

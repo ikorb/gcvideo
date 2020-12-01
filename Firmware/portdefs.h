@@ -36,6 +36,8 @@
 
 #ifdef MODULE_main
 #  include "portdefs-main.h"
+#else
+#  include "portdefs-flasher.h"
 #endif
 
 #ifdef __cplusplus

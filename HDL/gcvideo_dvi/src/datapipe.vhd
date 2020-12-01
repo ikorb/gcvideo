@@ -42,7 +42,7 @@ entity Datapipe is
   generic (
     TargetConsole: string; -- "GC" or "WII"
     Firmware     : string;
-    Module       : string
+    Module       : string  -- "main" or "flasher"
   );
   port (
     -- clocks
@@ -293,6 +293,15 @@ begin
     vs_rebuildcsync   <= video_settings.RebuildCSync;
   end generate;
 
+  vs_flasher: if Module = "flasher" generate
+    vs_enhanced_mode  <= false;
+    vs_widescreen     <= false;
+    vs_sampleratehack <= false;
+    vs_colormode      <= "01"; -- RGB limited range
+    vs_analogrgbout   <= false;
+    vs_rebuildcsync   <= false;
+  end generate;
+
   -- master clock generator
   Inst_ClockGen: ClockGen
     port map (
@@ -318,6 +327,15 @@ begin
         Audio       => audio,
         SPDIF_Out   => SPDIF_Out
       );
+  end generate;
+
+  audio_flasher: if Module = "flasher" generate
+    -- no audio
+    SPDIF_Out         <= '0';
+    audio.Left        <= (others => '0');
+    audio.Right       <= (others => '0');
+    audio.LeftEnable  <= false;
+    audio.RightEnable <= false;
   end generate;
 
   -- read gamecube video data
@@ -391,6 +409,26 @@ begin
 
   end generate;
 
+  blanking_regen_flasher: if Module = "flasher" generate
+    -- regenerate blanking signal
+    Inst_Reblanking: Blanking_Regenerator_Fixed
+      PORT MAP (
+        PixelClock       => Clock54M,
+        PixelClockEnable => pixel_clk_en_reblanker,
+        VideoIn          => video_reblanker_in,
+        VideoOut         => video_reblanker_out
+      );
+
+    video_measurements.HTotal        <= 0;
+    video_measurements.HActiveStart  <= 0;
+    video_measurements.VTotal        <= 0;
+    video_measurements.VActiveStart0 <= 0;
+    video_measurements.VActiveStart1 <= 0;
+    video_measurements.VHOffset0     <= 0;
+    video_measurements.VHOffset1     <= 0;
+
+    -- no scanlines
+  end generate;
 
   -- add OSD overlay
   Inst_OSD: TextOSD
@@ -484,12 +522,24 @@ begin
   -- external Syncs
   process(Clock54M, pixel_clk_en_ld_out)
     variable csync: boolean;
+    variable hsync: boolean;
+    variable vsync: boolean;
   begin
     if rising_edge(Clock54M) and pixel_clk_en_ld_out then
-      if video_settings.RebuildCSync then
-        csync := video_dvienc_in.VSync xor video_dvienc_in.HSync;
+      if Module = "flasher" then
+        csync := video_gcdv_out.CSync;
+        hsync := video_gcdv_out.HSync;
+        vsync := video_gcdv_out.VSync;
+
       else
-        csync := video_dvienc_in.CSync;
+        if vs_rebuildcsync then
+          csync := video_dvienc_in.VSync xor video_dvienc_in.HSync;
+        else
+          csync := video_dvienc_in.CSync;
+        end if;
+
+        hsync := video_dvienc_in.HSync;
+        vsync := video_dvienc_in.VSync;
       end if;
 
       if csync then
@@ -498,13 +548,13 @@ begin
         CSync_out <= '1';
       end if;
 
-      if video_dvienc_in.VSync then
+      if vsync then
         VSync_out <= '0';
       else
         VSync_out <= '1';
       end if;
 
-      if video_dvienc_in.HSync then
+      if hsync then
         HSync_out <= '0';
       else
         HSync_out <= '1';
@@ -515,6 +565,42 @@ begin
 
 
   -- signal connections
+  Connections_Flasher: if Module = "flasher" generate
+    -- reduced pipeline, monochrome only
+    --   in -> OSD -> linedoubler -> reblanker -> dvid
+    --         +-> dac
+    video_osd_in       <= to_444_mono(video_gcdv_out);
+    video_ld_in        <= to_422_mono(video_osd_out);
+    video_reblanker_in <= to_444_mono(video_ld_out);
+    video_dvienc_in    <= to_rgb_mono(video_reblanker_out);
+
+    pixel_clk_en_osd       <= pixel_clk_en;
+    pixel_clk_en_reblanker <= pixel_clk_en_ld_out;
+    pixel_clk_en_dac       <= pixel_clk_en;
+
+    DAC_RGBMode     <= false;
+    use_syncongreen <= true;
+
+    process(Clock54M, pixel_clk_en)
+    begin
+      if rising_edge(Clock54M) and pixel_clk_en then
+        video_dac_in.PixelR <= x"80";
+        video_dac_in.PixelG <= video_osd_out.PixelY;
+        video_dac_in.PixelB <= x"80";
+        video_dac_in.HSync  <= video_osd_out.HSync;
+        video_dac_in.VSync  <= video_osd_out.VSync;
+        video_dac_in.CSync  <= video_osd_out.CSync;
+
+        if video_osd_out.Blanking then
+          video_dac_in.PixelG <= x"00";
+          -- let's hope that the signals on R and B are clamped to something useful...
+        end if;
+
+      end if;
+    end process;
+
+  end generate;
+
   Connections_Main: if Module = "main" generate
     video_ld_in        <= video_gcdv_out;
     video_422conv_in   <= video_ld_out;

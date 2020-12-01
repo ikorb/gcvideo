@@ -52,6 +52,8 @@ endif
 
 ifeq ($(MODULE),main)
 # nothing yet
+else ifeq ($(MODULE),flasher)
+# still nothing (target hardware ID is stored in updater signature)
 else
 dummy_mod:
 	@echo "MODULE variable invalid"
@@ -86,6 +88,8 @@ SRCFILES_main := modeset_common.c screen_about.c screen_allmodes.c \
 	screen_idle.c screen_mainmenu.c screen_osdsettings.c screen_outputsettings.c \
 	screen_picturesettings.c screen_advanced.c screen_scanlines.c settings-main.c \
 	reblanker.c infoframe.c menu.c colormatrix.c
+
+SRCFILES_flasher := flasher.c settings-flasher.c
 
 COPYDIR     := build/$(MODULE)
 BASENAME    := gcvideo-sw-$(TARGET)

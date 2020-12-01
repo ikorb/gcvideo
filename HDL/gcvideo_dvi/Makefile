@@ -28,8 +28,6 @@
 # Makefile: Single-output Makefile for GCVideo-DVI
 #
 
-MODULE := main
-
 # values that are usually overriden by the main Makefile
 VERSION := dev
 
@@ -43,9 +41,18 @@ ifeq ($(MODULE),main)
        src/i2s_decoder.vhd                \
        src/ZPU_SPICAP.vhd                 \
        src/scanline_generator.vhd
+
+else ifeq ($(MODULE),flasher)
+  CONSTRAINTS_MODULE :=
+  SRC_MODULE := \
+       src/crc32.vhd                      \
+       src/Blanking_Regenerator_Fixed.vhd \
+       src/ZPU_SPICAP_CRC.vhd             \
+       src/ZPULineCapture.vhd
+
 else
 moduledummy:
-       @echo "MODULE invalid or unspecified"
+	@echo "MODULE invalid or unspecified"
 endif
 
 SRC_COMMON := \

@@ -25,19 +25,15 @@
    THE POSSIBILITY OF SUCH DAMAGE.
 
 
-   reblanker.h: Reblanker setup
-
+   flasher.c: Flash update tool for GCVideo
 */
 
-#ifndef REBLANKER_H
-#define REBLANKER_H
+#include <stdio.h>
+#include "osd.h"
+#include "screens.h"
 
-#include <stdbool.h>
-
-#ifdef MODULE_main
-void update_reblanker(void);
-#else
-static inline void update_reblanker(void) {}
-#endif
-
-#endif
+void run_mainloop(void) {
+  osd_clrscr();
+  printf("Not yet implemented.");
+  while (1) ;
+}

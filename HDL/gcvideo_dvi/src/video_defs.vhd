@@ -169,6 +169,63 @@ package video_defs is
     return signed("0" & a);
   end function;
 
+  function to_444_mono(vin: VideoY422)
+    return VideoYCbCr is
+    variable output: VideoYCbCr;
+  begin
+    output.PixelY        := vin.PixelY;
+    output.PixelCb       := x"00";
+    output.PixelCr       := x"00";
+    output.Blanking      := vin.Blanking;
+    output.HSync         := vin.HSync;
+    output.VSync         := vin.VSync;
+    output.CSync         := vin.CSync;
+    output.IsEvenField   := vin.IsEvenField;
+    output.IsProgressive := vin.IsProgressive;
+    output.IsPAL         := vin.IsPAL;
+    output.Is30kHz       := vin.Is30kHz;
+
+    return output;
+  end function;
+
+  function to_rgb_mono(vin: VideoYCbCr)
+    return VideoRGB is
+    variable output: VideoRGB;
+  begin
+    output.PixelR        := vin.PixelY;
+    output.PixelG        := vin.PixelY;
+    output.PixelB        := vin.PixelY;
+    output.Blanking      := vin.Blanking;
+    output.HSync         := vin.HSync;
+    output.VSync         := vin.VSync;
+    output.CSync         := vin.CSync;
+    output.IsEvenField   := vin.IsEvenField;
+    output.IsProgressive := vin.IsProgressive;
+    output.IsPAL         := vin.IsPAL;
+    output.Is30kHz       := vin.Is30kHz;
+
+    return output;
+  end function;
+
+  function to_422_mono(vin: VideoYCbCr)
+    return VideoY422 is
+    variable output: VideoY422;
+  begin
+    output.PixelY        := vin.PixelY;
+    output.PixelCbCr     := x"80";
+    output.CurrentIsCb   := true;
+    output.Blanking      := vin.Blanking;
+    output.HSync         := vin.HSync;
+    output.VSync         := vin.VSync;
+    output.CSync         := vin.CSync;
+    output.IsEvenField   := vin.IsEvenField;
+    output.IsProgressive := vin.IsProgressive;
+    output.IsPAL         := vin.IsPAL;
+    output.Is30kHz       := vin.Is30kHz;
+
+    return output;
+  end function;
+
 end video_defs;
 
 package body video_defs is

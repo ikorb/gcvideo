@@ -25,19 +25,45 @@
    THE POSSIBILITY OF SUCH DAMAGE.
 
 
-   reblanker.h: Reblanker setup
+   portdefs-flasher.h: Hardware interface definitions for flash update firmware
 
 */
 
-#ifndef REBLANKER_H
-#define REBLANKER_H
+#ifndef PORTDEFS_FLASHER_H
+#define PORTDEFS_FLASHER_H
 
-#include <stdbool.h>
+#include <stdint.h>
 
-#ifdef MODULE_main
-void update_reblanker(void);
+#ifdef __cplusplus
+  #define __I volatile
 #else
-static inline void update_reblanker(void) {}
+  #define __I volatile const
 #endif
+#define __O  volatile
+#define __IO volatile
+
+#define HAVE_SPI_HWCRC
+
+/* --- Line capture RAM --- */
+
+typedef struct {
+  union {
+    __I uint32_t linedata[256 * 4];
+    struct {
+      __O uint32_t arm;
+      __O uint32_t dummy[256 * 3 - 1];
+      __O uint32_t needed_lines[255];
+      __O uint32_t selected_page;
+    };
+  };
+} LINECAPTURE_TypeDef;
+
+#define LINECAPTURE_FLAG_BUSY (1 << 31)
+
+/* --- mixing it all together --- */
+
+#define LINECAPTURE_BASE ((uint32_t)0xffffe000UL)
+
+#define LINECAPTURE ((LINECAPTURE_TypeDef *)LINECAPTURE_BASE)
 
 #endif
