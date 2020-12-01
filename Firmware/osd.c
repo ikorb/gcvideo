@@ -150,17 +150,3 @@ void osd_drawborder(unsigned int xpos, unsigned int ypos,
     ptr2 += OSD_CHARS_PER_LINE;
   }
 }
-
-void osd_puthex(uint32_t value, unsigned int line) {
-  static const uint8_t hexchars[] = { 0xb0, 0xb1, 0xb2, 0xb3,
-                                      0xb4, 0xb5, 0xb6, 0xb7,
-                                      0xb8, 0xb9, 0xe1, 0xe2,
-                                      0xe3, 0xe4, 0xe5, 0xe6 };
-
-  volatile uint32_t *ptr = OSDRAM->data + 45 * line + 8;
-
-  for (unsigned int i = 0; i < 8; i++) {
-    *ptr-- = hexchars[value & 0x0f];
-    value >>= 4;
-  }
-}

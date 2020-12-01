@@ -53,6 +53,5 @@ void osd_fillbox(unsigned int xpos, unsigned int ypos,
                  unsigned int xsize, unsigned int ysize, uint32_t ch);
 void osd_drawborder(unsigned int xpos, unsigned int ypos,
                     unsigned int xsize, unsigned int ysize);
-void osd_puthex(uint32_t value, unsigned int line);
 
 #endif
