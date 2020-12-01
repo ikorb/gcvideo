@@ -34,8 +34,6 @@
 
 #include <stdint.h>
 
-extern uint8_t flash_chip_id[4];
-
 void spiflash_init(void);
 void spiflash_read_settings(void);
 void spiflash_write_settings(void);

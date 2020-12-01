@@ -38,7 +38,6 @@
 #include "portdefs.h"
 #include "screens.h"
 #include "settings.h"
-#include "spiflash.h"
 
 /* helper symbols for slightly better code readability */
 #ifdef CONSOLE_WII
@@ -83,10 +82,6 @@ void screen_about(void) {
   osd_putsat(12, 13, "Copyright \013 2015-2020");
   osd_putsat(16, 14, "by Ingo Korb");
   osd_putsat(15, 15, "ingo@akana.de");
-  osd_gotoxy(14, 17);
-  printf("FlashID %02x%02x%02x%02x",
-         flash_chip_id[0], flash_chip_id[1],
-         flash_chip_id[2], flash_chip_id[3]);
 
   /* wait until all buttons are released */
   pad_wait_for_release();

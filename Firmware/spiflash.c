@@ -54,8 +54,6 @@
 #define SETTINGS_SIZE_V4 60
 #define SETTINGS_SIZE_V5 63
 
-uint8_t flash_chip_id[4];
-
 static uint16_t current_setid;
 
 typedef struct {
@@ -86,25 +84,6 @@ static unsigned int send_byte(unsigned int byte) {
   SPI->data = byte;
   while (SPI->flags & SPI_FLAG_BUSY) ;
   return SPI->data;
-}
-
-static void read_chip_id(void) {
-  /* read the single-byte chip ID */
-  set_cs(false);
-  send_byte(CMD_READ_SIGNATURE);
-  send_byte(0x00); // three dummy bytes
-  send_byte(0x00);
-  send_byte(0x00);
-  flash_chip_id[0] = send_byte(0x00);
-  set_cs(true);
-
-  /* read the JEDEC ID */
-  set_cs(false);
-  send_byte(CMD_READ_IDENT);
-  flash_chip_id[1] = send_byte(0x00);
-  flash_chip_id[2] = send_byte(0x00);
-  flash_chip_id[3] = send_byte(0x00);
-  set_cs(true);
 }
 
 static void write_enable(void) {
@@ -279,6 +258,5 @@ void spiflash_write_settings(void) {
 }
 
 void spiflash_init(void) {
-  read_chip_id();
   spiflash_read_settings();
 }
