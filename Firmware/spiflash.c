@@ -51,15 +51,15 @@
 
 static void set_cs(bool state) {
   if (state)
-    SPI->flags |=  SPI_FLAG_SSEL;
+    SPICAP->spi_flags |=  SPI_FLAG_SSEL;
   else
-    SPI->flags &= ~SPI_FLAG_SSEL;
+    SPICAP->spi_flags &= ~SPI_FLAG_SSEL;
 }
 
 unsigned int spiflash_send_byte(unsigned int byte) {
-  SPI->data = byte;
+  SPICAP->spi_data = byte;
   /* no busy check, handled via hardware waitstates */
-  return SPI->data;
+  return SPICAP->spi_data;
 }
 
 static void write_enable(void) {

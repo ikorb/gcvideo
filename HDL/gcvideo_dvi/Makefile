@@ -21,7 +21,7 @@ SRC_COMMON := \
 	src/ZPUWatchdog.vhd                \
 	src/ZPUIRReceiver.vhd              \
 	src/ZPU_DPRAM.vhd                  \
-	src/ZPU_SPI.vhd                    \
+	src/ZPU_SPICAP.vhd                 \
 	src/audio_spdif.vhd                \
 	src/ConsoleModeDetect.vhd          \
 	src/aux_ecc1.vhd                   \

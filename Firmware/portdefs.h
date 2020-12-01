@@ -142,15 +142,23 @@ typedef struct {
   /*__IO*/ uint32_t profiles[SCANLINERAM_ENTRIES];
 } SCANLINERAM_TypeDef;
 
-/* --- SPI --- */
+/* --- SPI+ICAP --- */
 
 typedef struct {
-  __IO uint32_t data;
-  __IO uint32_t flags;
-} SPI_TypeDef;
+  __IO uint32_t spi_data;
+  __IO uint32_t spi_flags;
+  __IO uint32_t unused_word_1;
+  __IO uint32_t unused_word_2;
+  __IO uint32_t icap_data;
+  __O  uint32_t icap_flags;
+} SPICAP_TypeDef;
 
-#define SPI_FLAG_SSEL (1 << 0)
-#define SPI_FLAG_BUSY (1 << 1)
+#define SPI_FLAG_SSEL     (1 << 0)
+#define SPI_FLAG_BUSY     (1 << 1)
+#define ICAP_FLAG_CLOCK   (1 << 0)
+#define ICAP_FLAG_CE      (1 << 1)
+#define ICAP_FLAG_WRITE   (1 << 2)
+#define ICAP_FLAG_BUSY    (1 << 0)
 
 /* --- IR receiver --- */
 
@@ -178,7 +186,7 @@ typedef struct {
 #define IRQController_BASE (PERIPH_BASE)
 #define VIDEOIF_BASE       (PERIPH_BASE + 0x100)
 #define PADREADER_BASE     (PERIPH_BASE + 0x200)
-#define SPI_BASE           (PERIPH_BASE + 0x300)
+#define SPICAP_BASE        (PERIPH_BASE + 0x300)
 #define IRRX_BASE          (PERIPH_BASE + 0x400)
 
 #define IRQController ((IRQController_TypeDef *)IRQController_BASE)
@@ -186,7 +194,7 @@ typedef struct {
 #define PADREADER     ((PadReader_TypeDef *)PADREADER_BASE)
 #define SCANLINERAM   ((SCANLINERAM_TypeDef *)SCANLINERAM_BASE)
 #define OSDRAM        ((OSDRAM_TypeDef *)OSDRAM_BASE)
-#define SPI           ((SPI_TypeDef *)SPI_BASE)
+#define SPICAP        ((SPICAP_TypeDef *)SPICAP_BASE)
 #define IRRX          ((IRRX_TypeDef *)IRRX_BASE)
 
 #endif

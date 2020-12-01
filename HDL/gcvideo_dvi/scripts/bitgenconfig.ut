@@ -26,3 +26,5 @@
 -g sw_clk:Startupclk
 -g sw_gwe_cycle:5
 -g sw_gts_cycle:4
+-g ICAP_Enable:Yes
+-g next_config_register_write:Disable

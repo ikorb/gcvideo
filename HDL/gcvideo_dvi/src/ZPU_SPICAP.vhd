@@ -24,13 +24,16 @@
 -- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 -- THE POSSIBILITY OF SUCH DAMAGE.
 --
--- ZPU_SPI.vhd: SPI interface for ZPU
+-- ZPU_SPI.vhd: SPI and ICAP interface for ZPU
 --
 ----------------------------------------------------------------------------------
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+
+library UNISIM;
+use UNISIM.vcomponents.ICAP_SPARTAN3A;
 
 use work.ZPUDevices.all;
 
@@ -57,11 +60,29 @@ architecture Behavioral of ZPU_SPI is
   signal spi_data        : std_logic_vector(7 downto 0)     := (others => '0');
   signal spi_state       : natural range 0 to 9             := 0;
   signal spi_active      : boolean                          := false;
+
+  signal icap_out  : std_logic_vector(7 downto 0); -- 7 is LSB!
+  signal icap_in   : std_logic_vector(7 downto 0); -- 7 is LSB!
+  signal icap_clock: std_logic := '0';
+  signal icap_ce   : std_logic := '0';
+  signal icap_write: std_logic := '0';
+  signal icap_busy : std_logic;
+
 begin
   SSelect <= spi_ssel;
   SClock  <= spi_clock;
 
   ZPUBusOut.mem_busy <= '1' when spi_active else '0'; -- hold CPU while busy
+
+  icap_inst: ICAP_SPARTAN3A
+    port map (
+      BUSY  => icap_busy,
+      O     => icap_out,
+      CE    => not icap_ce, -- active-low input
+      CLK   => icap_clock,
+      I     => icap_in,
+      WRITE => not icap_write -- active-low input
+    );
 
   process(Clock)
   begin
@@ -79,27 +100,59 @@ begin
         if ZSelect = '1' then
           if ZPUBusIn.mem_writeEnable = '1' then
             -- write access
-            if ZPUBusIn.mem_addr(2) = '0' then
-              spi_data         <= ZPUBusIn.mem_write(7 downto 0);
-              spi_state        <= 0;
-              spi_active       <= true;
-              MOSI             <= ZPUBusIn.mem_write(7); -- output first bit immediately
-              spi_clockcounter <= SPIClockDiv - 1;
-            else
-              spi_ssel <= ZPUBusIn.mem_write(0);
-            end if;
+            case ZPUBusIn.mem_addr(4 downto 2) is
+              -- SPI
+              when "000" =>
+                spi_data         <= ZPUBusIn.mem_write(7 downto 0);
+                spi_state        <= 0;
+                spi_active       <= true;
+                MOSI             <= ZPUBusIn.mem_write(7); -- output first bit immediately
+                spi_clockcounter <= SPIClockDiv - 1;
+
+              when "001" =>
+                spi_ssel  <= ZPUBusIn.mem_write(0);
+
+              -- ICAP
+              when "100" =>
+                for i in 0 to 7 loop
+                  icap_in(i) <= ZPUBusIn.mem_write(7 - i);
+                end loop;
+
+              when "101" =>
+                icap_clock <= ZPUBusIn.mem_write(0);
+                icap_ce    <= ZPUBusIn.mem_write(1);
+                icap_write <= ZPUBusIn.mem_write(2);
+
+              when others => null;
+            end case;
+
           else
             -- read access
             ZPUBusOut.mem_read <= (others => '0');
 
-            if ZPUBusIn.mem_addr(2) = '0' then
-              ZPUBusOut.mem_read(7 downto 0) <= spi_data;
-            else
-              ZPUBusOut.mem_read(0) <= spi_ssel;
-              if spi_active then
-                ZPUBusOut.mem_read(1) <= '1';
-              end if;
-            end if;
+            case ZPUBusIn.mem_addr(4 downto 2) is
+              -- SPI
+              when "000" =>
+                ZPUBusOut.mem_read(7 downto 0) <= spi_data;
+
+              when "001" =>
+                ZPUBusOut.mem_read(0) <= spi_ssel;
+                if spi_active then
+                  ZPUBusOut.mem_read(1) <= '1';
+                end if;
+
+              -- ICAP
+              when "100" =>
+                for i in 0 to 7 loop
+                  ZPUBusOut.mem_read(i) <= icap_out(7 - i);
+                end loop;
+
+              when "101" =>
+                ZPUBusOut.mem_read(0) <= icap_busy;
+
+              when others => null;
+
+            end case;
           end if;
         end if;
 
