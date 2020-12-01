@@ -45,7 +45,7 @@ is also available.
 
 There are four subdirectories:
 
-- `src` contains the VHDL sources and Xilinx ISE project files
+- `src` contains the VHDL sources
 - `bin` contains the synthesized bit stream in various formats
 - `doc` contains a few images showing the necessary connections
 - `codegens` contains two code generators that generate VHDL source
@@ -484,8 +484,7 @@ Notes about other issues will be added as time permits.
 
 ## Running synthesis ##
 
-There is a Xilinx ISE project file in the `src` subdirectory if you
-want to use Project Navigator. Alternatively, you can run the full
+You can run the full
 synthesis and bitstream generation steps using the `Makefile` in this
 directory. It has only been tested on Linux and assumes that the
 Xilinx synthesis tools are reachable via the `PATH` environment
