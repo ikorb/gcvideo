@@ -120,7 +120,7 @@ package video_defs is
     LimitedRange      : boolean;
     EnhancedMode      : boolean;
     Widescreen        : boolean;
-    RGBOutput         : boolean;
+    AnalogRGBOutput   : boolean;
     SyncOnGreen       : boolean;
     Volume            : unsigned(7 downto 0);
     SampleRateHack    : boolean;

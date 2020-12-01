@@ -403,7 +403,7 @@ begin
   process(Clock54M, pixel_clk_en_ld)
   begin
     if rising_edge(Clock54M) and pixel_clk_en_ld then
-      if video_settings.RGBOutput and ForceYPbPr /= '0' then
+      if video_settings.AnalogRGBOutput and ForceYPbPr /= '0' then
         -- RGB mode
         if video_settings.SyncOnGreen then
           if video_out.CSync then

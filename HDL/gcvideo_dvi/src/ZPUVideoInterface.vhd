@@ -92,7 +92,7 @@ begin
   VSettings.LimitedRange       <= (vid_settings(6)  = '1');
   VSettings.EnhancedMode       <= (vid_settings(7)  = '1');
   VSettings.Widescreen         <= (vid_settings(8)  = '1');
-  VSettings.RGBOutput          <= (vid_settings(9)  = '1');
+  VSettings.AnalogRGBOutput    <= (vid_settings(9)  = '1');
   VSettings.SyncOnGreen        <= (vid_settings(10) = '1');
   VSettings.SampleRateHack     <= (vid_settings(11) = '1');
   VSettings.Volume             <= unsigned(volume_setting);
