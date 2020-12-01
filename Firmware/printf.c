@@ -102,20 +102,16 @@ static int internal_nprintf(void (*output_function)(char c), const char *fmt, va
     /* read all flags */
     do {
       if (flags < FLAG_WIDTH) {
-        switch (*fmt) {
-        case '0':
+        if (*fmt == '0') {
           flags |= FLAG_ZEROPAD;
           continue;
-
-        case '-':
+        } else if (*fmt == '-') {
           flags |= FLAG_LEFTADJ;
           continue;
-
-        case ' ':
+        } else if (*fmt == ' ') {
           flags |= FLAG_BLANK;
           continue;
-
-        case '+':
+        } else if (*fmt == '+') {
           flags |= FLAG_FORCESIGN;
           continue;
         }
@@ -142,42 +138,28 @@ static int internal_nprintf(void (*output_function)(char c), const char *fmt, va
     } while (*fmt++);
 
     /* Strings */
-    if (*fmt == 'c' || *fmt == 's') {
-      switch (*fmt) {
-      case 'c':
-        buffer[0] = va_arg(ap, int);
-        ptr = buffer;
-        break;
+    if (*fmt == 'c') {
+      buffer[0] = va_arg(ap, int);
+      ptr = buffer;
 
-      case 's':
-        ptr = va_arg(ap, char *);
-        break;
-      }
+      goto output;
+    }
+
+    else if (*fmt == 's') {
+      ptr = va_arg(ap, char *);
 
       goto output;
     }
 
     /* Numbers */
-    switch (*fmt) {
-    case 'u':
-      flags |= FLAG_UNSIGNED;
-    case 'd':
+    else if (*fmt == 'u') {
       base = 10;
-      break;
-
-    case 'o':
-      base = 8;
       flags |= FLAG_UNSIGNED;
-      break;
-
-    case 'p': // pointer
-      output_function('0');
-      output_function('x');
-      width -= 2;
-    case 'x':
+    } else if (*fmt == 'd') {
+      base = 10;
+    } else if (*fmt == 'x') {
       base = 16;
       flags |= FLAG_UNSIGNED;
-      break;
     }
 
     unsigned int num;
