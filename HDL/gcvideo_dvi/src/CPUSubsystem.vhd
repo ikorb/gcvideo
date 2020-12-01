@@ -38,7 +38,8 @@ use work.video_defs.all;
 
 entity CPUSubsystem is
   generic (
-    Firmware         : string
+    Firmware         : string;
+    Module           : string
   );
   port (
     Clock            : in  std_logic;

@@ -33,5 +33,5 @@ use warnings;
 use feature ':5.10';
 
 foreach my $fn (@ARGV) {
-    say "vhdl work \"../$fn\"";
+    say "vhdl work \"../../$fn\"";
 }

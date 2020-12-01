@@ -50,37 +50,46 @@ dummy:
 	@false
 endif
 
+MODULE := main
+
 PERL := perl
 CROSS_PREFIX=zpu-elf-
 CC := $(CROSS_PREFIX)gcc
 LD := $(CROSS_PREFIX)ld
 AS := $(CROSS_PREFIX)as
 CFLAGS = -Wall -Werror -Os -g -std=gnu99 -ffunction-sections -fdata-sections -I. \
-         -finline-limit=11 \
+         -DMODULE_$(MODULE) -finline-limit=11 \
          -DVERSION=\"$(VERSION)\" $(EXTRA_CFLAGS) $(patsubst %,-D%,$(FEATURE_FLAGS))
 LDFLAGS := -Tstandalone-bsd.ld -Wl,--gc-sections -Wl,--relax -nostartfiles
 
 DATA2MEM := data2mem
 
 ifndef FEATURE_FLAGS
-  OBJDIR := obj-$(TARGET)
+  OBJDIR := obj-$(TARGET)-$(MODULE)
 else
   space := $(subst ,, )
   FLAGSUFFIX := $(subst $(space),-,$(strip $(FEATURE_FLAGS)))
-  OBJDIR := obj-$(TARGET)-$(FLAGSUFFIX)
+  OBJDIR := obj-$(TARGET)-$(MODULE)-$(FLAGSUFFIX)
 endif
 
+SRCFILES_COMMON := main.c osd.c printf.c pad.c vsync.c irrx.c \
+       spiflash.c utils.c icap.c screen_irconfig.c \
+       modeset_common.c screen_about.c screen_allmodes.c \
+       screen_idle.c screen_mainmenu.c screen_osdsettings.c screen_outputsettings.c \
+       screen_picturesettings.c screen_advanced.c screen_scanlines.c settings.c \
+       reblanker.c infoframe.c menu.c colormatrix.c
+
+SRCFILES_main :=
+
+COPYDIR     := build/$(MODULE)
 BASENAME    := gcvideo-sw-$(TARGET)
+FULLNAME    := $(BASENAME)-$(MODULE)
 CRT0        := crt0-bsd.S
-SRCFILES    := main.c osd.c printf.c pad.c vsync.c menu.c irrx.c \
-	modeset_common.c screen_about.c screen_allmodes.c screen_irconfig.c \
-	screen_idle.c screen_mainmenu.c screen_osdsettings.c screen_outputsettings.c \
-	settings.c spiflash.c screen_picturesettings.c screen_advanced.c \
-	screen_scanlines.c utils.c icap.c colormatrix.c reblanker.c infoframe.c
-BITFILE_IN  := ../HDL/gcvideo_dvi/build/toplevel_p2xh.bit
-BITFILE_OUT := ../HDL/gcvideo_dvi/build/p2xh_output.bit
-MIFFILE_OUT := ../HDL/gcvideo_dvi/build/$(BASENAME).mif
-BMMFILE     := ../HDL/gcvideo_dvi/src/zpu_bootram_bd.bmm
+SRCFILES    := $(SRCFILES_COMMON) $(SRCFILES_$(MODULE))
+BITFILE_IN  := ../HDL/gcvideo_dvi/$(COPYDIR)/toplevel_p2xh.bit
+BITFILE_OUT := ../HDL/gcvideo_dvi/$(COPYDIR)/p2xh_output.bit
+MIFFILE_OUT := ../HDL/gcvideo_dvi/$(COPYDIR)/$(BASENAME).mif
+BMMFILE     := ../HDL/gcvideo_dvi/$(COPYDIR)/zpu_bootram_bd.bmm
 
 BRAM_SIZE   := 16384
 
@@ -101,11 +110,11 @@ all: mif
 
 .PHONY : inject mif
 
-inject: $(OBJDIR)/$(BASENAME).mem
+inject: $(OBJDIR)/$(FULLNAME).mem
 	$(E) "  DATA2MEM"
 	$(Q)$(DATA2MEM) -bm $(BMMFILE) -bt $(BITFILE_IN) -bd $< -o b $(BITFILE_OUT)
 
-mif: $(OBJDIR)/$(BASENAME).mif
+mif: $(OBJDIR)/$(FULLNAME).mif
 	$(E) "  COPY     $<"
 	$(Q)cp $< $(MIFFILE_OUT)
 
@@ -121,7 +130,7 @@ $(OBJDIR)/%.bin: $(OBJDIR)/%.elf
 	$(E) "  BIN      $@"
 	$(Q)$(CROSS_PREFIX)objcopy -O binary $< $@
 
-$(OBJDIR)/$(BASENAME).elf: $(OBJFILES)
+$(OBJDIR)/$(FULLNAME).elf: $(OBJFILES)
 	$(E) "  LINK     $@"
 	$(Q)$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $^
 
@@ -140,8 +149,8 @@ $(OBJDIR):
 
 clean:
 	$(E) "  CLEAN"
-	$(Q)-rm -f $(OBJDIR)/$(BASENAME).bin $(OBJDIR)/$(BASENAME).elf
-	$(Q)-rm -f $(OBJDIR)/$(BASENAME).mem $(OBJDIR)/$(BASENAME).mif $(OBJFILES)
+	$(Q)-rm -f $(OBJDIR)/$(FULLNAME).bin $(OBJDIR)/$(FULLNAME).elf
+	$(Q)-rm -f $(OBJDIR)/$(FULLNAME).mem $(OBJDIR)/$(FULLNAME).mif $(OBJFILES)
 	$(Q)-rm -f .dep/*
 	$(Q)-rmdir .dep $(OBJDIR)
 

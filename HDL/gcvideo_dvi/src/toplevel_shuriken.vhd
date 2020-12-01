@@ -41,7 +41,8 @@ use work.video_defs.all;
 entity toplevel_shuriken is
   generic (
     TargetConsole: string; -- "GC" or "WII"
-    Firmware     : string
+    Firmware     : string;
+    Module       : string
   );
   port (
     -- clocks
@@ -87,7 +88,8 @@ begin
   -- data pipe
   Inst_Datapipe: Datapipe generic map (
     TargetConsole => TargetConsole,
-    Firmware      => Firmware
+    Firmware      => Firmware,
+    Module        => Module
   ) port map (
     VClockN     => VClockN,
     VData       => VData,

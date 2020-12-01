@@ -41,7 +41,8 @@ use work.video_defs.all;
 entity Datapipe is
   generic (
     TargetConsole: string; -- "GC" or "WII"
-    Firmware     : string
+    Firmware     : string;
+    Module       : string
   );
   port (
     -- clocks
@@ -216,7 +217,8 @@ begin
 
   -- CPU subsystem
   Inst_CPU: CPUSubsystem generic map (
-    Firmware         => Firmware
+    Firmware         => Firmware,
+    Module           => Module
   ) port map (
     Clock            => Clock54M,
     ExtReset         => not clock_locked,

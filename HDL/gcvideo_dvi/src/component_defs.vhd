@@ -311,7 +311,8 @@ package component_defs is
 
   component CPUSubsystem is
     generic (
-      Firmware        : string
+      Firmware        : string;
+      Module          : string
     );
     port (
       Clock           : in  std_logic;
@@ -387,7 +388,8 @@ package component_defs is
   component Datapipe is
     generic (
       TargetConsole: string; -- "GC" or "WII"
-      Firmware     : string
+      Firmware     : string;
+      Module       : string
     );
     port (
       -- clocks

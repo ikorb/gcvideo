@@ -1,6 +1,40 @@
-# FIXME: Header, make-it-work, etc.
+# -*- mode: makefile-gmake -*-
+#
+# GCVideo DVI HDL
+# Copyright (C) 2014-2020, Ingo Korb <ingo@akana.de>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Makefile: Single-output Makefile for GCVideo-DVI
+#
 
-VERSION := 2.4d
+MODULE := main
+
+# values that are usually overriden by the main Makefile
+VERSION := dev
+
+CONSTRAINTS_MODULE :=
+SRC_MODULE :=
 
 SRC_COMMON := \
 	src/Blanking_Regenerator.vhd       \
@@ -52,15 +86,11 @@ SRC_DUAL     := src/toplevel_dual.vhd
 BMM          := src/zpu_bootram.bmm
 PART         := xc3s200a-vq100-4
 
-PROMFILE     := gcvideo-dvi-$(TARGET)-$(VERSION)-spirom
-PROMTYPE     := M25P40
-XSVFFILE     := gcvideo-dvi-$(TARGET)-$(VERSION)-$(PROMTYPE).xsvf
-BITFILE      := gcvideo-dvi-$(TARGET)-$(VERSION).bit
-
 MAP_OPTS := -timing -logic_opt on -ol high -xe n -t 1 -register_duplication on -cm balanced -detail -ir off -ignore_keep_hierarchy -pr b -bp -power off
 PAR_OPTS := -ol high -xe n -t 1
+OBJCOPY  := zpu-elf-objcopy
 
-SRC = $(SRC_COMMON)
+SRC = $(SRC_COMMON) $(SRC_MODULE)
 
 ifeq ($(TARGET),p2xh-gc)
   SRC      += $(SRC_P2XH)
@@ -136,77 +166,70 @@ else
  E := @echo
 endif
 
+ifeq ($(DEV),1)
+  BUILDDIR := build/$(MODULE)
+else
+  BUILDDIR := build/$(MODULE)-$(TARGET)
+endif
+
 CONSOLE_LC := $(shell echo $(CONSOLE)|tr A-Z a-z)
 
-UCF := build/constraints-$(BOARD)-$(CONSOLE_LC).ucf
+UCF := $(BUILDDIR)/constraints-$(BOARD)-$(CONSOLE_LC).ucf
 
 FIRMWARE_MIF := gcvideo-sw-$(FIRMWARE).mif
 
-all: build/$(XSVFFILE) build/$(BITFILE)
+all: $(BUILDDIR)/$(TOPLEVEL).bin
 
-build/$(XSVFFILE): build/$(PROMFILE).mcs
-	$(E) "---- XSVFGEN  $<"
-	$(Q) sed -e "s/%BITFILE%/$(TOPLEVEL).bit/;s/%MCSFILE%/$(PROMFILE).mcs/;s/%PROMTYPE%/$(PROMTYPE)/;s/%XSVFFILE%/$(XSVFFILE)/" scripts/impact-genxsvf.cmd > build/genxsvf.cmd
-	$(Q)cd build ; impact -batch genxsvf.cmd
-
-build/$(PROMFILE).mcs: build/$(TOPLEVEL).bit
-	$(E) "---- PROMGEN  $<"
-	$(Q) sed -e "s/%BITFILE%/$(TOPLEVEL).bit/;s/%OUTFILE%/$(PROMFILE)./" scripts/impact-genprom.cmd > build/genprom.cmd
-	$(Q)cd build ; impact -batch genprom.cmd
-
-build/$(BITFILE): build/$(TOPLEVEL).bit
-	$(E) "---- CP       $<"
-	$(Q)cp build/$(TOPLEVEL).bit build/$(BITFILE)
-
-build/%.bit: build/%.ncd
+build/%.bin build/%.bit: build/%.ncd
 	$(E) "---- BITGEN   $<"
-	$(Q)cd build ; bitgen -f ../scripts/bitgenconfig.ut $(TOPLEVEL).ncd
+	$(Q)cd $(dir $<) ; bitgen -f ../../scripts/bitgenconfig.ut $(TOPLEVEL).ncd
 
 build/%.ncd: build/%.pcf
 	$(E) "---- PAR      $<"
-	$(Q)cd build ; par -w $(PAR_OPTS) $(TOPLEVEL)_map.ncd $(TOPLEVEL).ncd $(TOPLEVEL).pcf
-	$(Q)grep " Timing constraints? not met" build/$(TOPLEVEL).par && false || true
+	$(Q)cd $(dir $<) ; par -w $(PAR_OPTS) $(TOPLEVEL)_map.ncd $(TOPLEVEL).ncd $(TOPLEVEL).pcf
+	$(Q)grep "All constraints were met" $(BUILDDIR)/$(TOPLEVEL).par
 
 build/%.pcf: build/%.ngd
 	$(E) "---- MAP      $<"
-	$(Q)cd build ; map -p $(PART) $(MAP_OPTS) -o $(TOPLEVEL)_map.ncd $(TOPLEVEL).ngd $(TOPLEVEL).pcf
+	$(Q)cd $(dir $<) ; map -p $(PART) $(MAP_OPTS) -o $(TOPLEVEL)_map.ncd $(TOPLEVEL).ngd $(TOPLEVEL).pcf
 
 build/%.ngd: build/%.ngc $(UCF) $(BMM)
 	$(E) "---- NGDBUILD $<"
-	$(Q)cd build ; ngdbuild -dd _ngo -nt timestamp -uc ../$(UCF) -bm ../$(BMM) -p $(PART) $(TOPLEVEL).ngc $(TOPLEVEL).ngd
+	$(Q)cp $(BMM) $(dir $<)/$(notdir $(BMM))
+	$(Q)cd $(dir $<) ; ngdbuild -dd _ngo -nt timestamp -uc ../../$(UCF) -bm $(notdir $(BMM)) -p $(PART) $(TOPLEVEL).ngc $(TOPLEVEL).ngd
 
 build/%.ngc: build/%.xst $(SRC)
 	$(E) "---- XST      $<"
-	$(Q)cd build ; xst -ifn $(TOPLEVEL).xst -ofn $(TOPLEVEL).syr
+	$(Q)cd $(dir $<) ; xst -ifn $(TOPLEVEL).xst -ofn $(TOPLEVEL).syr
 
-build/%.xst: build/%.prj scripts/template.xst build/$(FIRMWARE_MIF)
+build/%.xst: build/%.prj scripts/template.xst $(BUILDDIR)/$(FIRMWARE_MIF)
 	$(E) "---- GENXST   $<"
 	$(Q)cp scripts/template.xst $@
 	$(Q)echo -ifn $(TOPLEVEL).prj >> $@
 	$(Q)echo -ofn $(TOPLEVEL)     >> $@
 	$(Q)echo -top $(TOPLEVEL)     >> $@
-	$(Q)echo -generics {TargetConsole=\"$(CONSOLE)\" Firmware=\"$(FIRMWARE_MIF)\"} >> $@
+	$(Q)echo -generics {TargetConsole=\"$(CONSOLE)\" Firmware=\"$(FIRMWARE_MIF)\" Module=\"$(MODULE)\"} >> $@
 
-$(UCF): src/constraints-common.ucf src/constraints-$(BOARD).ucf src/constraints-$(CONSOLE_LC).ucf
+$(UCF): src/constraints-common.ucf src/constraints-$(BOARD).ucf src/constraints-$(CONSOLE_LC).ucf $(CONSTRAINTS_MODULE)
 	$(E) "---- GENUCF   $<"
 	$(Q)cat $^ > $@
 
-build/$(FIRMWARE_MIF):
-	$(MAKE) -C ../../Firmware TARGET=$(FIRMWARE) VERSION=$(VERSION) FEATURE_FLAGS="$(FWFLAGS)"
+$(BUILDDIR)/$(FIRMWARE_MIF):
+	$(MAKE) -C ../../Firmware TARGET=$(FIRMWARE) VERSION=$(VERSION) FEATURE_FLAGS="$(FWFLAGS)" MODULE=$(MODULE) COPYDIR=$(BUILDDIR)
 
-build/%.prj: | build # FIXME: Should somehow depend on the content of the source file list
+build/%.prj: | $(BUILDDIR)
 	$(E) "---- GENPRJ   $@"
 	$(Q)scripts/genproject.pl $(SRC) > $@
 
-build:
+$(BUILDDIR):
 	$(E) "---- MKDIR    $@"
-	$(Q)mkdir -p build/xst/tmp
+	$(Q)mkdir -p $(BUILDDIR)/xst/tmp
 
 clean:
 	$(E) "---- CLEAN"
-	-$(Q)rm -rf build # brute-force cleanup
+	-$(Q)rm -rf $(BUILDDIR) # brute-force cleanup
 
 printversion:
 	@echo $(VERSION)
 
-.PRECIOUS : build/%.prj build/%.xst build/%.ngc build/%.ngd build/%.pcf build/%.ncd build/%.bit build/$(PROMFILE).mcs build/$(XSVFFILE)
+.PRECIOUS : build/%.prj build/%.xst build/%.ngc build/%.ngd build/%.pcf build/%.ncd
