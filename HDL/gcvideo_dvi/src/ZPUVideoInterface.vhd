@@ -54,8 +54,11 @@ end ZPUVideoInterface;
 
 architecture Behavioral of ZPUVideoInterface is
   -- everything disabled by default
-  --                                                2109876543210
-  constant VidSettingsDefault: std_logic_vector := "0000000000000";
+  --                                                109876543210
+  constant VidSettingsDefault: std_logic_vector := "000000000000";
+
+  -- output disabled, colors don't matter
+  constant OSDBGSettingsDefault: std_logic_vector := "1------------------------";
 
   signal current_pixelcount: natural range 0 to 880;
   signal current_linecount : natural range 0 to 650;
@@ -67,8 +70,8 @@ architecture Behavioral of ZPUVideoInterface is
   signal active_line       : boolean;
   signal active_line_count : natural range 0 to 7;
   signal volume_setting    : std_logic_vector( 7 downto 0) := x"ff";
-  signal vid_settings      : std_logic_vector(12 downto 0) := VidSettingsDefault;
-  signal osd_bgsettings    : std_logic_vector(23 downto 0);
+  signal vid_settings      : std_logic_vector(11 downto 0) := VidSettingsDefault;
+  signal osd_bgsettings    : std_logic_vector(24 downto 0) := OSDBGSettingsDefault;
   signal image_controls    : std_logic_vector(24 downto 0);
 
   signal stored_flags      : std_logic_vector(2 downto 0);
@@ -85,15 +88,17 @@ begin
   VSettings.ScanlinesEven      <= (vid_settings(2)  = '1');
   VSettings.ScanlinesAlternate <= (vid_settings(3)  = '1');
   VSettings.LinedoublerEnabled <= (vid_settings(4)  = '1');
-  VSettings.DisableOutput      <= (vid_settings(5)  = '1');
-  VSettings.CableDetect        <= (vid_settings(6)  = '1');
-  VSettings.LimitedRange       <= (vid_settings(7)  = '1');
-  VSettings.EnhancedMode       <= (vid_settings(8)  = '1');
-  VSettings.Widescreen         <= (vid_settings(9)  = '1');
-  VSettings.RGBOutput          <= (vid_settings(10) = '1');
-  VSettings.SyncOnGreen        <= (vid_settings(11) = '1');
-  VSettings.SampleRateHack     <= (vid_settings(12) = '1');
+  VSettings.CableDetect        <= (vid_settings(5)  = '1');
+  VSettings.LimitedRange       <= (vid_settings(6)  = '1');
+  VSettings.EnhancedMode       <= (vid_settings(7)  = '1');
+  VSettings.Widescreen         <= (vid_settings(8)  = '1');
+  VSettings.RGBOutput          <= (vid_settings(9)  = '1');
+  VSettings.SyncOnGreen        <= (vid_settings(10) = '1');
+  VSettings.SampleRateHack     <= (vid_settings(11) = '1');
   VSettings.Volume             <= unsigned(volume_setting);
+
+  -- putting this bit in an unrelated register simplifies the software side
+  VSettings.DisableOutput      <= (osd_bgsettings(24) = '1');
 
   -- forward OSD settings to output
   OSDSettings.BGAlpha    <= unsigned(osd_bgsettings(23 downto 16));
@@ -113,7 +118,7 @@ begin
       if ZPUBusIn.Reset = '1' then
         IRQ             <= '0';
         vid_settings    <= VidSettingsDefault;
-        osd_bgsettings  <= (others => '0');
+        osd_bgsettings  <= OSDBGSettingsDefault;
         volume_setting  <= x"ff";
       end if;
 
@@ -132,8 +137,8 @@ begin
                        ZPUBusOut.mem_read(3)          <= console_mode;
                        ZPUBusOut.mem_read(2 downto 0) <= stored_flags;
 
-        when "011"  => ZPUBusOut.mem_read <= x"0000" & "000" & vid_settings;
-        when "100"  => ZPUBusOut.mem_read <= x"00"        & osd_bgsettings;
+        when "011"  => ZPUBusOut.mem_read <= x"00000"     & vid_settings;
+        when "100"  => ZPUBusOut.mem_read <= x"0" & "000" & osd_bgsettings;
         when "101"  => ZPUBusOut.mem_read <= x"000000"    & volume_setting;
         when "110"  => ZPUBusOut.mem_read <= x"0" & "000" & image_controls;
         when others => ZPUBusOut.mem_read <= (others => '-');  -- undefined
@@ -142,8 +147,8 @@ begin
       -- write path
       if ZSelect = '1' and ZPUBusIn.mem_writeEnable = '1' then
         case ZPUBusIn.mem_addr(4 downto 2) is
-          when "011"  => vid_settings   <= ZPUBusIn.mem_write(12 downto 0);
-          when "100"  => osd_bgsettings <= ZPUBusIn.mem_write(23 downto 0);
+          when "011"  => vid_settings   <= ZPUBusIn.mem_write(11 downto 0);
+          when "100"  => osd_bgsettings <= ZPUBusIn.mem_write(24 downto 0);
           when "101"  => volume_setting <= ZPUBusIn.mem_write( 7 downto 0);
           when "110"  => image_controls <= ZPUBusIn.mem_write(24 downto 0);
           when others => null;

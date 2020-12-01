@@ -73,14 +73,14 @@ void vsync_handler(void) {
     if (disable_frames == 0) {
       /* if delay is enabled, disable output and start counting */
       disable_frames = 3;
-      VIDEOIF->settings |= VIDEOIF_SET_DISABLE_OUTPUT;
+      VIDEOIF->osd_bg = VIDEOIF_OSDBG_DISABLE_OUTPUT;
     } else {
       /* count down */
       disable_frames--;
 
       if (disable_frames == 0) {
         /* timer expired, re-enable and signal change */
-        VIDEOIF->settings &= ~VIDEOIF_SET_DISABLE_OUTPUT;
+        VIDEOIF->osd_bg = osdbg_settings;
         mode_changed = true;
       }
     }
