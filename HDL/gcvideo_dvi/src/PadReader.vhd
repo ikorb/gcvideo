@@ -50,12 +50,15 @@ architecture Behavioral of PadReader is
   -- Hama clone pad needs ~9.3us to respond, so this timeout must be larger
   -- SD Media Loader sometimes retriggers controller poll after 13us, so this timeout must be smaller
   -- TODO: Maybe increase again (was 2047) and stop after 90 bits instead?
-  constant TimeoutLength: natural := 700;
+  -- GC+ has a large delay from query to response, so the timeout is now split
+  -- between one for the inital reply and one for the end of transmission.
+  constant TimeoutReply : natural := 2047;
+  constant TimeoutEnd   : natural := 700;
   constant SamplePoint  : natural := 100; -- was 128, but that fails with one specific NES adapter
 
   signal data_deglitched: std_logic;
   signal prev_data      : std_logic;
-  signal pulselength    : natural range 0 to TimeoutLength;
+  signal pulselength    : natural range 0 to TimeoutReply;
   signal irq_internal   : std_logic := '0';
 
   signal bitshifter     : std_logic_vector(95 downto 0);
@@ -99,7 +102,7 @@ begin
         pulselength <= 0;
       else
         -- measure pulse length
-        if pulselength < TimeoutLength then
+        if (bits > 24 and pulselength < TimeoutEnd) or (pulselength < TimeoutReply) then
           pulselength <= pulselength + 1;
 
           if pulselength = SamplePoint then
