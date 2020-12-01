@@ -203,6 +203,17 @@ package ZPUDevices is
     );
   end component;
 
+  component ZPULineCapture is
+    port (
+      Clock           : in  std_logic;
+      ZSelect         : in  std_logic;
+      ZPUBusIn        : in  ZPUDeviceIn;
+      ZPUBusOut       : out ZPUDeviceOut;
+      VideoIn         : in  VideoY422;
+      PixelClockEnable: in  boolean
+    );
+  end component;
+
 end ZPUDevices;
 
 package body ZPUDevices is
