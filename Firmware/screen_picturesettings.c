@@ -43,8 +43,9 @@ enum {
   MENUITEM_BRIGHTNESS,
   MENUITEM_CONTRAST,
   MENUITEM_SATURATION,
-  MENUITEM_NEUTRAL,
-  MENUITEM_EXIT
+  MENUITEM_RESET,
+  MENUITEM_SAVEEXIT,
+  MENUITEM_CANCEL
 };
 
 /* --- getters and setters --- */
@@ -62,13 +63,14 @@ static menuitem_t pictureset_items[] = {
   { "Brightness",       &value_brightness, 1, 0 }, // 0
   { "Contrast",         &value_contrast,   2, 0 }, // 1
   { "Saturation",       &value_saturation, 3, 0 }, // 2
-  { "Reset to neutral", NULL,              4, 0 }, // 3
-  { "Exit",             NULL,              6, 0 }, // 4
+  { "Reset",            NULL,              4, 0 }, // 3
+  { "Save and Exit",    NULL,              6, 0 }, // 4
+  { "Cancel",           NULL,              7, 0 }, // 5
 };
 
 static menu_t pictureset_menu = {
-  9, 4,
-  26, 8,
+  9, 3,
+  26, 9,
   NULL,
   sizeof(pictureset_items) / sizeof(*pictureset_items),
   pictureset_items
@@ -79,16 +81,27 @@ void screen_picturesettings(void) {
 
   osd_clrscr();
 
+  int8_t prev_brightness = picture_brightness;
+  int8_t prev_contrast   = picture_contrast;
+  int8_t prev_saturation = picture_saturation;
+
   while (1) {
     menu_draw(&pictureset_menu);
     current_item = menu_exec(&pictureset_menu, current_item);
 
     switch (current_item) {
     case MENU_ABORT:
-    case MENUITEM_EXIT:
+    case MENUITEM_CANCEL:
+      picture_brightness = prev_brightness;
+      picture_contrast   = prev_contrast;
+      picture_saturation = prev_saturation;
+      update_colormatrix();
       return;
 
-    case MENUITEM_NEUTRAL:
+    case MENUITEM_SAVEEXIT:
+      return;
+
+    case MENUITEM_RESET:
       picture_brightness = 0;
       picture_contrast   = 0;
       picture_saturation = 0;
