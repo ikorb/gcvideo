@@ -59,12 +59,12 @@ static const cliprange_t clipranges[] = {
 
 /* (un)draw marker on a menu item */
 static void mark_item(menu_t *menu, unsigned int item, char ch) {
-  osd_putcharat(menu->xpos + 1, menu->ypos + menu->items[item].line + 1, ch, ATTRIB_DIM_BG);
+  osd_putcharat(menu->xpos + 1, menu->ypos + menu->items[item].line, ch, ATTRIB_DIM_BG);
 }
 
 /* (un)draw marker on a value item */
 static void mark_value(menu_t *menu, unsigned int item, char ch) {
-  osd_putcharat(menu->xpos + menu->xsize - 7, menu->ypos + menu->items[item].line + 1,
+  osd_putcharat(menu->xpos + menu->xsize - 7, menu->ypos + menu->items[item].line,
                 ch, ATTRIB_DIM_BG);
 }
 
@@ -73,7 +73,7 @@ static void print_value(menu_t *menu, unsigned int itemnum) {
   int value = menu->items[itemnum].value->get();
 
   osd_gotoxy(menu->xpos + menu->xsize - 6,
-             menu->ypos + menu->items[itemnum].line + 1);
+             menu->ypos + menu->items[itemnum].line);
   switch (menu->items[itemnum].value->type) {
   case VALTYPE_BOOL:
     if (value)
@@ -91,7 +91,7 @@ static void print_value(menu_t *menu, unsigned int itemnum) {
 
   case VALTYPE_RGBMODE:
     osd_gotoxy(menu->xpos + menu->xsize - 7,
-               menu->ypos + menu->items[itemnum].line + 1);
+               menu->ypos + menu->items[itemnum].line);
     switch (value) {
     case 0:
       osd_puts("YPbPr");
@@ -206,7 +206,7 @@ void menu_draw(menu_t *menu) {
       osd_setattr(true, false);
 
     /* print item */
-    osd_gotoxy(menu->xpos + 2, menu->ypos + items[i].line + 1);
+    osd_gotoxy(menu->xpos + 2, menu->ypos + items[i].line);
     osd_puts(items[i].text);
 
     if (items[i].value) {

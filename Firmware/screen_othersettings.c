@@ -155,15 +155,15 @@ static void otherset_draw(menu_t *menu);
 
 #ifdef OUTPUT_DUAL
 static menuitem_t otherset_items[] = {
-  { "Allow 480p mode",   &value_cabledetect, 0, 0 }, // 0
-  { "RGB Limited Range", &value_rgblimited,  1, 0 }, // 1
-  { "Enhanced DVI mode", &value_dvienhanced, 2, 0 }, // 2
-  { "  Display as 16:9", &value_169,         3, 0 }, // 3
-  { "Mode switch delay", &value_switchdelay, 4, 0 }, // 4
-  { "Volume",            &value_volume,      5, 0 }, // 5
-  { "Mute",              &value_mute,        6, 0 }, // 6
-  { "Analog output",     &value_analogmode,  7, 0 }, // 7
-  { "Exit",              NULL,               9, 0 }, // 8
+  { "Allow 480p mode",   &value_cabledetect,  1, 0 }, // 0
+  { "RGB Limited Range", &value_rgblimited,   2, 0 }, // 1
+  { "Enhanced DVI mode", &value_dvienhanced,  3, 0 }, // 2
+  { "  Display as 16:9", &value_169,          4, 0 }, // 3
+  { "Mode switch delay", &value_switchdelay,  5, 0 }, // 4
+  { "Volume",            &value_volume,       6, 0 }, // 5
+  { "Mute",              &value_mute,         7, 0 }, // 6
+  { "Analog output",     &value_analogmode,   8, 0 }, // 7
+  { "Exit",              NULL,               10, 0 }, // 8
 };
 
 static menu_t otherset_menu = {
@@ -175,14 +175,14 @@ static menu_t otherset_menu = {
 };
 #else
 static menuitem_t otherset_items[] = {
-  { "Allow 480p mode",   &value_cabledetect, 0, 0 }, // 0
-  { "RGB Limited Range", &value_rgblimited,  1, 0 }, // 1
-  { "Enhanced DVI mode", &value_dvienhanced, 2, 0 }, // 2
-  { "  Display as 16:9", &value_169,         3, 0 }, // 3
-  { "Mode switch delay", &value_switchdelay, 4, 0 }, // 4
-  { "Volume",            &value_volume,      5, 0 }, // 5
-  { "Mute",              &value_mute,        6, 0 }, // 6
-  { "Exit",              NULL,               8, 0 }, // 7
+  { "Allow 480p mode",   &value_cabledetect, 1, 0 }, // 0
+  { "RGB Limited Range", &value_rgblimited,  2, 0 }, // 1
+  { "Enhanced DVI mode", &value_dvienhanced, 3, 0 }, // 2
+  { "  Display as 16:9", &value_169,         4, 0 }, // 3
+  { "Mode switch delay", &value_switchdelay, 5, 0 }, // 4
+  { "Volume",            &value_volume,      6, 0 }, // 5
+  { "Mute",              &value_mute,        7, 0 }, // 6
+  { "Exit",              NULL,               9, 0 }, // 7
 };
 
 static menu_t otherset_menu = {

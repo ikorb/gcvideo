@@ -82,11 +82,11 @@ static valueitem_t value_tint_cr     = { get_tint_cr,  set_tint_cr,  VALTYPE_SBY
 /* --- menu definition --- */
 
 static menuitem_t osdset_items[] = {
-  { "Mode popup",      &value_resbox,   0, 0 }, // 0
-  { "BG Transparency", &value_alpha,    1, 0 }, // 1
-  { "BG Tint Blue",    &value_tint_cb,  2, 0 }, // 2
-  { "BG Tint Red",     &value_tint_cr,  3, 0 }, // 3
-  { "Exit",            NULL,            5, 0 }, // 4
+  { "Mode popup",      &value_resbox,   1, 0 }, // 0
+  { "BG Transparency", &value_alpha,    2, 0 }, // 1
+  { "BG Tint Blue",    &value_tint_cb,  3, 0 }, // 2
+  { "BG Tint Red",     &value_tint_cr,  4, 0 }, // 3
+  { "Exit",            NULL,            6, 0 }, // 4
 };
 
 static menu_t osdset_menu = {

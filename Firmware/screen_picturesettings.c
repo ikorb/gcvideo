@@ -75,11 +75,11 @@ static valueitem_t value_saturation = { get_saturation, set_saturation, VALTYPE_
 /* --- menu definition --- */
 
 static menuitem_t pictureset_items[] = {
-  { "Brightness",       &value_brightness, 0, 0 }, // 0
-  { "Contrast",         &value_contrast,   1, 0 }, // 1
-  { "Saturation",       &value_saturation, 2, 0 }, // 2
-  { "Reset to neutral", NULL,              3, 0 }, // 3
-  { "Exit",             NULL,              5, 0 }, // 4
+  { "Brightness",       &value_brightness, 1, 0 }, // 0
+  { "Contrast",         &value_contrast,   2, 0 }, // 1
+  { "Saturation",       &value_saturation, 3, 0 }, // 2
+  { "Reset to neutral", NULL,              4, 0 }, // 3
+  { "Exit",             NULL,              6, 0 }, // 4
 };
 
 static menu_t pictureset_menu = {

@@ -42,12 +42,12 @@
 /* ----- per-mode settings menu ----- */
 
 static menuitem_t modeset_items[] = {
-  { "Linedoubler",            &modeset_value_linedoubler, 1, 0 }, // 0
-  { "Scanlines",              &modeset_value_scanlines,   2, 0 }, // 1
-  { " Scanline strength",     &modeset_value_slstrength,  3, 0 }, // 2
-  { " Scanlines on",          &modeset_value_sleven,      4, 0 }, // 3
-  { " Alternating scanlines", &modeset_value_slalt,       5, 0 }, // 4
-  { "Exit",                   NULL,                       7, 0 }, // 5
+  { "Linedoubler",            &modeset_value_linedoubler, 2, 0 }, // 0
+  { "Scanlines",              &modeset_value_scanlines,   3, 0 }, // 1
+  { " Scanline strength",     &modeset_value_slstrength,  4, 0 }, // 2
+  { " Scanlines on",          &modeset_value_sleven,      5, 0 }, // 3
+  { " Alternating scanlines", &modeset_value_slalt,       6, 0 }, // 4
+  { "Exit",                   NULL,                       8, 0 }, // 5
 };
 
 static menu_t modeset_menu = {
@@ -75,13 +75,13 @@ static void screen_modesettings(video_mode_t mode) {
 
 static menuitem_t allmodes_items[] = {
   // assumption: Entries use the same item IDs as video_mode_t
-  { "240p...", NULL, 0, 0 }, // 0
-  { "288p...", NULL, 1, 0 }, // 1
-  { "480i...", NULL, 2, 0 }, // 2
-  { "576i...", NULL, 3, 0 }, // 3
-  { "480p...", NULL, 4, 0 }, // 4
-  { "576p...", NULL, 5, 0 }, // 5
-  { "Exit",    NULL, 7, 0 }, // 6
+  { "240p...", NULL, 1, 0 }, // 0
+  { "288p...", NULL, 2, 0 }, // 1
+  { "480i...", NULL, 3, 0 }, // 2
+  { "576i...", NULL, 4, 0 }, // 3
+  { "480p...", NULL, 5, 0 }, // 4
+  { "576p...", NULL, 6, 0 }, // 5
+  { "Exit",    NULL, 8, 0 }, // 6
 };
 
 static menu_t allmodes_menu = {
