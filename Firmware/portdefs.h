@@ -81,11 +81,15 @@ typedef union {
   };
 } VideoInterface_TypeDef;
 
-#define VIDEOIF_FLAG_PROGRESSIVE (1<<0)
-#define VIDEOIF_FLAG_PAL         (1<<1)
-#define VIDEOIF_FLAG_31KHZ       (1<<2)
-#define VIDEOIF_FLAG_MODE_WII    (1<<3)
-#define VIDEOIF_FLAG_FORCE_YPBPR (1<<4)
+#define VIDEOIF_FLAG_IN_PROGRESSIVE (1<<0)
+#define VIDEOIF_FLAG_IN_PAL         (1<<1)
+#define VIDEOIF_FLAG_IN_31KHZ       (1<<2)
+#define VIDEOIF_FLAG_MODE_WII       (1<<3)
+#define VIDEOIF_FLAG_FORCE_YPBPR    (1<<4)
+#define VIDEOIF_FLAG_EVENFIELD      (1<<5)
+#define VIDEOIF_FLAG_LD_PROGRESSIVE (1<<6)
+#define VIDEOIF_FLAG_LD_PAL         (1<<7)
+#define VIDEOIF_FLAG_LD_31KHZ       (1<<8)
 
 #define VIDEOIF_BIT_SL_EVEN          2
 #define VIDEOIF_BIT_SL_ALTERNATE     3

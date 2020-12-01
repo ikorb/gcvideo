@@ -39,7 +39,8 @@ entity ZPUVideoInterface is
   port (
     Clock           : in  std_logic;
     PixelClockEnable: in  boolean;
-    Video           : in  VideoY422;
+    VideoIn         : in  VideoY422;
+    VideoLD         : in  VideoY422;
     ConsoleMode     : in  console_mode_t;
     ForceYPbPr      : in  boolean;
     ZSelect         : in  std_logic;
@@ -73,7 +74,8 @@ architecture Behavioral of ZPUVideoInterface is
   signal osd_bgsettings    : std_logic_vector(24 downto 0) := OSDBGSettingsDefault;
   signal color_matrix      : ColorMatrix_t;
 
-  signal stored_flags      : std_logic_vector(2 downto 0);
+  signal stored_flags_in   : std_logic_vector(3 downto 0);
+  signal stored_flags_ld   : std_logic_vector(2 downto 0);
   signal console_mode      : std_logic;
   signal force_ypbpr       : std_logic;
 begin
@@ -128,9 +130,11 @@ begin
         when "001"  => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(line_counter,  32));
 
         when "010"  => ZPUBusOut.mem_read             <= (others => '0');
+                       ZPUBusOut.mem_read(8 downto 6) <= stored_flags_ld;
+                       ZPUBusOut.mem_read(5)          <= stored_flags_in(3);
                        ZPUBusOut.mem_read(4)          <= force_ypbpr;
                        ZPUBusOut.mem_read(3)          <= console_mode;
-                       ZPUBusOut.mem_read(2 downto 0) <= stored_flags;
+                       ZPUBusOut.mem_read(2 downto 0) <= stored_flags_in(2 downto 0);
 
         when others => ZPUBusOut.mem_read <= (others => '-');  -- undefined
       end case;
@@ -161,17 +165,17 @@ begin
 
       ---- update signal measurements
       if PixelClockEnable then
-        prev_vsync <= Video.VSync;
-        prev_hsync <= Video.HSync;
+        prev_vsync <= VideoIn.VSync;
+        prev_hsync <= VideoIn.HSync;
 
-        if not Video.Blanking then
+        if not VideoIn.Blanking then
           -- non-blank pixel on line
           current_pixelcount <= current_pixelcount + 1;
           active_line        <= true;
         end if;
 
-        if Video.HSync and not prev_hsync and
-           not Video.VSync then
+        if VideoIn.HSync and not prev_hsync and
+           not VideoIn.VSync then
           -- start of HSync, outside VSync
           if active_line then
             -- measure just one line per frame, but not the first
@@ -190,7 +194,7 @@ begin
           active_line        <= false;
         end if;
 
-        if Video.VSync and not prev_vsync then
+        if VideoIn.VSync and not prev_vsync then
           -- start of VSync, copy remaining measurements
           IRQ <= '1';
 
@@ -198,16 +202,34 @@ begin
           current_linecount <= 0;
           active_line_count <= 0;
 
-          stored_flags <= (others => '0');
-          if Video.IsProgressive then
-            stored_flags(0) <= '1';
+          stored_flags_in <= (others => '0');
+
+          if VideoIn.IsProgressive then
+            stored_flags_in(0) <= '1';
           end if;
-          if Video.IsPAL then
-            stored_flags(1) <= '1';
+          if VideoIn.IsPAL then
+            stored_flags_in(1) <= '1';
           end if;
-          if Video.Is30kHz then
-            stored_flags(2) <= '1';
+          if VideoIn.Is30kHz then
+            stored_flags_in(2) <= '1';
           end if;
+          if VideoIn.IsEvenField then
+            stored_flags_in(3) <= '1';
+          end if;
+
+          stored_flags_ld <= (others => '0');
+
+          if VideoLD.IsProgressive then
+            stored_flags_ld(0) <= '1';
+          end if;
+          if VideoLD.IsPAL then
+            -- technically redundant, but simplifies the software side
+            stored_flags_ld(1) <= '1';
+          end if;
+          if VideoLD.Is30kHz then
+            stored_flags_ld(2) <= '1';
+          end if;
+
         end if;
 
       end if;

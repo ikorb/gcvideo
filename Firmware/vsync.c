@@ -56,7 +56,7 @@ void vsync_handler(void) {
   uint32_t cur_flags = VIDEOIF->flags;
 
   /* update tick counter */
-  if (cur_flags & VIDEOIF_FLAG_PAL) {
+  if (cur_flags & VIDEOIF_FLAG_IN_PAL) {
     tick_counter += TICKS_PER_VSYNC_PAL;
   } else {
     tick_counter += TICKS_PER_VSYNC_NTSC;

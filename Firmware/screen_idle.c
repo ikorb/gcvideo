@@ -80,7 +80,7 @@ void screen_idle(void) {
       pad_clear(PAD_VIDEOCHANGE);
 
       /* update video settings */
-      current_videomode = detect_inputmode();
+      current_videomode = detect_input_videomode();
       VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
 
       /* print resolution box */

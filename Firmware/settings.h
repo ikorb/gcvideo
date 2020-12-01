@@ -65,10 +65,22 @@ extern bool         scanline_custom;
 
 void set_all_modes(uint32_t flag, bool state);
 void update_scanlines(void);
-video_mode_t detect_inputmode(void);
+video_mode_t detect_videomode(bool inputmode);
 void print_resolution(void);
 void settings_load(void);
 void settings_save(void);
 void settings_init(void);
+
+static inline video_mode_t detect_input_videomode(void) {
+   return detect_videomode(true);
+}
+
+static inline video_mode_t detect_output_videomode(void) {
+   return detect_videomode(false);
+}
+
+static inline bool is_progressive(video_mode_t mode) {
+   return (mode != VIDMODE_480i) && (mode != VIDMODE_576i);
+}
 
 #endif

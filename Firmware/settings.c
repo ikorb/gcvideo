@@ -73,6 +73,17 @@ const char *mode_names[VIDMODE_COUNT] = {
   "480p", "576p"
 };
 
+static const unsigned char vidmode_by_flags[] = {
+  VIDMODE_480i, // none
+  VIDMODE_240p, // prog
+  VIDMODE_576i, // pal
+  VIDMODE_288p, // pal+prog
+  VIDMODE_480p, // 31khz - technically 960i
+  VIDMODE_480p, // prog+31khz
+  VIDMODE_576p, // pal+31khz - technically 1152i
+  VIDMODE_576p, // pal+prog+31khz
+};
+
 uint32_t     video_settings[VIDMODE_COUNT];
 uint32_t     video_settings_global;
 uint32_t     osdbg_settings;
@@ -113,32 +124,17 @@ void update_scanlines(void) {
   }
 }
 
-video_mode_t detect_inputmode(void) {
-  uint32_t cur_flags = VIDEOIF->flags & (VIDEOIF_FLAG_PROGRESSIVE | VIDEOIF_FLAG_PAL | VIDEOIF_FLAG_31KHZ);
+video_mode_t detect_videomode(bool inputmode) {
+  uint32_t cur_flags = VIDEOIF->flags;
 
-  switch (cur_flags) {
-  case VIDEOIF_FLAG_PAL | VIDEOIF_FLAG_31KHZ:
-  case VIDEOIF_FLAG_PAL | VIDEOIF_FLAG_31KHZ | VIDEOIF_FLAG_PROGRESSIVE:
-    /* assumption: the Cube cannot output 960i/1152i */
-    return VIDMODE_576p;
-
-  case VIDEOIF_FLAG_PAL | VIDEOIF_FLAG_PROGRESSIVE:
-    return VIDMODE_288p;
-
-  case VIDEOIF_FLAG_PAL:
-    return VIDMODE_576i;
-
-  case VIDEOIF_FLAG_31KHZ:
-  case VIDEOIF_FLAG_31KHZ | VIDEOIF_FLAG_PROGRESSIVE:
-    return VIDMODE_480p;
-
-  case VIDEOIF_FLAG_PROGRESSIVE:
-    return VIDMODE_240p;
-
-  case 0:
-  default:
-    return VIDMODE_480i;
+  if (inputmode) {
+    cur_flags &= (VIDEOIF_FLAG_IN_PROGRESSIVE | VIDEOIF_FLAG_IN_PAL | VIDEOIF_FLAG_IN_31KHZ);
+  } else {
+    cur_flags = (cur_flags & (VIDEOIF_FLAG_LD_PROGRESSIVE | VIDEOIF_FLAG_LD_PAL | VIDEOIF_FLAG_LD_31KHZ))
+      >> 6;
   }
+
+  return vidmode_by_flags[cur_flags];
 }
 
 void print_resolution(void) {
@@ -146,12 +142,12 @@ void print_resolution(void) {
   uint32_t yres  = VIDEOIF->yres;
   uint32_t flags = VIDEOIF->flags;
 
-  if (!(flags & VIDEOIF_FLAG_PROGRESSIVE))
+  if (!(flags & VIDEOIF_FLAG_IN_PROGRESSIVE))
     yres *= 2;
 
   printf("%3dx%3d%c%d", xres, yres,
-         (flags & VIDEOIF_FLAG_PROGRESSIVE) ? 'p' : 'i',
-         (flags & VIDEOIF_FLAG_PAL        ) ? 50  : 60);
+         (flags & VIDEOIF_FLAG_IN_PROGRESSIVE) ? 'p' : 'i',
+         (flags & VIDEOIF_FLAG_IN_PAL        ) ? 50  : 60);
 }
 
 
@@ -286,7 +282,7 @@ void settings_init(void) {
 
   audio_mute        = false;
   audio_volume      = 255;
-  current_videomode = detect_inputmode();
+  current_videomode = detect_input_videomode();
 
   /* initialize scanline profiles */
   scanline_selected_profile = 1;

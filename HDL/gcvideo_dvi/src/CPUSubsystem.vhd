@@ -43,7 +43,8 @@ entity CPUSubsystem is
   port (
     Clock            : in  std_logic;
     ExtReset         : in  std_logic;
-    RawVideo         : in  VideoY422;
+    VideoIn          : in  VideoY422;
+    VideoLD          : in  VideoY422;
     PixelClockEnable : in  boolean;
     ConsoleMode      : in  console_mode_t;
     ForceYPbPr       : in  boolean;
@@ -166,7 +167,7 @@ begin
     TriggerLimit => 5
   ) PORT MAP (
     Clock   => Clock,
-    Video   => RawVideo,
+    Video   => VideoIn,
     Trigger => IRQControllerSel,
     Reset   => watchdog_reset
   );
@@ -201,7 +202,8 @@ begin
   Inst_VideoInterface: ZPUVideoInterface port map (
     Clock            => Clock,
     PixelClockEnable => PixelClockEnable,
-    Video            => RawVideo,
+    VideoIn          => VideoIn,
+    VideoLD          => VideoLD,
     ConsoleMode      => ConsoleMode,
     ForceYPbPr       => ForceYPbPr,
     ZSelect          => VideoIFSel,

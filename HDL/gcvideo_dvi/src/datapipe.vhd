@@ -193,7 +193,8 @@ begin
   ) port map (
     Clock            => Clock54M,
     ExtReset         => not clock_locked,
-    RawVideo         => video_422,
+    VideoIn          => video_422,
+    VideoLD          => video_ld,
     PixelClockEnable => pixel_clk_en,
     ConsoleMode      => console_mode,
     ForceYPbPr       => force_ypbpr,

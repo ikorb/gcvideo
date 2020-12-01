@@ -128,7 +128,8 @@ package ZPUDevices is
     port (
       Clock           : in  std_logic;
       PixelClockEnable: in  boolean;
-      Video           : in  VideoY422;
+      VideoIn         : in  VideoY422;
+      VideoLD         : in  VideoY422;
       ConsoleMode     : in  console_mode_t;
       ForceYPbPr      : in  boolean;
       ZSelect         : in  std_logic;

@@ -267,7 +267,8 @@ package component_defs is
     port (
       Clock           : in  std_logic;
       ExtReset        : in  std_logic;
-      RawVideo        : in  VideoY422;
+      VideoIn         : in  VideoY422;
+      VideoLD         : in  VideoY422;
       PixelClockEnable: in  boolean;
       ConsoleMode     : in  console_mode_t;
       ForceYPbPr      : in  boolean;
