@@ -29,8 +29,8 @@
 
 */
 
-#ifndef TIME_H
-#define TIME_H
+#ifndef VSYNC_H
+#define VSYNC_H
 
 #include <stdbool.h>
 
