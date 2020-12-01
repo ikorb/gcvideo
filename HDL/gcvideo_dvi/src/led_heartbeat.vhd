@@ -49,10 +49,11 @@ end LED_Heartbeat;
 
 architecture Behavioral of LED_Heartbeat is
   type vsync_counter_t is range 0 to 119;
-  type clock_counter_t is range 0 to 2 ** 24 - 1;
+  type clock_counter_t is range 0 to 2 ** 22 - 1;
 
   signal vsync_counter  : vsync_counter_t := 0;
   signal clock_counter  : clock_counter_t := 0;
+  signal clock_phase    : natural range 0 to 3 := 0;
   signal hb_clock       : std_logic := '0';
   signal hb_vsync       : std_logic := '0';
   signal hb_vs_capture  : std_logic := '0';
@@ -75,14 +76,17 @@ begin
 
       if clock_counter /= 0 then
         clock_counter <= clock_counter - 1;
+      else
+        clock_counter <= clock_counter_t'high;
 
-        if clock_counter = (clock_counter_t'high + 1) / 4 then
+        if clock_phase /= 0 then
+          clock_phase <= clock_phase - 1;
+          hb_clock    <= '0';
+        else
+          clock_phase   <= 3;
           hb_clock      <= '1';
           hb_vs_capture <= hb_vsync;
         end if;
-      else
-        clock_counter <= clock_counter_t'high;
-        hb_clock      <= '0';
       end if;
     end if;
   end process;
