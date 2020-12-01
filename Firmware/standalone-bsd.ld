@@ -54,7 +54,7 @@ SECTIONS {
     KEEP(*(.emulate_loadh))
   } > vectors
 
-  .emulate_storeh 0x60 : { /* currently one byte too long */
+  .emulate_storeh 0x60 : {
     KEEP(*(.emulate_storeh))
   } > vectors
 

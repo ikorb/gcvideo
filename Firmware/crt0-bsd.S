@@ -73,10 +73,10 @@ _start:
 
         .global _memreg
 _memreg:
-        .long   0
-        .long   0
-        .long   0
-
+        .long   0               ; 8
+        .long   0               ; 12
+        .long   0               ; 16
+        .long   0xffff          ; 20 - constant for masks
 
         /* ---- interrupt vector ---- */
         .section ".interrupt_vector", "ax"
@@ -128,9 +128,6 @@ _emulate_loadh:
 
 
         ;; -- storeh --
-        ;; TODO: Code is one byte too long for the storeh area,
-        ;;       but since ZPUFlex supports LESSTHAN in hardware,
-        ;;       this doesn't matter for now.
         .section ".emulate_storeh", "ax"
 _emulate_storeh:
         ;; calculate the number of bits to shift the value
@@ -150,7 +147,8 @@ _emulate_storeh:
         load                    ; [ramval shift ret waddr val]
 
         ;; mask unused part of ramval
-        im      0xffff          ; [0xffff ramval shift ...]
+        im      20
+        load                    ; [0xffff ramval shift ...]
         loadsp  8
         ashiftleft              ; [mask ramval shift ret waddr val]
         not
@@ -158,7 +156,8 @@ _emulate_storeh:
 
         ;; add in the new value
         loadsp  16              ; [val mramval shift ret ...]
-        im      0xffff
+        im      20
+        load
         and
         loadsp  8
         ashiftleft              ; [shiftval mramval shift ret ...]
