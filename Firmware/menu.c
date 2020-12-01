@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include "osd.h"
 #include "pad.h"
+#include "utils.h"
 #include "menu.h"
 
 #define MENUMARKER_LEFT  9
@@ -41,6 +42,20 @@ typedef enum {
   UPDATE_DECREMENT,
   UPDATE_INCREMENT
 } updatetype_t;
+
+typedef struct {
+  int16_t lower;
+  int16_t upper;
+} cliprange_t;
+
+static const cliprange_t clipranges[] = {
+  [ VALTYPE_BOOL ]         = {    0,     1 },
+  [ VALTYPE_EVENODD ]      = {    0,     1 },
+  [ VALTYPE_RGBMODE ]      = {    0,     2 },
+  [ VALTYPE_BYTE ]         = {    0,   255 },
+  [ VALTYPE_SBYTE_99 ]     = {   -99,   99 },
+  [ VALTYPE_SBYTE_127 ]    = {  -128,  127 },
+};
 
 /* (un)draw marker on a menu item */
 static void mark_item(menu_t *menu, unsigned int item, char ch) {
@@ -112,53 +127,19 @@ static void update_value(menu_t *menu, unsigned int itemid, updatetype_t upd) {
   valueitem_t *value = menu->items[itemid].value;
   int curval = value->get();
 
-  switch (value->type) {
-  case VALTYPE_BOOL:
-  case VALTYPE_EVENODD:
-    /* bool always toggles */
-    curval = !curval;
-    break;
-
-  case VALTYPE_RGBMODE:
-    if (upd == UPDATE_INCREMENT) {
-      if (curval < 2)
-        curval++;
-    } else {
-      if (curval > 0)
-        curval--;
-    }
-    break;
-
-  case VALTYPE_BYTE:
-    if (upd == UPDATE_INCREMENT) {
-      if (curval < 255)
-        curval++;
-    } else {
-      if (curval > 0)
-        curval--;
-    }
-    break;
-
-  case VALTYPE_SBYTE_99:
-    if (upd == UPDATE_INCREMENT) {
-      if (curval < 99)
-        curval++;
-    } else {
-      if (curval > -99)
-        curval--;
-    }
-    break;
-
-    case VALTYPE_SBYTE_127:
-    if (upd == UPDATE_INCREMENT) {
-      if (curval < 127)
-        curval++;
-    } else {
-      if (curval > -128)
-        curval--;
-    }
-    break;
+  if (upd == UPDATE_INCREMENT) {
+    curval++;
+  } else {
+    curval--;
   }
+
+  if (value->type == VALTYPE_BOOL ||
+      value->type == VALTYPE_EVENODD) {
+    /* bool always toggles */
+    curval = value->get();
+  }
+
+  clip_value(&curval, clipranges[value->type].lower, clipranges[value->type].upper);
 
   if (value->set(curval)) {
     /* need a full redraw */
