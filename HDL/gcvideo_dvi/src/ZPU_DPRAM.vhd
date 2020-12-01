@@ -31,13 +31,15 @@
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
 use IEEE.NUMERIC_STD.ALL;
+use std.textio.all;
 
 use work.ZPUDevices.all;
 
 entity ZPU_DPRAM is
   generic (
     AddressBits: natural range 1 to 32;
-    DataBits   : natural range 1 to 32
+    DataBits   : natural range 1 to 32;
+    Datafile   : string := ""
   );
   port (
     Clock    : in  std_logic;
@@ -52,7 +54,28 @@ end ZPU_DPRAM;
 architecture Behavioral of ZPU_DPRAM is
   type ram_type is array(0 to 2**AddressBits - 1) of std_logic_vector(DataBits-1 downto 0);
 
-  signal dpram: ram_type := (others => (others => '0'));
+  -- initialize contents from data file
+  -- (doesn't work with Quartus)
+  impure function init_mem return ram_type is
+    file mif_file: text;
+    variable mif_line: line;
+    variable temp_bv : bit_vector(DataBits-1 downto 0);
+    variable temp_mem: ram_type;
+  begin
+    temp_mem := (others => (others => '0'));
+    if Datafile /= "" then
+      file_open(mif_file, Datafile, read_mode);
+      for i in 0 to 2**AddressBits-1 loop
+        readline(mif_file, mif_line);
+        read(mif_line, temp_bv);
+        temp_mem(i) := to_stdlogicvector(temp_bv);
+      end loop;
+      file_close(mif_file);
+    end if;
+    return temp_mem;
+  end function;
+
+  signal dpram: ram_type := init_mem;
 
   signal write_delay: std_logic := '0';
   signal addr_a     : std_logic_vector(AddressBits-1 downto 0) := (others => '0');

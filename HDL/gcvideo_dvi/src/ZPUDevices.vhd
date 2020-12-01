@@ -112,7 +112,8 @@ package ZPUDevices is
   component ZPU_DPRAM is
     generic (
       AddressBits: natural range 1 to 32;
-      DataBits   : natural range 1 to 32
+      DataBits   : natural range 1 to 32;
+      Datafile   : string := ""
     );
     port (
       Clock    : in  std_logic;
