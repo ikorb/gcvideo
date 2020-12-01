@@ -129,7 +129,7 @@ architecture Behavioral of dvid is
   -- audio
   type enable_syncer_t is array(2 downto 0) of boolean;
 
-  signal channel_status    : std_logic_vector(191 downto 0) := x"00000000000000000000000000000000000000020200f904";
+  signal channel_status    : std_logic_vector(191 downto 0) := x"00000000000000000000000000000000000000d202000104";
   signal channel_bit       : natural range 0 to 191 := 0;
   signal sample_count      : natural range 0 to 3   := 0;
   signal left_buffer       : signed(15 downto 0);
