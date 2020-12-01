@@ -96,7 +96,7 @@ void screen_idle(void) {
       }
     } else if (resbox_active && time_after(now, resbox_timeout)) {
       resbox_active = false;
-      osd_fillbox(RESBOX_X, RESBOX_Y, RESBOX_XS, RESBOX_YS, ' ');
+      osd_clrscr();
     }
   }
 }
