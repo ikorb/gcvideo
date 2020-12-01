@@ -1,6 +1,6 @@
 -w
 -g DebugBitstream:No
--g Binary:no
+-g Binary:Yes
 -g CRC:Enable
 -g Reset_on_err:No
 -g ConfigRate:17
@@ -11,7 +11,6 @@
 -g TdoPin:PullUp
 -g TmsPin:PullUp
 -g UnusedPin:PullDown
--g UserID:0xFFFFFFFF
 -g StartUpClk:CClk
 -g DONE_cycle:4
 -g GTS_cycle:5

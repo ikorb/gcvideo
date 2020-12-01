@@ -25,134 +25,66 @@
 # ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 # THE POSSIBILITY OF SUCH DAMAGE.
 #
-# Makefile: Single-output Makefile for GCVideo-DVI
+# Makefile: Main makefile for GCVideo-DVI FPGA code,
+#           bundles main+flasher into a single binary
 #
 
-# values that are usually overriden by the main Makefile
-VERSION := dev
+VERSION := 3.0
 
-ifeq ($(MODULE),main)
-  CONSTRAINTS_MODULE := src/constraints-audio.ucf
-  SRC_MODULE := \
-       src/Blanking_Regenerator.vhd       \
-       src/SPDIF_Encoder.vhd              \
-       src/audio_spdif.vhd                \
-       src/colormatrix.vhd                \
-       src/i2s_decoder.vhd                \
-       src/ZPU_SPICAP.vhd                 \
-       src/scanline_generator.vhd
-
-else ifeq ($(MODULE),flasher)
-  CONSTRAINTS_MODULE :=
-  SRC_MODULE := \
-       src/crc32.vhd                      \
-       src/Blanking_Regenerator_Fixed.vhd \
-       src/ZPU_SPICAP_CRC.vhd             \
-       src/ZPULineCapture.vhd
-
-else
-moduledummy:
-	@echo "MODULE invalid or unspecified"
-endif
-
-SRC_COMMON := \
-       src/CPUSubsystem.vhd               \
-       src/ClockGen.vhd                   \
-       src/Deglitcher.vhd                 \
-       src/Linedoubler.vhd                \
-       src/PadReader.vhd                  \
-       src/SimpleROM.vhd                  \
-       src/TMDS_encoder.vhd               \
-       src/TextOSD.vhd                    \
-       src/ZPUBusMux.vhd                  \
-       src/ZPUDevices.vhd                 \
-       src/ZPUIRQController.vhd           \
-       src/ZPUVideoInterface.vhd          \
-       src/ZPUWatchdog.vhd                \
-       src/ZPUIRReceiver.vhd              \
-       src/ZPU_DPRAM.vhd                  \
-       src/ConsoleModeDetect.vhd          \
-       src/aux_ecc1.vhd                   \
-       src/aux_ecc2.vhd                   \
-       src/aux_encoder.vhd                \
-       src/component_defs.vhd             \
-       src/convert_422_to_444.vhd         \
-       src/datapipe.vhd                   \
-       src/delayline_bool.vhd             \
-       src/delayline_unsigned.vhd         \
-       src/dvid.vhd                       \
-       src/dvienc_defs.vhd                \
-       src/edvi_ucode.vhd                 \
-       src/gcdv_decoder.vhd               \
-       src/led_heartbeat.vhd              \
-       src/video_defs.vhd                 \
-       src/ycrange.vhd                    \
-       src/zpu_core_flex.vhd              \
-       src/zpu_rom.vhd                    \
-       src/zpupkg.vhd
-
-
-SRC_P2XH     := src/toplevel_p2xh.vhd
-SRC_SHURIKEN := src/toplevel_shuriken.vhd
-SRC_DUAL     := src/toplevel_dual.vhd
-BMM          := src/zpu_bootram.bmm
-PART         := xc3s200a-vq100-4
-
-MAP_OPTS := -timing -logic_opt on -ol high -xe n -t 1 -register_duplication on -cm balanced -detail -ir off -ignore_keep_hierarchy -pr b -bp -power off
-PAR_OPTS := -ol high -xe n -t 1
+PROMFILE := gcvideo-dvi-$(TARGET)-$(VERSION)-spirom
+PROMTYPE := M25P40
+XSVFFILE := gcvideo-dvi-$(TARGET)-$(VERSION)-$(PROMTYPE)-complete.xsvf
+PART     := xc3s200a
 OBJCOPY  := zpu-elf-objcopy
 
-SRC = $(SRC_COMMON) $(SRC_MODULE)
-
 ifeq ($(TARGET),p2xh-gc)
-  SRC      += $(SRC_P2XH)
+  # P2XG
+  HWID     := 0x50325847
   TOPLEVEL := toplevel_p2xh
   BOARD    := p2xh
   CONSOLE  := GC
-  FIRMWARE := gc-dvi
 else ifeq ($(TARGET),p2xh-wii)
-  SRC      += $(SRC_P2XH)
+  # P2XW
+  HWID     := 0x50325857
   TOPLEVEL := toplevel_p2xh
   BOARD    := p2xh
   CONSOLE  := WII
-  FIRMWARE := wii-dvi
 else ifeq ($(TARGET),shuriken-gc)
-  SRC      += $(SRC_SHURIKEN)
+  # SHUG
+  HWID     := 0x53485547
   TOPLEVEL := toplevel_shuriken
   BOARD    := shuriken
   CONSOLE  := GC
-  FIRMWARE := gc-dvi
 else ifeq ($(TARGET),shuriken-wii)
-  SRC      += $(SRC_SHURIKEN)
+  # SHUW
+  HWID     := 0x53485557
   TOPLEVEL := toplevel_shuriken
   BOARD    := shuriken
   CONSOLE  := WII
-  FIRMWARE := wii-dvi
 else ifeq ($(TARGET),shuriken-v3-gc)
-  SRC      += $(SRC_SHURIKEN)
+  # SH3G
+  HWID     := 0x53483347
   TOPLEVEL := toplevel_shuriken
   BOARD    := shuriken-v3
   CONSOLE  := GC
-  FIRMWARE := gc-dvi
 else ifeq ($(TARGET),shuriken-v3-wii)
-  SRC      += $(SRC_SHURIKEN)
+  # SH3W
+  HWID     := 0x53483357
   TOPLEVEL := toplevel_shuriken
   BOARD    := shuriken-v3
   CONSOLE  := WII
-  FIRMWARE := wii-dvi
 else ifeq ($(TARGET),dual-gc)
-  SRC      += $(SRC_DUAL)
+  # GCDU
+  HWID     := 0x47434455
   TOPLEVEL := toplevel_dual
   BOARD    := dualgc
   CONSOLE  := GC
-  FIRMWARE := gc-dual
-  FWFLAGS  := DISABLE_CABLEDETECT
 else ifeq ($(TARGET),dual-wii)
-  SRC      += $(SRC_DUAL)
+  # WIID
+  HWID     := 0x57494944
   TOPLEVEL := toplevel_dual
   BOARD    := dualwii
   CONSOLE  := WII
-  FIRMWARE := wii-dual
 else
 dummy:
 	@echo "TARGET variable not specified"
@@ -178,70 +110,52 @@ else
  E := @echo
 endif
 
-ifeq ($(DEV),1)
-  BUILDDIR := build/$(MODULE)
-else
-  BUILDDIR := build/$(MODULE)-$(TARGET)
-endif
-
 CONSOLE_LC := $(shell echo $(CONSOLE)|tr A-Z a-z)
 
-UCF := $(BUILDDIR)/constraints-$(BOARD)-$(CONSOLE_LC).ucf
 
-FIRMWARE_MIF := gcvideo-sw-$(FIRMWARE).mif
+all: build/$(PROMFILE)-complete.bin build/$(XSVFFILE) build/$(PROMFILE)-impact.mcs
 
-all: $(BUILDDIR)/$(TOPLEVEL).bin
+build/$(XSVFFILE): build/$(PROMFILE)-impact.mcs
+	$(E) "---- XSVFGEN  $<"
+	$(Q) sed -e "s/%PART%/$(PART)/;s/%MCSFILE%/$(PROMFILE)-impact.mcs/;s/%PROMTYPE%/$(PROMTYPE)/;s/%XSVFFILE%/$(XSVFFILE)/" scripts/impact-genxsvf.cmd > build/genxsvf-$(TARGET).cmd
+	$(Q)cd build ; impact -batch genxsvf-$(TARGET).cmd
 
-build/%.bin build/%.bit: build/%.ncd
-	$(E) "---- BITGEN   $<"
-	$(Q)cd $(dir $<) ; bitgen -f ../../scripts/bitgenconfig.ut $(TOPLEVEL).ncd
+# note: promgen -r ... generates a corrupt file, objcopy works fine
+build/%-complete.bin: build/%-impact.mcs
+	$(E) "---- MCS2BIN  $@"
+	$(Q)$(OBJCOPY) --gap-fill 0xff -I ihex -O binary $< $@
 
-build/%.ncd: build/%.pcf
-	$(E) "---- PAR      $<"
-	$(Q)cd $(dir $<) ; par -w $(PAR_OPTS) $(TOPLEVEL)_map.ncd $(TOPLEVEL).ncd $(TOPLEVEL).pcf
-	$(Q)grep "All constraints were met" $(BUILDDIR)/$(TOPLEVEL).par
+build/$(PROMFILE)-impact.mcs: build/main-$(TARGET)/$(TOPLEVEL).tagmain build/flasher-$(TARGET)/$(TOPLEVEL).tagflasher build/flasher-$(TARGET)/$(TOPLEVEL).bit
+	$(E) "---- PROMGEN  $@"
+	$(Q)promgen -spi -u 0 build/flasher-$(TARGET)/$(TOPLEVEL).bit \
+		-data_file up 2ffe8 build/flasher-$(TARGET)/$(TOPLEVEL).tagflasher \
+		-data_file up 30000 build/main-$(TARGET)/$(TOPLEVEL).tagmain \
+		-w -p mcs -o $@
 
-build/%.pcf: build/%.ngd
-	$(E) "---- MAP      $<"
-	$(Q)cd $(dir $<) ; map -p $(PART) $(MAP_OPTS) -o $(TOPLEVEL)_map.ncd $(TOPLEVEL).ngd $(TOPLEVEL).pcf
+build/%.tagmain: build/%.bin
+	$(E) "---- TAG      $@"
+	$(Q)scripts/fwtagger-main.pl $(HWID) $(VERSION) $< $@
 
-build/%.ngd: build/%.ngc $(UCF) $(BMM)
-	$(E) "---- NGDBUILD $<"
-	$(Q)cp $(BMM) $(dir $<)/$(notdir $(BMM))
-	$(Q)cd $(dir $<) ; ngdbuild -dd _ngo -nt timestamp -uc ../../$(UCF) -bm $(notdir $(BMM)) -p $(PART) $(TOPLEVEL).ngc $(TOPLEVEL).ngd
+build/%.tagflasher: build/%.bit
+	$(E) "---- TAG      $@"
+	$(Q)scripts/writetag-flasher.pl $(HWID) $(VERSION) $@
 
-build/%.ngc: build/%.xst $(SRC)
-	$(E) "---- XST      $<"
-	$(Q)cd $(dir $<) ; xst -ifn $(TOPLEVEL).xst -ofn $(TOPLEVEL).syr
+build/main-$(TARGET)/$(TOPLEVEL).bin: FORCE
+	$(E) "---- MAKE main"
+	$(Q)$(MAKE) -f scripts/Makefile.common TARGET=$(TARGET) MODULE=main HWID=$(HWID) VERSION=$(VERSION) V=$(V)
 
-build/%.xst: build/%.prj scripts/template.xst $(BUILDDIR)/$(FIRMWARE_MIF)
-	$(E) "---- GENXST   $<"
-	$(Q)cp scripts/template.xst $@
-	$(Q)echo -ifn $(TOPLEVEL).prj >> $@
-	$(Q)echo -ofn $(TOPLEVEL)     >> $@
-	$(Q)echo -top $(TOPLEVEL)     >> $@
-	$(Q)echo -generics {TargetConsole=\"$(CONSOLE)\" Firmware=\"$(FIRMWARE_MIF)\" Module=\"$(MODULE)\"} >> $@
-
-$(UCF): src/constraints-common.ucf src/constraints-$(BOARD).ucf src/constraints-$(CONSOLE_LC).ucf $(CONSTRAINTS_MODULE)
-	$(E) "---- GENUCF   $<"
-	$(Q)cat $^ > $@
-
-$(BUILDDIR)/$(FIRMWARE_MIF):
-	$(MAKE) -C ../../Firmware TARGET=$(FIRMWARE) VERSION=$(VERSION) FEATURE_FLAGS="$(FWFLAGS)" MODULE=$(MODULE) COPYDIR=$(BUILDDIR)
-
-build/%.prj: | $(BUILDDIR)
-	$(E) "---- GENPRJ   $@"
-	$(Q)scripts/genproject.pl $(SRC) > $@
-
-$(BUILDDIR):
-	$(E) "---- MKDIR    $@"
-	$(Q)mkdir -p $(BUILDDIR)/xst/tmp
+build/flasher-$(TARGET)/$(TOPLEVEL).bit: FORCE
+	$(E) "---- MAKE main"
+	$(Q)$(MAKE) -f scripts/Makefile.common TARGET=$(TARGET) MODULE=flasher HWID=$(HWID) VERSION=$(VERSION) V=$(V)
 
 clean:
 	$(E) "---- CLEAN"
-	-$(Q)rm -rf $(BUILDDIR) # brute-force cleanup
+	-$(Q)$(MAKE) -f scripts/Makefile.common TARGET=$(TARGET) MODULE=main V=$(V) clean
+	-$(Q)$(MAKE) -f scripts/Makefile.common TARGET=$(TARGET) MODULE=flasher V=$(V) clean
 
 printversion:
 	@echo $(VERSION)
 
-.PRECIOUS : build/%.prj build/%.xst build/%.ngc build/%.ngd build/%.pcf build/%.ncd
+.PHONY : FORCE all clean printversion dummy
+
+.PRECIOUS : build/%.tagmain build/main-$(TARGET)/$(TOPLEVEL).bin build/flasher-$(TARGET)/$(TOPLEVEL).bit

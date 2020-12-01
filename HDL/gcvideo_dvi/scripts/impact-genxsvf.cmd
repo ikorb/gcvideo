@@ -1,5 +1,5 @@
 setMode -bs
-addDevice -p 1 -file "%BITFILE%"
+addDevice -p 1 -part %PART%
 attachflash -position 1 -spi "%PROMTYPE%"
 assignfiletoattachedflash -position 1 -file "%MCSFILE%"
 setCable -port xsvf -file "%XSVFFILE%"

@@ -5,20 +5,21 @@ set -e
 function build () {
     local TARGET="$1"
 
-    rm -rf build
     make TARGET=$TARGET
 
     zip -9jX binaries/gcvideo-$VERSION-$TARGET.zip \
-        build/gcvideo-dvi-$TARGET-$VERSION-M25P40.xsvf \
-        build/gcvideo-dvi-$TARGET-$VERSION-spirom.cfi \
-        build/gcvideo-dvi-$TARGET-$VERSION-spirom.mcs \
-        build/gcvideo-dvi-$TARGET-$VERSION.bit
+        build/gcvideo-dvi-$TARGET-$VERSION-M25P40-complete.xsvf \
+        build/gcvideo-dvi-$TARGET-$VERSION-spirom-complete.bin \
+        build/gcvideo-dvi-$TARGET-$VERSION-spirom-impact.cfi \
+        build/gcvideo-dvi-$TARGET-$VERSION-spirom-impact.mcs
 }
 
 if [ ! -d codegens ]; then
     echo "You seem to be running this from the wrong directory."
     exit 1
 fi
+
+rm -rf build
 
 VERSION=`make printversion`
 
@@ -32,5 +33,3 @@ build shuriken-v3-gc
 build shuriken-v3-wii
 build dual-gc
 build dual-wii
-
-rm -rf build

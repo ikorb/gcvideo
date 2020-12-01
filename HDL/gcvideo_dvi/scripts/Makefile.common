@@ -1,0 +1,259 @@
+# -*- mode: makefile-gmake -*-
+#
+# GCVideo DVI HDL
+# Copyright (C) 2014-2020, Ingo Korb <ingo@akana.de>
+# All rights reserved.
+#
+# Redistribution and use in source and binary forms, with or without
+# modification, are permitted provided that the following conditions are met:
+#
+# 1. Redistributions of source code must retain the above copyright notice,
+#    this list of conditions and the following disclaimer.
+# 2. Redistributions in binary form must reproduce the above copyright notice,
+#    this list of conditions and the following disclaimer in the documentation
+#    and/or other materials provided with the distribution.
+#
+# THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+# AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+# IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
+# ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE
+# LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR
+# CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF
+# SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS
+# INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN
+# CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE)
+# ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
+# THE POSSIBILITY OF SUCH DAMAGE.
+#
+# Makefile.common: Single-output (flasher or main) Makefile for GCVideo-DVI
+#
+# Developer hint: To build just a single output that can be used for
+# with the "inject" target of the firmware Makefile, use something
+# like this from the gcvideo_dvi directory:
+#
+#    make -f scripts/Makefile.common TARGET=p2xh-gc MODULE=main DEV=1
+#
+
+
+# values that are usually overriden by the main Makefile
+VERSION := dev
+HWID    := 0
+
+ifeq ($(MODULE),main)
+  CONSTRAINTS_MODULE := src/constraints-audio.ucf
+  SRC_MODULE := \
+	src/Blanking_Regenerator.vhd       \
+	src/SPDIF_Encoder.vhd              \
+	src/audio_spdif.vhd                \
+	src/colormatrix.vhd                \
+	src/i2s_decoder.vhd                \
+	src/ZPU_SPICAP.vhd                 \
+	src/scanline_generator.vhd
+
+else ifeq ($(MODULE),flasher)
+  CONSTRAINTS_MODULE :=
+  SRC_MODULE := \
+	src/crc32.vhd                      \
+	src/Blanking_Regenerator_Fixed.vhd \
+	src/ZPU_SPICAP_CRC.vhd             \
+	src/ZPULineCapture.vhd
+
+else
+moduledummy:
+	@echo "MODULE invalid or unspecified"
+endif
+
+SRC_COMMON := \
+	src/CPUSubsystem.vhd               \
+	src/ClockGen.vhd                   \
+	src/Deglitcher.vhd                 \
+	src/Linedoubler.vhd                \
+	src/PadReader.vhd                  \
+	src/SimpleROM.vhd                  \
+	src/TMDS_encoder.vhd               \
+	src/TextOSD.vhd                    \
+	src/ZPUBusMux.vhd                  \
+	src/ZPUDevices.vhd                 \
+	src/ZPUIRQController.vhd           \
+	src/ZPUVideoInterface.vhd          \
+	src/ZPUWatchdog.vhd                \
+	src/ZPUIRReceiver.vhd              \
+	src/ZPU_DPRAM.vhd                  \
+	src/ConsoleModeDetect.vhd          \
+	src/aux_ecc1.vhd                   \
+	src/aux_ecc2.vhd                   \
+	src/aux_encoder.vhd                \
+	src/component_defs.vhd             \
+	src/convert_422_to_444.vhd         \
+	src/datapipe.vhd                   \
+	src/delayline_bool.vhd             \
+	src/delayline_unsigned.vhd         \
+	src/dvid.vhd                       \
+	src/dvienc_defs.vhd                \
+	src/edvi_ucode.vhd                 \
+	src/gcdv_decoder.vhd               \
+	src/led_heartbeat.vhd              \
+	src/video_defs.vhd                 \
+	src/ycrange.vhd			   \
+	src/zpu_core_flex.vhd              \
+	src/zpu_rom.vhd                    \
+	src/zpupkg.vhd
+
+
+SRC_P2XH     := src/toplevel_p2xh.vhd
+SRC_SHURIKEN := src/toplevel_shuriken.vhd
+SRC_DUAL     := src/toplevel_dual.vhd
+BMM          := src/zpu_bootram.bmm
+PART         := xc3s200a-vq100-4
+
+MAP_OPTS := -timing -logic_opt on -ol high -xe n -t 1 -register_duplication on -cm balanced -detail -ir off -ignore_keep_hierarchy -pr b -bp -power off
+PAR_OPTS := -ol high -xe n -t 1
+OBJCOPY  := zpu-elf-objcopy
+
+SRC = $(SRC_COMMON) $(SRC_MODULE)
+
+ifeq ($(TARGET),p2xh-gc)
+  SRC      += $(SRC_P2XH)
+  TOPLEVEL := toplevel_p2xh
+  BOARD    := p2xh
+  CONSOLE  := GC
+  FIRMWARE := gc-dvi
+else ifeq ($(TARGET),p2xh-wii)
+  SRC      += $(SRC_P2XH)
+  TOPLEVEL := toplevel_p2xh
+  BOARD    := p2xh
+  CONSOLE  := WII
+  FIRMWARE := wii-dvi
+else ifeq ($(TARGET),shuriken-gc)
+  SRC      += $(SRC_SHURIKEN)
+  TOPLEVEL := toplevel_shuriken
+  BOARD    := shuriken
+  CONSOLE  := GC
+  FIRMWARE := gc-dvi
+else ifeq ($(TARGET),shuriken-wii)
+  SRC      += $(SRC_SHURIKEN)
+  TOPLEVEL := toplevel_shuriken
+  BOARD    := shuriken
+  CONSOLE  := WII
+  FIRMWARE := wii-dvi
+else ifeq ($(TARGET),shuriken-v3-gc)
+  SRC      += $(SRC_SHURIKEN)
+  TOPLEVEL := toplevel_shuriken
+  BOARD    := shuriken-v3
+  CONSOLE  := GC
+  FIRMWARE := gc-dvi
+else ifeq ($(TARGET),shuriken-v3-wii)
+  SRC      += $(SRC_SHURIKEN)
+  TOPLEVEL := toplevel_shuriken
+  BOARD    := shuriken-v3
+  CONSOLE  := WII
+  FIRMWARE := wii-dvi
+else ifeq ($(TARGET),dual-gc)
+  SRC      += $(SRC_DUAL)
+  TOPLEVEL := toplevel_dual
+  BOARD    := dualgc
+  CONSOLE  := GC
+  FIRMWARE := gc-dual
+  FWFLAGS  := DISABLE_CABLEDETECT
+else ifeq ($(TARGET),dual-wii)
+  SRC      += $(SRC_DUAL)
+  TOPLEVEL := toplevel_dual
+  BOARD    := dualwii
+  CONSOLE  := WII
+  FIRMWARE := wii-dual
+else
+dummy:
+	@echo "TARGET variable not specified"
+	@echo "Please select a build target using \"make TARGET=...\""
+	@echo "Valid targets:"
+	@echo "  - p2xh-gc"
+	@echo "  - p2xh-wii"
+	@echo "  - shuriken-gc"
+	@echo "  - shuriken-wii"
+	@echo "  - shuriken-v3-gc"
+	@echo "  - shuriken-v3-wii"
+	@echo "  - dual-gc"
+	@echo "  - dual-wii"
+	@false
+endif
+
+ifeq ($(HWID),)
+$(error HWID not set)
+endif
+
+# Enable verbose compilation with "make V=1"
+ifdef V
+ Q :=
+ E := @:
+else
+ Q := @
+ E := @echo
+endif
+
+ifeq ($(DEV),1)
+  BUILDDIR := build/$(MODULE)
+else
+  BUILDDIR := build/$(MODULE)-$(TARGET)
+endif
+
+CONSOLE_LC := $(shell echo $(CONSOLE)|tr A-Z a-z)
+
+UCF := $(BUILDDIR)/constraints-$(BOARD)-$(CONSOLE_LC).ucf
+
+FIRMWARE_MIF := gcvideo-sw-$(FIRMWARE).mif
+
+all: $(BUILDDIR)/$(TOPLEVEL).bin
+
+build/%.bin build/%.bit: build/%.ncd
+	$(E) "---- BITGEN   $<"
+	$(Q)cd $(dir $<) ; bitgen -f ../../scripts/bitgenconfig.ut -g "UserID:$(HWID)" $(TOPLEVEL).ncd
+
+build/%.ncd: build/%.pcf
+	$(E) "---- PAR      $<"
+	$(Q)cd $(dir $<) ; par -w $(PAR_OPTS) $(TOPLEVEL)_map.ncd $(TOPLEVEL).ncd $(TOPLEVEL).pcf
+	$(Q)grep "All constraints were met" $(BUILDDIR)/$(TOPLEVEL).par
+
+build/%.pcf: build/%.ngd
+	$(E) "---- MAP      $<"
+	$(Q)cd $(dir $<) ; map -p $(PART) $(MAP_OPTS) -o $(TOPLEVEL)_map.ncd $(TOPLEVEL).ngd $(TOPLEVEL).pcf
+
+build/%.ngd: build/%.ngc $(UCF) $(BMM)
+	$(E) "---- NGDBUILD $<"
+	$(Q)cp $(BMM) $(dir $<)/$(notdir $(BMM))
+	$(Q)cd $(dir $<) ; ngdbuild -dd _ngo -nt timestamp -uc ../../$(UCF) -bm $(notdir $(BMM)) -p $(PART) $(TOPLEVEL).ngc $(TOPLEVEL).ngd
+
+build/%.ngc: build/%.xst $(SRC)
+	$(E) "---- XST      $<"
+	$(Q)cd $(dir $<) ; xst -ifn $(TOPLEVEL).xst -ofn $(TOPLEVEL).syr
+
+build/%.xst: build/%.prj scripts/template.xst $(BUILDDIR)/$(FIRMWARE_MIF)
+	$(E) "---- GENXST   $<"
+	$(Q)cp scripts/template.xst $@
+	$(Q)echo -ifn $(TOPLEVEL).prj >> $@
+	$(Q)echo -ofn $(TOPLEVEL)     >> $@
+	$(Q)echo -top $(TOPLEVEL)     >> $@
+	$(Q)echo -generics {TargetConsole=\"$(CONSOLE)\" Firmware=\"$(FIRMWARE_MIF)\" Module=\"$(MODULE)\"} >> $@
+
+$(UCF): src/constraints-common.ucf src/constraints-$(BOARD).ucf src/constraints-$(CONSOLE_LC).ucf $(CONSTRAINTS_MODULE)
+	$(E) "---- GENUCF   $<"
+	$(Q)cat $^ > $@
+
+$(BUILDDIR)/$(FIRMWARE_MIF):
+	$(MAKE) -C ../../Firmware TARGET=$(FIRMWARE) VERSION=$(VERSION) FEATURE_FLAGS="$(FWFLAGS)" MODULE=$(MODULE) COPYDIR=$(BUILDDIR)
+
+build/%.prj: | $(BUILDDIR)
+	$(E) "---- GENPRJ   $@"
+	$(Q)scripts/genproject.pl $(SRC) > $@
+
+$(BUILDDIR):
+	$(E) "---- MKDIR    $@"
+	$(Q)mkdir -p $(BUILDDIR)/xst/tmp
+
+clean:
+	$(E) "---- CLEAN"
+	-$(Q)rm -rf $(BUILDDIR) # brute-force cleanup
+
+printversion:
+	@echo $(VERSION)
+
+.PRECIOUS : build/%.prj build/%.xst build/%.ngc build/%.ngd build/%.pcf build/%.ncd
