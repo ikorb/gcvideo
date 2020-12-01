@@ -246,7 +246,7 @@ begin
 
   -- SPI
   Inst_SPI: ZPU_SPI GENERIC MAP (
-    SPIClockDiv => 20
+    SPIClockDiv => 2 -- just 13.5MHz because some M25P40 are 25MHz max =(
   ) PORT MAP (
     Clock     => Clock,
     ZSelect   => SPISel,

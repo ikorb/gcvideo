@@ -61,7 +61,7 @@ begin
   SSelect <= spi_ssel;
   SClock  <= spi_clock;
 
-  ZPUBusOut.mem_busy <= '0';
+  ZPUBusOut.mem_busy <= '1' when spi_active else '0'; -- hold CPU while busy
 
   process(Clock)
   begin
@@ -124,7 +124,7 @@ begin
               -- at the falling edge, change output
               spi_clock <= '0';
               if spi_state = 8 then
-                MOSI <= '1';
+                MOSI      <= '1';
                 spi_state <= 9;
               else
                 MOSI <= spi_data(7);

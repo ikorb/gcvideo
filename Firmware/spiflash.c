@@ -58,7 +58,7 @@ static void set_cs(bool state) {
 
 unsigned int spiflash_send_byte(unsigned int byte) {
   SPI->data = byte;
-  while (SPI->flags & SPI_FLAG_BUSY) ;
+  /* no busy check, handled via hardware waitstates */
   return SPI->data;
 }
 
