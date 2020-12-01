@@ -43,6 +43,8 @@ enum {
   MENUITEM_BRIGHTNESS,
   MENUITEM_CONTRAST,
   MENUITEM_SATURATION,
+  MENUITEM_XPOS,
+  MENUITEM_YPOS,
   MENUITEM_RESET,
   MENUITEM_SAVEEXIT,
   MENUITEM_CANCEL
@@ -56,6 +58,11 @@ static valueitem_t value_contrast   = { VALTYPE_SBYTE_127, true,
                                         { .field = { &picture_contrast,   8, 24, VIFLAG_SBYTE | VIFLAG_COLORMATRIX }} };
 static valueitem_t value_saturation = { VALTYPE_SBYTE_127, true,
                                         { .field = { &picture_saturation, 8, 24, VIFLAG_SBYTE | VIFLAG_COLORMATRIX }} };
+static valueitem_t value_xpos       = { VALTYPE_SBYTE_127, true,
+                                        { .field = { &screen_x_shift, 8, 24, VIFLAG_SBYTE }} };
+static valueitem_t value_ypos       = { VALTYPE_SBYTE_127, true,
+                                        { .field = { &screen_y_shift, 8, 24, VIFLAG_SBYTE }} };
+
 
 /* --- menu definition --- */
 
@@ -63,14 +70,16 @@ static menuitem_t pictureset_items[] = {
   { "Brightness",       &value_brightness, 1, 0 }, // 0
   { "Contrast",         &value_contrast,   2, 0 }, // 1
   { "Saturation",       &value_saturation, 3, 0 }, // 2
-  { "Reset",            NULL,              4, 0 }, // 3
-  { "Save and Exit",    NULL,              6, 0 }, // 4
-  { "Cancel",           NULL,              7, 0 }, // 5
+  { "X position",       &value_xpos,       4, 0 }, // 3
+  { "Y position",       &value_ypos,       5, 0 }, // 4
+  { "Reset",            NULL,              6, 0 }, // 5
+  { "Save and Exit",    NULL,              8, 0 }, // 6
+  { "Cancel",           NULL,              9, 0 }, // 7
 };
 
 static menu_t pictureset_menu = {
   9, 3,
-  26, 9,
+  26, 11,
   NULL,
   sizeof(pictureset_items) / sizeof(*pictureset_items),
   pictureset_items
@@ -81,9 +90,22 @@ void screen_picturesettings(void) {
 
   osd_clrscr();
 
+  int8_t prev_xshift     = screen_x_shift;
+  int8_t prev_yshift     = screen_y_shift;
   int8_t prev_brightness = picture_brightness;
   int8_t prev_contrast   = picture_contrast;
   int8_t prev_saturation = picture_saturation;
+
+  bool do_reblank = video_settings_global & VIDEOIF_SET_ENABLEREBLANK;
+  bool do_resync  = video_settings_global & VIDEOIF_SET_ENABLERESYNC;
+
+  if (do_reblank && do_resync) {
+    pictureset_items[MENUITEM_XPOS].flags = 0;
+    pictureset_items[MENUITEM_YPOS].flags = 0;
+  } else {
+    pictureset_items[MENUITEM_XPOS].flags = MENU_FLAG_DISABLED;
+    pictureset_items[MENUITEM_YPOS].flags = MENU_FLAG_DISABLED;
+  }
 
   while (1) {
     menu_draw(&pictureset_menu);
@@ -92,6 +114,8 @@ void screen_picturesettings(void) {
     switch (current_item) {
     case MENU_ABORT:
     case MENUITEM_CANCEL:
+      screen_x_shift     = prev_xshift;
+      screen_y_shift     = prev_yshift;
       picture_brightness = prev_brightness;
       picture_contrast   = prev_contrast;
       picture_saturation = prev_saturation;
@@ -102,6 +126,8 @@ void screen_picturesettings(void) {
       return;
 
     case MENUITEM_RESET:
+      screen_x_shift     = 0;
+      screen_y_shift     = 0;
       picture_brightness = 0;
       picture_contrast   = 0;
       picture_saturation = 0;

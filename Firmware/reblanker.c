@@ -128,8 +128,12 @@ void update_reblanker(void) {
     return;
   }
 
-  int32_t actual_x_shift = 0;
-  int32_t actual_y_shift = 0;
+  int32_t actual_x_shift = screen_x_shift << 2;
+  int32_t actual_y_shift = screen_y_shift;
+  if (!(video_settings_global & VIDEOIF_SET_ENABLERESYNC)) {
+    actual_x_shift = 0;
+    actual_y_shift = 0;
+  }
 
   /* center image horizontally */
   uint32_t htotal = VIDEOIF->htotal;

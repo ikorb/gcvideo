@@ -60,6 +60,8 @@ extern bool         resbox_enabled;
 extern video_mode_t current_videomode;
 extern uint8_t      audio_volume;
 extern bool         audio_mute;
+extern int8_t       screen_x_shift;
+extern int8_t       screen_y_shift;
 extern uint8_t      scanline_selected_profile;
 extern uint16_t     scanline_strength;
 extern uint16_t     scanline_hybrid;

@@ -92,6 +92,8 @@ bool         resbox_enabled;
 video_mode_t current_videomode;
 uint8_t      audio_volume;
 bool         audio_mute;
+int8_t       screen_x_shift;
+int8_t       screen_y_shift;
 uint8_t      scanline_selected_profile;
 uint16_t     scanline_strength;
 uint16_t     scanline_hybrid;
@@ -315,6 +317,8 @@ void settings_init(void) {
   audio_mute        = false;
   audio_volume      = 255;
   current_videomode = detect_input_videomode();
+  screen_x_shift    = 0;
+  screen_y_shift    = 0;
 
   /* initialize scanline profiles */
   scanline_selected_profile = 1;
