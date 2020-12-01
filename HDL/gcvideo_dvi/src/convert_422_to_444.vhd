@@ -53,7 +53,7 @@ end convert_422_to_444;
 architecture Behavioral of convert_422_to_444 is
 
   -- delay in (enabled) clock cycles for untouched signals
-  constant Delayticks: Natural := 3;
+  constant Delayticks: Natural := 4;
 
   -- stored color signals
   signal current_c1: unsigned(7 downto 0) := (others => '1');

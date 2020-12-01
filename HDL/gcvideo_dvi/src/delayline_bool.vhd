@@ -44,18 +44,33 @@ entity delayline_bool is
 end delayline_bool;
 
 architecture Behavioral of delayline_bool is
-  type   delay_type is array(Delayticks - 1 downto 0) of boolean;
+  type   delay_type is array(Delayticks - 2 downto 0) of boolean;
   signal delayline: delay_type;
 begin
 
-  process (Clock, ClockEnable)
-  begin
-    if rising_edge(Clock) and ClockEnable then
-      Output <= delayline(delayline'high);
-      delayline(delayline'high downto 1) <= delayline(delayline'high - 1 downto 0);
-      delayline(0) <= Input;
-    end if;
-  end process;
+  ZeroTicks: if Delayticks = 0 generate
+    Output <= Input;
+  end generate;
+
+  OneTick: if Delayticks = 1 generate
+    process(Clock, ClockEnable)
+    begin
+      if rising_edge(Clock) and ClockEnable then
+        Output <= Input;
+      end if;
+    end process;
+  end generate;
+
+  ManyTicks: if delayticks > 1 generate
+    process (Clock, ClockEnable)
+    begin
+      if rising_edge(Clock) and ClockEnable then
+        Output <= delayline(delayline'high);
+        delayline(delayline'high downto 1) <= delayline(delayline'high - 1 downto 0);
+        delayline(0) <= Input;
+      end if;
+    end process;
+  end generate;
 
 end Behavioral;
 
