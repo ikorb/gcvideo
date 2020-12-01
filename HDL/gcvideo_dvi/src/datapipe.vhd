@@ -73,6 +73,7 @@ entity Datapipe is
     -- exported internal signals
     ConsoleMode: out console_mode_t;
     PipeClock  : out std_logic;
+    DAC_RGBMode: out boolean;
 
     -- audio out
     SPDIF_Out  : out std_logic;
@@ -407,6 +408,8 @@ begin
     if rising_edge(Clock54M) and pixel_clk_en_ld then
       if video_settings.AnalogRGBOutput and ForceYPbPr /= '0' then
         -- RGB mode
+        DAC_RGBMode <= true;
+
         if video_settings.SyncOnGreen then
           if video_out.CSync then
             DAC_SyncN <= '0';
@@ -423,6 +426,8 @@ begin
         DAC_Blue  <= std_logic_vector(video_out.PixelB);
       else
         -- component mode
+        DAC_RGBMode <= false;
+
         if video_444_osd.CSync then
           DAC_SyncN <= '0';
         else

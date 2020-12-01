@@ -401,6 +401,7 @@ package component_defs is
       -- exported internal signals
       ConsoleMode: out console_mode_t;
       PipeClock  : out std_logic;
+      DAC_RGBMode: out boolean;
 
       -- audio out
       SPDIF_Out  : out std_logic;
