@@ -50,7 +50,7 @@ bool modeset_set_scanlines(int value) {
     video_settings[modeset_mode] &= ~VIDEOIF_SET_SL_ENABLE;
 
   if (current_videomode == modeset_mode)
-    VIDEOIF->settings = video_settings[modeset_mode];
+    VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
   return true;
 }
 
@@ -58,7 +58,7 @@ bool modeset_set_slstrength(int value) {
   video_settings[modeset_mode] = (video_settings[modeset_mode] & ~VIDEOIF_SET_SL_STRENGTH_MASK) | value;
 
   if (current_videomode == modeset_mode)
-    VIDEOIF->settings = video_settings[modeset_mode];
+    VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
   return false;
 }
 
@@ -69,7 +69,7 @@ bool modeset_set_sleven(int value) {
     video_settings[modeset_mode] &= ~VIDEOIF_SET_SL_EVEN;
 
   if (current_videomode == modeset_mode)
-    VIDEOIF->settings = video_settings[modeset_mode];
+    VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
   return false;
 }
 
@@ -80,7 +80,7 @@ bool modeset_set_slalt(int value) {
     video_settings[modeset_mode] &= ~VIDEOIF_SET_SL_ALTERNATE;
 
   if (current_videomode == modeset_mode)
-    VIDEOIF->settings = video_settings[modeset_mode];
+    VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
   return false;
 }
 
@@ -91,7 +91,7 @@ bool modeset_set_linedoubler(int value) {
     video_settings[modeset_mode] &= ~VIDEOIF_SET_LD_ENABLE;
 
   if (current_videomode == modeset_mode)
-    VIDEOIF->settings = video_settings[modeset_mode];
+    VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
   return true;
 }
 

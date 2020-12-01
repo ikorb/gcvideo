@@ -81,7 +81,7 @@ void screen_idle(void) {
 
       /* update video settings */
       current_videomode = detect_inputmode();
-      VIDEOIF->settings = video_settings[current_videomode];
+      VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
 
       /* print resolution box */
       if (resbox_enabled) {

@@ -57,16 +57,16 @@
 
 /* --- getters and setters --- */
 
-static int get_cabledetect(void) { return video_settings[current_videomode] & VIDEOIF_SET_CABLEDETECT; }
-static int get_rgblimited(void)  { return video_settings[current_videomode] & VIDEOIF_SET_RGBLIMITED;  }
-static int get_dvienhanced(void) { return video_settings[current_videomode] & VIDEOIF_SET_DVIENHANCED; }
-static int get_169(void)         { return video_settings[current_videomode] & VIDEOIF_SET_169;         }
-static int get_switchdelay(void) { return mode_switch_delay;                                           }
-static int get_volume(void)      { return audio_volume;                                                }
-static int get_mute(void)        { return audio_mute;                                                  }
+static int get_cabledetect(void) { return video_settings_global & VIDEOIF_SET_CABLEDETECT; }
+static int get_rgblimited(void)  { return video_settings_global & VIDEOIF_SET_RGBLIMITED;  }
+static int get_dvienhanced(void) { return video_settings_global & VIDEOIF_SET_DVIENHANCED; }
+static int get_169(void)         { return video_settings_global & VIDEOIF_SET_169;         }
+static int get_switchdelay(void) { return mode_switch_delay;                               }
+static int get_volume(void)      { return audio_volume;                                    }
+static int get_mute(void)        { return audio_mute;                                      }
 
 static int get_analogmode(void) {
-  uint32_t val = (video_settings[current_videomode] & VIDEOIF_SET_ANALOG_MASK)
+  uint32_t val = (video_settings_global & VIDEOIF_SET_ANALOG_MASK)
     >> VIDEOIF_SET_ANALOG_SHIFT;
   if (val == 3)
     return 2;
@@ -76,35 +76,31 @@ static int get_analogmode(void) {
 
 
 static void set_all_modes(uint32_t flag, bool state) {
-  for (unsigned int i = 0; i < VIDMODE_COUNT; i++) {
-    if (state)
-      video_settings[i] |=  flag;
-    else
-      video_settings[i] &= ~flag;
-  }
+  if (state)
+    video_settings_global |=  flag;
+  else
+    video_settings_global &= ~flag;
+
+  VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
 }
 
 static bool set_cabledetect(int value) {
   set_all_modes(VIDEOIF_SET_CABLEDETECT, value);
-  VIDEOIF->settings = video_settings[current_videomode];
   return false;
 }
 
 static bool set_rgblimited(int value) {
   set_all_modes(VIDEOIF_SET_RGBLIMITED, value);
-  VIDEOIF->settings = video_settings[current_videomode];
   return false;
 }
 
 static bool set_dvienhanced(int value) {
   set_all_modes(VIDEOIF_SET_DVIENHANCED, value);
-  VIDEOIF->settings = video_settings[current_videomode];
   return true;
 }
 
 static bool set_169(int value) {
   set_all_modes(VIDEOIF_SET_169, value);
-  VIDEOIF->settings = video_settings[current_videomode];
   return false;
 }
 
@@ -134,7 +130,6 @@ static bool set_analogmode(int value) {
     value = 3;
   set_all_modes(VIDEOIF_SET_ANALOG_MASK, false);
   set_all_modes(value << VIDEOIF_SET_ANALOG_SHIFT, true);
-  VIDEOIF->settings = video_settings[current_videomode];
   return false;
 }
 
@@ -195,7 +190,7 @@ static menu_t otherset_menu = {
 #endif
 
 static void otherset_draw(menu_t *menu) {
-  if (video_settings[current_videomode] & VIDEOIF_SET_DVIENHANCED) {
+  if (video_settings_global & VIDEOIF_SET_DVIENHANCED) {
     otherset_items[MENUITEM_169].flags = 0;
   } else {
     otherset_items[MENUITEM_169].flags = MENU_FLAG_DISABLED;

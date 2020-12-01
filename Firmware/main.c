@@ -76,7 +76,7 @@ int main(int argc, char **argv) {
   osd_init();
   spiflash_init();
 
-  VIDEOIF->settings = video_settings[current_videomode];
+  VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
   VIDEOIF->osd_bg   = osdbg_settings;
 
   while (1) {

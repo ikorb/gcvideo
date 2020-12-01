@@ -50,6 +50,7 @@ extern const uint16_t video_out_lines[VIDMODE_COUNT];
 extern const char    *mode_names[VIDMODE_COUNT];
 
 extern uint32_t     video_settings[VIDMODE_COUNT];
+extern uint32_t     video_settings_global;
 extern uint32_t     osdbg_settings;
 extern int8_t       picture_brightness;
 extern int8_t       picture_contrast;

@@ -49,6 +49,7 @@ const char *mode_names[VIDMODE_COUNT] = {
 };
 
 uint32_t     video_settings[VIDMODE_COUNT];
+uint32_t     video_settings_global;
 uint32_t     osdbg_settings;
 uint32_t     mode_switch_delay;
 bool         resbox_enabled;
@@ -115,12 +116,13 @@ void print_resolution(void) {
 void settings_init(void) {
   resbox_enabled = true;
 
-  video_settings[VIDMODE_240p] = VIDEOIF_SET_CABLEDETECT | 0x80 | VIDEOIF_SET_LD_ENABLE;
-  video_settings[VIDMODE_288p] = VIDEOIF_SET_CABLEDETECT | 0x80 | VIDEOIF_SET_LD_ENABLE;
-  video_settings[VIDMODE_480i] = VIDEOIF_SET_CABLEDETECT | 0x80 | VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;
-  video_settings[VIDMODE_576i] = VIDEOIF_SET_CABLEDETECT | 0x80 | VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;
-  video_settings[VIDMODE_480p] = VIDEOIF_SET_CABLEDETECT | 0x80;
-  video_settings[VIDMODE_576p] = VIDEOIF_SET_CABLEDETECT | 0x80;
+  video_settings_global = VIDEOIF_SET_CABLEDETECT;
+  video_settings[VIDMODE_240p] = 0x80 | VIDEOIF_SET_LD_ENABLE;
+  video_settings[VIDMODE_288p] = 0x80 | VIDEOIF_SET_LD_ENABLE;
+  video_settings[VIDMODE_480i] = 0x80 | VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;
+  video_settings[VIDMODE_576i] = 0x80 | VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;
+  video_settings[VIDMODE_480p] = 0x80;
+  video_settings[VIDMODE_576p] = 0x80;
   osdbg_settings = 0x501bf8;  // partially transparent, blue tinted background
   picture_brightness = 0;
   picture_contrast   = 0;
@@ -131,7 +133,7 @@ void settings_init(void) {
   mode_switch_delay = 0;
   current_videomode = detect_inputmode();
 
-  VIDEOIF->settings       = video_settings[current_videomode];
+  VIDEOIF->settings       = video_settings[current_videomode] | video_settings_global;
   VIDEOIF->osd_bg         = osdbg_settings;
   VIDEOIF->audio_volume   = 255;
   VIDEOIF->image_controls = 0x00800080;
