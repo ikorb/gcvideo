@@ -36,13 +36,17 @@
 #include <stdint.h>
 
 typedef enum {
-  VALTYPE_BOOL,
-  VALTYPE_EVENODD,
-  VALTYPE_ANALOGMODE,
-  VALTYPE_BYTE,
+  VALTYPE_BOOL,         // 0, 1
+  VALTYPE_EVENODD,      // 0, 1 shown as Even, Odd
+  VALTYPE_ANALOGMODE,   // 0 to 2 shown as YPbPr, RGB, RGsB
+  VALTYPE_BYTE,         // 0 to 255
   VALTYPE_SBYTE_99,     // -99 to 99
   VALTYPE_SBYTE_127,    // -128 to 127
+  VALTYPE_FIXPOINT1,    // 0.00 to 1.00, scaled by 256
+  VALTYPE_FIXPOINT2,    // 0.00 to 1.992 (255), scaled by 128
   VALTYPE_SLPROFILEOFF, // 0 to 3 shown as Off, 1 to 3
+  VALTYPE_SLPROFILE,    // 1 to 3
+  VALTYPE_SLINDEX,      // 16 to 235
 } valuetype_t;
 
 #define VIFLAG_REDRAW         (1<<0)

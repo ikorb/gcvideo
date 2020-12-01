@@ -61,8 +61,13 @@ extern bool         resbox_enabled;
 extern video_mode_t current_videomode;
 extern uint8_t      audio_volume;
 extern bool         audio_mute;
+extern uint8_t      scanline_selected_profile;
+extern uint16_t     scanline_strength;
+extern uint16_t     scanline_hybrid;
+extern bool         scanline_custom;
 
 void set_all_modes(uint32_t flag, bool state);
+void update_scanlines(void);
 void update_imagecontrols(void);
 video_mode_t detect_inputmode(void);
 void print_resolution(void);

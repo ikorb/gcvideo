@@ -57,7 +57,11 @@ static const cliprange_t clipranges[] = {
   [ VALTYPE_BYTE ]         = {    0,   255 },
   [ VALTYPE_SBYTE_99 ]     = {   -99,   99 },
   [ VALTYPE_SBYTE_127 ]    = {  -128,  127 },
+  [ VALTYPE_FIXPOINT1 ]    = {     0,  256 },
+  [ VALTYPE_FIXPOINT2 ]    = {     0,  255 },
   [ VALTYPE_SLPROFILEOFF ] = {     0,    3 },
+  [ VALTYPE_SLPROFILE ]    = {     1,    3 },
+  [ VALTYPE_SLINDEX ]      = {    16,  235 },
 };
 
 static const uint8_t value_widths[] = {
@@ -67,7 +71,11 @@ static const uint8_t value_widths[] = {
   [ VALTYPE_BYTE ]         = 6,
   [ VALTYPE_SBYTE_99 ]     = 6,
   [ VALTYPE_SBYTE_127 ]    = 6,
+  [ VALTYPE_FIXPOINT1 ]    = 8,
+  [ VALTYPE_FIXPOINT2 ]    = 8,
   [ VALTYPE_SLPROFILEOFF ] = 6,
+  [ VALTYPE_SLPROFILE ]    = 6,
+  [ VALTYPE_SLINDEX ]      = 6,
 };
 
 /* (un)draw marker on a menu item */
@@ -139,6 +147,10 @@ static bool set_value(const valueitem_t *value, int newval) {
       VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
     }
 
+    if (value->field.flags & VIFLAG_SLUPDATE) {
+      update_scanlines();
+    }
+
     return value->field.flags & VIFLAG_REDRAW;
 
   } else {
@@ -185,17 +197,27 @@ static void print_value(menu_t *menu, unsigned int itemnum) {
 
   case VALTYPE_BYTE:
   case VALTYPE_SBYTE_99:
+  case VALTYPE_SLINDEX:
     printf("%4d", value);
     break;
 
   case VALTYPE_SBYTE_127:
     if (value == 0)
-      printf("   0");
+      osd_puts("   0");
     else
       printf("%+4d", value);
     break;
 
+  case VALTYPE_FIXPOINT1:
+    printf("%2d.%03d", value / 256, (value % 256) * 1000 / 256);
+    break;
+
+  case VALTYPE_FIXPOINT2:
+    printf("%2d.%03d", value / 128, (value % 128) * 1000 / 128);
+    break;
+
   case VALTYPE_SLPROFILEOFF:
+  case VALTYPE_SLPROFILE:
     if (value) {
       printf("%4d", value);
     } else {

@@ -41,8 +41,9 @@
 #include "settings.h"
 
 enum {
-  MENUITEM_OSDSET = MODESET_COMMON_MENUITEM_COUNT,
+  MENUITEM_SLSET = MODESET_COMMON_MENUITEM_COUNT,
   MENUITEM_PICTURESET,
+  MENUITEM_OSDSET,
   MENUITEM_OUTPUTSET,
   MENUITEM_VIEWALL,
   MENUITEM_ADVANCED,
@@ -60,14 +61,15 @@ static menuitem_t mainmenu_items[] = {
   { "Scanline Profile",       &modeset_value_slprofile,   3, 0 }, // 1
   { " Apply to",              &modeset_value_sleven,      4, 0 }, // 2
   { " Alternating scanlines", &modeset_value_slalt,       5, 0 }, // 3
-  { "OSD settings...",        NULL,                       7, 0 }, // 4
+  { "Scanline settings...",   NULL,                       7, 0 }, // 4
   { "Picture settings...",    NULL,                       8, 0 }, // 5
-  { "Output settings...",     NULL,                       9, 0 }, // 6
-  { "View all modes...",      NULL,                      10, 0 }, // 7
-  { "Advanced settings...",   NULL,                      11, 0 }, // 8
-  { "Store settings",         NULL,                      13, 0 }, // 9
-  { "About...",               NULL,                      14, 0 }, // 10
-  { "Exit",                   NULL,                      15, 0 }, // 11
+  { "OSD settings...",        NULL,                       9, 0 }, // 6
+  { "Output settings...",     NULL,                      10, 0 }, // 7
+  { "View all modes...",      NULL,                      11, 0 }, // 8
+  { "Advanced settings...",   NULL,                      12, 0 }, // 9
+  { "Store settings",         NULL,                      14, 0 }, // 10
+  { "About...",               NULL,                      15, 0 }, // 11
+  { "Exit",                   NULL,                      16, 0 }, // 12
 };
 
 static void mainmenu_draw(menu_t *menu);
@@ -145,12 +147,16 @@ void screen_mainmenu(void) {
     case MENUITEM_EXIT:
       return;
 
-    case MENUITEM_OSDSET:
-      screen_osdsettings();
+    case MENUITEM_SLSET:
+      screen_scanlines();
       break;
 
     case MENUITEM_PICTURESET:
       screen_picturesettings();
+      break;
+
+    case MENUITEM_OSDSET:
+      screen_osdsettings();
       break;
 
     case MENUITEM_OUTPUTSET:
