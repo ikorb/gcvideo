@@ -1,3 +1,17 @@
+2020-01-12: GCVideo DVI version 3.0
+- attempted to improve signal compatibility
+- non-standard mode detection
+- automatic processing bypass for non-standard modes
+- automatic image centering, with optional image shift
+- more flexible scanline strength including hybrid
+- scanline profiles
+- infrastructure for installing future firmware updates via console
+- faster startup time
+- analog component output signal range workaround
+- YCbCr 4:4:4 and 4:2:2 output options
+- advanced options menu for disabling parts of the image processing
+- less strict gamepad snooper timing to fix GC+ compatibility
+
 2019-05-31: GCVideo-DVI version 2.4d
 - fix incorrect chroma mixing for Cr-first lines
 
