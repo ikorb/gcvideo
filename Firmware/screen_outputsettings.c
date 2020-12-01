@@ -104,7 +104,7 @@ static bool set_analogmode(int value) {
 static valueitem_t value_cabledetect = { VALTYPE_BOOL, true,
                                          { .field = { NULL, VIDEOIF_BIT_CABLEDETECT, 0, VIFLAG_ALLMODES }} };
 static valueitem_t value_rgblimited  = { VALTYPE_BOOL, true,
-                                         { .field = { NULL, VIDEOIF_BIT_RGBLIMITED, 0, VIFLAG_ALLMODES }} };
+                                         { .field = { NULL, VIDEOIF_BIT_RGBLIMITED, 0, VIFLAG_ALLMODES | VIFLAG_COLORMATRIX }} };
 static valueitem_t value_169         = { VALTYPE_BOOL, true,
                                          { .field = { NULL, VIDEOIF_BIT_169, 0, VIFLAG_ALLMODES }} };
 static valueitem_t value_dvienhanced = { VALTYPE_BOOL, false, {{ get_dvienhanced, set_dvienhanced }} };

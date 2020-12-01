@@ -31,6 +31,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include "colormatrix.h"
 #include "menu.h"
 #include "osd.h"
 #include "pad.h"
@@ -48,34 +49,12 @@ enum {
 
 /* --- getters and setters --- */
 
-static int get_brightness(void) { return picture_brightness; }
-static int get_contrast(void)   { return picture_contrast;   }
-static int get_saturation(void) { return picture_saturation; }
-
-static bool set_brightness(int value) {
-  picture_brightness = value;
-  update_imagecontrols();
-  return false;
-}
-
-static bool set_contrast(int value) {
-  picture_contrast = value;
-  update_imagecontrols();
-  return false;
-}
-
-static bool set_saturation(int value) {
-  picture_saturation = value;
-  update_imagecontrols();
-  return true;
-}
-
-static valueitem_t value_brightness = { VALTYPE_SBYTE_127, false,
-                                        { .functions = { get_brightness, set_brightness }} };
-static valueitem_t value_contrast   = { VALTYPE_SBYTE_127, false,
-                                        { .functions = { get_contrast,   set_contrast   }} };
-static valueitem_t value_saturation = { VALTYPE_SBYTE_127, false,
-                                        { .functions = { get_saturation, set_saturation }} };
+static valueitem_t value_brightness = { VALTYPE_SBYTE_127, true,
+                                        { .field = { &picture_brightness, 8, 24, VIFLAG_SBYTE | VIFLAG_COLORMATRIX }} };
+static valueitem_t value_contrast   = { VALTYPE_SBYTE_127, true,
+                                        { .field = { &picture_contrast,   8, 24, VIFLAG_SBYTE | VIFLAG_COLORMATRIX }} };
+static valueitem_t value_saturation = { VALTYPE_SBYTE_127, true,
+                                        { .field = { &picture_saturation, 8, 24, VIFLAG_SBYTE | VIFLAG_COLORMATRIX }} };
 
 /* --- menu definition --- */
 
@@ -113,7 +92,7 @@ void screen_picturesettings(void) {
       picture_brightness = 0;
       picture_contrast   = 0;
       picture_saturation = 0;
-      update_imagecontrols();
+      update_colormatrix();
       break;
 
     default:

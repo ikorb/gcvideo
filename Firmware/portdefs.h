@@ -72,7 +72,10 @@ typedef union {
     __O uint32_t settings;
     __O uint32_t osd_bg;
     __O uint32_t audio_volume;
-    __O uint32_t image_controls;
+    __O uint32_t yr_factor_y_bias;
+    __O uint32_t yb_yg_factor;
+    __O uint32_t cbb_cbg_factor;
+    __O uint32_t crg_crr_factor;
     // "virtual" register, any write clears IRQ flag
     __O uint32_t clear_irq;
   };
@@ -119,15 +122,6 @@ typedef union {
 #define VIDEOIF_OSDBG_TINTCR_SHIFT   0
 
 #define VIDEOIF_OSDBG_DISABLE_OUTPUT -1 // technically just bit 24, but -1 is one insn
-
-#define VIDEOIF_IMGCTL_SATURATION_MASK  0x1ff0000
-#define VIDEOIF_IMGCTL_SATURATION_SHIFT 16
-#define VIDEOIF_IMGCTL_BRIGHTNESS_MASK  0x000ff00
-#define VIDEOIF_IMGCTL_BRIGHTNESS_SHIFT 8
-#define VIDEOIF_IMGCTL_CONTRAST_MASK    0x00000ff
-#define VIDEOIF_IMGCTL_CONTRAST_SHIFT   0
-
-#define VIDEOIF_IMGCTL_NEUTRAL 0x00800080
 
 /* --- PadReader --- */
 

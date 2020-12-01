@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include "colormatrix.h"
 #include "irrx.h"
 #include "portdefs.h"
 #include "spiflash.h"
@@ -79,9 +80,6 @@ bool         resbox_enabled;
 video_mode_t current_videomode;
 uint8_t      audio_volume;
 bool         audio_mute;
-int8_t       picture_brightness;
-int8_t       picture_contrast;
-int8_t       picture_saturation;
 uint8_t      scanline_selected_profile;
 uint16_t     scanline_strength;
 uint16_t     scanline_hybrid;
@@ -113,18 +111,6 @@ void update_scanlines(void) {
 
     SCANLINERAM->profiles[scanline_selected_profile * 256 + i] = 256 - str_adjusted;
   }
-}
-
-void update_imagecontrols(void) {
-  uint32_t imgctl;
-  uint8_t  contrast   = picture_contrast + 0x80;
-  uint16_t saturation = ((picture_saturation + 0x80) * contrast) / 128;
-
-  imgctl = (contrast << VIDEOIF_IMGCTL_CONTRAST_SHIFT) |
-    ((uint8_t)picture_brightness << VIDEOIF_IMGCTL_BRIGHTNESS_SHIFT) |
-    (saturation << VIDEOIF_IMGCTL_SATURATION_SHIFT);
-
-  VIDEOIF->image_controls = imgctl;
 }
 
 video_mode_t detect_inputmode(void) {
@@ -232,7 +218,7 @@ void settings_load(void) {
       picture_brightness = set.brightness;
       picture_contrast   = set.contrast;
       picture_saturation = set.saturation;
-      update_imagecontrols();
+      update_colormatrix();
     }
   }
 }
@@ -296,6 +282,7 @@ void settings_init(void) {
   picture_brightness = 0;
   picture_contrast   = 0;
   picture_saturation = 0;
+  update_colormatrix();
 
   audio_mute        = false;
   audio_volume      = 255;

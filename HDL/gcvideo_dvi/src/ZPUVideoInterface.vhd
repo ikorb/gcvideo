@@ -47,8 +47,7 @@ entity ZPUVideoInterface is
     ZPUBusOut       : out ZPUDeviceOut;
     IRQ             : out std_logic;
     VSettings       : out VideoSettings_t;
-    OSDSettings     : out OSDSettings_t;
-    ImageControls   : out ImageControls_t
+    OSDSettings     : out OSDSettings_t
   );
 end ZPUVideoInterface;
 
@@ -72,7 +71,7 @@ architecture Behavioral of ZPUVideoInterface is
   signal volume_setting    : std_logic_vector( 7 downto 0) := x"ff";
   signal vid_settings      : std_logic_vector(11 downto 0) := VidSettingsDefault;
   signal osd_bgsettings    : std_logic_vector(24 downto 0) := OSDBGSettingsDefault;
-  signal image_controls    : std_logic_vector(24 downto 0);
+  signal color_matrix      : ColorMatrix_t;
 
   signal stored_flags      : std_logic_vector(2 downto 0);
   signal console_mode      : std_logic;
@@ -96,19 +95,15 @@ begin
   VSettings.SyncOnGreen        <= (vid_settings(10) = '1');
   VSettings.SampleRateHack     <= (vid_settings(11) = '1');
   VSettings.Volume             <= unsigned(volume_setting);
+  VSettings.Matrix             <= color_matrix;
 
   -- putting this bit in an unrelated register simplifies the software side
   VSettings.DisableOutput      <= (osd_bgsettings(24) = '1');
 
   -- forward OSD settings to output
-  OSDSettings.BGAlpha    <= unsigned(osd_bgsettings(23 downto 16));
-  OSDSettings.BGTintCb   <=   signed(osd_bgsettings(15 downto  8));
-  OSDSettings.BGTintCr   <=   signed(osd_bgsettings( 7 downto  0));
-
-  -- forward picture settings
-  ImageControls.Saturation <= unsigned(image_controls(24 downto 16));
-  ImageControls.Brightness <=   signed(image_controls(15 downto  8));
-  ImageControls.Contrast   <= unsigned(image_controls( 7 downto  0));
+  OSDSettings.BGAlpha  <= unsigned(osd_bgsettings(23 downto 16));
+  OSDSettings.BGTintCb <=   signed(osd_bgsettings(15 downto  8));
+  OSDSettings.BGTintCr <=   signed(osd_bgsettings( 7 downto  0));
 
   process(Clock)
   begin
@@ -142,11 +137,24 @@ begin
 
       -- write path
       if ZSelect = '1' and ZPUBusIn.mem_writeEnable = '1' then
-        case ZPUBusIn.mem_addr(4 downto 2) is
-          when "000"  => vid_settings   <= ZPUBusIn.mem_write(11 downto 0);
-          when "001"  => osd_bgsettings <= ZPUBusIn.mem_write(24 downto 0);
-          when "010"  => volume_setting <= ZPUBusIn.mem_write( 7 downto 0);
-          when "011"  => image_controls <= ZPUBusIn.mem_write(24 downto 0);
+        case ZPUBusIn.mem_addr(5 downto 2) is
+          when "0000" => vid_settings   <= ZPUBusIn.mem_write(11 downto 0);
+          when "0001" => osd_bgsettings <= ZPUBusIn.mem_write(24 downto 0);
+          when "0010" => volume_setting <= ZPUBusIn.mem_write( 7 downto 0);
+
+          when "0011" =>
+            color_matrix.YBias     <= signed(ZPUBusIn.mem_write( 9 downto  0));
+            color_matrix.YRFactor  <= signed(ZPUBusIn.mem_write(31 downto 16));
+          when "0100" =>
+            color_matrix.YGFactor  <= signed(ZPUBusIn.mem_write(15 downto  0));
+            color_matrix.YBFactor  <= signed(ZPUBusIn.mem_write(31 downto 16));
+          when "0101" =>
+            color_matrix.CbGFactor <= signed(ZPUBusIn.mem_write(15 downto  0));
+            color_matrix.CbBFactor <= signed(ZPUBusIn.mem_write(31 downto 16));
+          when "0110" =>
+            color_matrix.CrRFactor <= signed(ZPUBusIn.mem_write(15 downto  0));
+            color_matrix.CrGFactor <= signed(ZPUBusIn.mem_write(31 downto 16));
+
           when others => null;
         end case;
       end if;

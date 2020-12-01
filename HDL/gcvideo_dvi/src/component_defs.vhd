@@ -89,14 +89,16 @@ package component_defs is
     );
   end component;
 
-  component convert_yuv_to_rgb is
+  component colormatrix is
     port (
       PixelClock      : in  std_logic;
       PixelClockEnable: in  boolean;
 
+      -- control
+      Settings        : in  VideoSettings_t;
+
       -- input video
       VideoIn         : in  VideoYCbCr;
-      Limited_Range   : in  boolean;
 
       -- output video
       VideoOut        : out VideoRGB
@@ -281,8 +283,7 @@ package component_defs is
       OSDRamAddr      : in  std_logic_vector(10 downto 0);
       OSDRamData      : out std_logic_vector(8 downto 0);
       OSDSettings     : out OSDSettings_t;
-      VSettings       : out VideoSettings_t;
-      ImageControls   : out ImageControls_t
+      VSettings       : out VideoSettings_t
     );
   end component;
 
@@ -318,16 +319,6 @@ package component_defs is
       Clock      : in  std_logic;
       I2S_LRClock: in  std_logic;
       ConsoleMode: out console_mode_t
-    );
-  end component;
-
-  component ImageAdjuster is
-    port (
-      PixelClock      : in  std_logic;
-      PixelClockEnable: in  boolean;
-      VideoIn         : in  VideoYCbCr;
-      VideoOut        : out VideoYCbCr;
-      Settings        : in  ImageControls_t
     );
   end component;
 

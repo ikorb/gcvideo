@@ -24,7 +24,7 @@
 -- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 -- THE POSSIBILITY OF SUCH DAMAGE.
 --
--- PictureAdjuster.vhd: Brightness/Contrast/Saturation adjustment
+-- colormatrix: matrix multiplier for color conversion
 --
 ----------------------------------------------------------------------------------
 
@@ -35,69 +35,107 @@ use IEEE.NUMERIC_STD.ALL;
 use work.component_defs.all;
 use work.video_defs.all;
 
-entity ImageAdjuster is
+entity ColorMatrix is
   port (
     PixelClock      : in  std_logic;
     PixelClockEnable: in  boolean;
+
+    -- control
+    Settings        : in  VideoSettings_t;
+
+    -- input video
     VideoIn         : in  VideoYCbCr;
-    VideoOut        : out VideoYCbCr;
-    Settings        : in  ImageControls_t
+
+    -- output video
+    VideoOut        : out VideoRGB
   );
-end ImageAdjuster;
+end ColorMatrix;
 
-architecture Behavioral of ImageAdjuster is
-  constant MODULE_DELAY: natural := 2;
+architecture Behavioral of colormatrix is
 
-  signal ymult : signed(18 downto 0);
-  signal cbmult: signed(17 downto 0);
-  signal crmult: signed(17 downto 0);
+  -- delay in (enabled) clock cycles for untouched signals
+  constant Delayticks: Natural := 2;
 
-  -- clip Y to 0..(255-16) because internally it's adjusted to 0 IRE at 0
-  function clip_y(v: signed)
+  signal yr_mult: signed(26 downto 0);
+  signal yg_mult: signed(26 downto 0);
+  signal yb_mult: signed(26 downto 0);
+
+  signal color_r: signed(23 downto 0);
+  signal color_g: signed(24 downto 0);
+  signal color_b: signed(23 downto 0);
+
+  signal rsum   : signed(14 downto 0);
+  signal gsum   : signed(14 downto 0);
+  signal bsum   : signed(14 downto 0);
+
+  -- clip value to 8 bit range
+  function clip(v: signed)
     return unsigned is
   begin
     if v < 0 then
       return x"00";
-    elsif v > 255-16 then
-      return x"ef";
+    elsif v > 255 then
+      return x"ff";
     else
       return resize(unsigned(v), 8);
     end if;
   end function;
 
-  -- clip Cb/Cr to valid range
-  function clip_c(v: signed)
-    return signed is
-  begin
-    if v < 16 - 128 then
-      return to_signed(16 - 128, 8);
-    elsif v > 240 - 128 then
-      return to_signed(240 - 128, 8);
-    else
-      return resize(signed(v), 8);
-    end if;
-  end function;
-
 begin
 
-  process(PixelClock, PixelClockEnable)
+  -- capture and interpolate colors
+  process (PixelClock, PixelClockEnable)
+    variable y_shifted: signed(10 downto 0);
+    variable cb_r     : signed(23 downto 0);
+    variable cb_g     : signed(23 downto 0);
+    variable cb_b     : signed(23 downto 0);
+    variable cr_r     : signed(23 downto 0);
+    variable cr_g     : signed(23 downto 0);
+    variable cr_b     : signed(23 downto 0);
+    variable rsum     : signed(27 downto 0);
+    variable bsum     : signed(27 downto 0);
   begin
     if rising_edge(PixelClock) and PixelClockEnable then
-      ymult <= resize(mksigned(VideoIn.pixelY) * mksigned(Settings.Contrast), 19) +
-               Settings.Brightness * to_signed(128, 9);
-      cbmult <= VideoIn.PixelCb * mksigned(Settings.Saturation);
-      crmult <= VideoIn.PixelCr * mksigned(Settings.Saturation);
+      ---- pipeline stage 1: Y-offset, all multiplications and Cr/Cb sums
+      -- Y offset
+      y_shifted := mksigned(VideoIn.PixelY) + resize(Settings.Matrix.YBias, 11);
 
-      VideoOut.PixelY  <= clip_y(ymult / 128);
-      VideoOut.PixelCb <= clip_c(cbmult / 128);
-      VideoOut.PixelCr <= clip_c(crmult / 128);
+      -- Y parts of R/G/B
+      yr_mult <= Settings.Matrix.YRFactor * y_shifted;
+      yg_mult <= Settings.Matrix.YGFactor * y_shifted;
+      yb_mult <= Settings.Matrix.YBFactor * y_shifted;
+
+      -- Cb/Cr parts of R/G/B
+      cb_g := VideoIn.PixelCb * Settings.Matrix.CbGFactor;
+      cb_b := VideoIn.PixelCb * Settings.Matrix.CbBFactor;
+      cr_r := VideoIn.PixelCr * Settings.Matrix.CrRFactor;
+      cr_g := VideoIn.PixelCr * Settings.Matrix.CrGFactor;
+
+      -- Cb/Cr sums for R/G/B
+      color_r <= cr_r;
+      color_g <= resize(cb_g, 25) + cr_g;
+      color_b <= cb_b;
+
+      ---- pipeline stage 2: RGB sums and clipping
+      if Settings.ColorMode(1) = '1' then
+        rsum := (yr_mult + resize(color_r, 28)) / 4096 + 128;
+        bsum := (yb_mult + resize(color_b, 28)) / 4096 + 128;
+      else
+        rsum := (yr_mult + resize(color_r, 28)) / 4096;
+        bsum := (yb_mult + resize(color_b, 28)) / 4096;
+      end if;
+
+      VideoOut.PixelR <= clip(resize(rsum, 15));
+      VideoOut.PixelG <= clip(resize((yg_mult + resize(color_g, 28)) / 4096, 15));
+      VideoOut.PixelB <= clip(resize(bsum, 15));
+
     end if;
   end process;
 
   -- generate delayed signals
   Inst_HSyncDelay: delayline_bool
     generic map (
-      Delayticks  => MODULE_DELAY
+      Delayticks => Delayticks
     )
     port map (
       Clock       => PixelClock,
@@ -108,7 +146,7 @@ begin
 
   Inst_VSyncDelay: delayline_bool
     generic map (
-      Delayticks  => MODULE_DELAY
+      Delayticks => Delayticks
     )
     port map (
       Clock       => PixelClock,
@@ -119,7 +157,7 @@ begin
 
   Inst_CSyncDelay: delayline_bool
     generic map (
-      Delayticks  => MODULE_DELAY
+      Delayticks => Delayticks
     )
     port map (
       Clock       => PixelClock,
@@ -130,7 +168,7 @@ begin
 
   Inst_BlankingDelay: delayline_bool
     generic map (
-      Delayticks  => MODULE_DELAY
+      Delayticks => Delayticks
     )
     port map (
       Clock       => PixelClock,
@@ -141,7 +179,7 @@ begin
 
   Inst_FieldDelay: delayline_bool
     generic map (
-      Delayticks  => MODULE_DELAY
+      Delayticks => Delayticks
     )
     port map (
       Clock       => PixelClock,

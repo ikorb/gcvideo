@@ -13,7 +13,6 @@ SRC_COMMON := \
 	src/SimpleROM.vhd                  \
 	src/TMDS_encoder.vhd               \
 	src/TextOSD.vhd                    \
-	src/ImageAdjuster.vhd              \
 	src/ZPUBusMux.vhd                  \
 	src/ZPUDevices.vhd                 \
 	src/ZPUIRQController.vhd           \
@@ -29,7 +28,7 @@ SRC_COMMON := \
 	src/aux_encoder.vhd                \
 	src/component_defs.vhd             \
 	src/convert_422_to_444.vhd         \
-	src/convert_yuv_to_rgb.vhd         \
+	src/colormatrix.vhd                \
 	src/datapipe.vhd                   \
 	src/delayline_bool.vhd             \
 	src/delayline_unsigned.vhd         \

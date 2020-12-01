@@ -25,50 +25,33 @@
    THE POSSIBILITY OF SUCH DAMAGE.
 
 
-   settings.h: video-settings-related things
+   colormatrix.h: color matrix-related things
 
 */
 
-#ifndef SETTINGS_H
-#define SETTINGS_H
+#ifndef COLORMATRIX_H
+#define COLORMATRIX_H
 
-#include <stdbool.h>
 #include <stdint.h>
 
-#define SETTINGS_OFFSET 0x70000
+typedef struct {
+  short y_bias;
+  short yr_factor;
+  short yg_factor;
+  short yb_factor;
+  short cbg_factor;
+  short cbb_factor;
+  short crr_factor;
+  short crg_factor;
+} colormatrix_t;
 
-typedef enum {
-  VIDMODE_240p,
-  VIDMODE_288p,
-  VIDMODE_480i,
-  VIDMODE_576i,
-  /* the progressive modes must come last */
-  VIDMODE_480p,
-  VIDMODE_576p,
-  VIDMODE_COUNT
-} video_mode_t;
+extern const colormatrix_t* matrix_current;
+extern colormatrix_t matrix_custom;
 
-extern const uint16_t video_out_lines[VIDMODE_COUNT];
-extern const char    *mode_names[VIDMODE_COUNT];
+extern int8_t picture_brightness;
+extern int8_t picture_contrast;
+extern int8_t picture_saturation;
 
-extern uint32_t     video_settings[VIDMODE_COUNT];
-extern uint32_t     video_settings_global;
-extern uint32_t     osdbg_settings;
-extern bool         resbox_enabled;
-extern video_mode_t current_videomode;
-extern uint8_t      audio_volume;
-extern bool         audio_mute;
-extern uint8_t      scanline_selected_profile;
-extern uint16_t     scanline_strength;
-extern uint16_t     scanline_hybrid;
-extern bool         scanline_custom;
-
-void set_all_modes(uint32_t flag, bool state);
-void update_scanlines(void);
-video_mode_t detect_inputmode(void);
-void print_resolution(void);
-void settings_load(void);
-void settings_save(void);
-void settings_init(void);
+void update_colormatrix(void);
 
 #endif

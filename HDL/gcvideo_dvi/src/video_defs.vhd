@@ -104,10 +104,15 @@ package video_defs is
     BGTintCr  :   signed(7 downto 0);
   end record;
 
-  type ImageControls_t is record
-    Contrast  : unsigned(7 downto 0);
-    Brightness:   signed(7 downto 0);
-    Saturation: unsigned(8 downto 0);
+  type ColorMatrix_t is record
+    YBias    : signed( 9 downto 0); -- -127 to +144
+    YRFactor : signed(15 downto 0); -- -8.00 to +7.999755, scaled by 4096
+    YGFactor : signed(15 downto 0);
+    YBFactor : signed(15 downto 0);
+    CbGFactor: signed(15 downto 0);
+    CbBFactor: signed(15 downto 0);
+    CrRFactor: signed(15 downto 0);
+    CrGFactor: signed(15 downto 0);
   end record;
 
   type VideoSettings_t is record
@@ -124,6 +129,7 @@ package video_defs is
     SyncOnGreen       : boolean;
     Volume            : unsigned(7 downto 0);
     SampleRateHack    : boolean;
+    Matrix            : ColorMatrix_t;
   end record;
 
   -- 8 bit unsigned to 9 bit signed, no modifications

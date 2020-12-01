@@ -55,6 +55,7 @@ typedef enum {
 #define VIFLAG_SBYTE          (1<<3)
 #define VIFLAG_MODESET        (1<<4)
 #define VIFLAG_SLUPDATE       (1<<5)
+#define VIFLAG_COLORMATRIX    (1<<6)
 
 typedef struct {
   valuetype_t type:7;

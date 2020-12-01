@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include <stdio.h>
 #include <string.h>
+#include "colormatrix.h"
 #include "irrx.h"
 #include "menu.h"
 #include "osd.h"
@@ -83,6 +84,7 @@ int main(int argc, char **argv) {
   } else {
     VIDEOIF->audio_volume = audio_volume;
   }
+  update_colormatrix();
 
   run_mainloop();
 }

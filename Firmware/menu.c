@@ -30,6 +30,7 @@
 */
 
 #include <stdio.h>
+#include "colormatrix.h"
 #include "modeset_common.h"
 #include "osd.h"
 #include "pad.h"
@@ -145,6 +146,10 @@ static bool set_value(const valueitem_t *value, int newval) {
     if (value->field.flags & VIFLAG_UPDATE_VIDEOIF) {
       VIDEOIF->osd_bg = osdbg_settings;
       VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
+    }
+
+    if (value->field.flags & VIFLAG_COLORMATRIX) {
+      update_colormatrix();
     }
 
     if (value->field.flags & VIFLAG_SLUPDATE) {

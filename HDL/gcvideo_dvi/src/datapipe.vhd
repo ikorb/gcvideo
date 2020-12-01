@@ -112,7 +112,6 @@ architecture Behavioral of Datapipe is
   signal video_ld       : VideoY422;
   signal video_444      : VideoYCbCr;
   signal video_444_rb   : VideoYCbCr; -- reblanked
-  signal video_444_adj  : VideoYCbCr; -- adjusted
   signal video_444_sl   : VideoYCbCr; -- scanlined
   signal video_444_osd  : VideoYCbCr;
   signal video_rgb      : VideoRGB;
@@ -133,9 +132,6 @@ architecture Behavioral of Datapipe is
   signal osd_ram_addr   : std_logic_vector(10 downto 0);
   signal osd_ram_data   : std_logic_vector(8 downto 0);
   signal osd_settings   : OSDSettings_t;
-
-  -- contrast/brightness/saturation adjustments
-  signal image_controls : ImageControls_t;
 
   -- audio
   signal audio          : AudioData;
@@ -213,8 +209,7 @@ begin
     OSDRamAddr       => osd_ram_addr,
     OSDRamData       => osd_ram_data,
     OSDSettings      => osd_settings,
-    VSettings        => video_settings,
-    ImageControls    => image_controls
+    VSettings        => video_settings
   );
 
   -- DVI output
@@ -312,16 +307,6 @@ begin
       VideoOut         => video_444_rb
     );
 
-  -- adjust brightness/constrast/saturation
-  Inst_ImageAdjuster: ImageAdjuster
-    PORT MAP (
-      PixelClock       => Clock54M,
-      PixelClockEnable => pixel_clk_en_ld,
-      VideoIn          => video_444_rb,
-      VideoOut         => video_444_adj,
-      Settings         => image_controls
-    );
-
   -- overlay scanlines
   Inst_Scanliner: Scanline_Generator
     PORT MAP (
@@ -331,7 +316,7 @@ begin
       Use_Even         => scanline_even,
       PixelY           => scanline_ram_addr,
       ScanlineStrength => scanline_ram_data,
-      VideoIn          => video_444_adj,
+      VideoIn          => video_444_rb,
       VideoOut         => video_444_sl
     );
 
@@ -351,13 +336,13 @@ begin
       RAMData          => osd_ram_data
     );
 
-  -- convert YUV to RGB
-  Inst_yuv_to_rgb: Convert_yuv_to_rgb
+  -- convert color space
+  Inst_colormatrix: ColorMatrix
     PORT MAP (
       PixelClock       => Clock54M,
       PixelClockEnable => pixel_clk_en_ld,
+      Settings         => video_settings,
       VideoIn          => video_444_osd,
-      Limited_Range    => video_settings.LimitedRange,
       VideoOut         => video_rgb
     );
 
