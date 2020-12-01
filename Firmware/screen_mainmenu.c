@@ -40,14 +40,15 @@
 #include "screens.h"
 #include "settings.h"
 
-// 0-4 are from modeset_common.h
-#define MENUITEM_OSDSET      5
-#define MENUITEM_PICTURESET  6
-#define MENUITEM_OTHERSET    7
-#define MENUITEM_VIEWALL     8
-#define MENUITEM_STORE       9
-#define MENUITEM_ABOUT       10
-#define MENUITEM_EXIT        11
+enum {
+  MENUITEM_OSDSET = MODESET_COMMON_MENUITEM_COUNT,
+  MENUITEM_PICTURESET,
+  MENUITEM_OTHERSET,
+  MENUITEM_VIEWALL,
+  MENUITEM_STORE,
+  MENUITEM_ABOUT,
+  MENUITEM_EXIT
+};
 
 static menuitem_t mainmenu_items[];
 

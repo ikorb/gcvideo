@@ -38,11 +38,13 @@
 #include "screens.h"
 #include "settings.h"
 
-#define MENUITEM_RESBOX 0
-#define MENUITEM_ALPHA  1
-#define MENUITEM_TINTCB 2
-#define MENUITEM_TINTCR 3
-#define MENUITEM_EXIT   4
+enum {
+  MENUITEM_RESBOX,
+  MENUITEM_ALPHA,
+  MENUITEM_TINTCB,
+  MENUITEM_TINTCR,
+  MENUITEM_EXIT
+};
 
 /* --- valueitems --- */
 

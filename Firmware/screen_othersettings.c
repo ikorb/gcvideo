@@ -38,21 +38,24 @@
 #include "screens.h"
 #include "settings.h"
 
-#define MENUITEM_CABLEDETECT 0
-#define MENUITEM_LIMITEDRGB  1
-#define MENUITEM_DVIENHANCED 2
-#define MENUITEM_169         3
-#define MENUITEM_SWITCHDELAY 4
-#define MENUITEM_VOLUME      5
-#define MENUITEM_MUTE        6
+enum {
+  MENUITEM_CABLEDETECT,
+  MENUITEM_LIMITEDRGB,
+  MENUITEM_DVIENHANCED,
+  MENUITEM_169,
+  MENUITEM_SWITCHDELAY,
+  MENUITEM_VOLUME,
+  MENUITEM_MUTE,
+  MENUITEM_ANALOGOUT
+  // _EXIT as #define because ANALOGOUT doesn't always exist
+};
+
 #ifdef OUTPUT_DUAL
-#  define MENUITEM_ANALOGOUT 7
-#  define MENUITEM_EXIT      8
 #  define HAVE_DUAL 1
+#  define MENUITEM_EXIT (MENUITEM_ANALOGOUT + 1)
 #else
-#  define MENUITEM_ANALOGOUT 0
-#  define MENUITEM_EXIT      7
 #  define HAVE_DUAL 0
+#  define MENUITEM_EXIT (MENUITEM_ANALOGOUT)
 #endif
 
 /* --- getters and setters --- */

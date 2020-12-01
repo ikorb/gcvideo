@@ -38,11 +38,13 @@
 #include "screens.h"
 #include "settings.h"
 
-#define MENUITEM_BRIGHTNESS 0
-#define MENUITEM_CONTRAST   1
-#define MENUITEM_SATURATION 2
-#define MENUITEM_NEUTRAL    3
-#define MENUITEM_EXIT       4
+enum {
+  MENUITEM_BRIGHTNESS,
+  MENUITEM_CONTRAST,
+  MENUITEM_SATURATION,
+  MENUITEM_NEUTRAL,
+  MENUITEM_EXIT
+};
 
 /* --- getters and setters --- */
 

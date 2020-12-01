@@ -37,11 +37,14 @@
 #include "settings.h"
 
 /* positions are assumed to be fixed for now */
-#define MENUITEM_LINEDOUBLER 0
-#define MENUITEM_SCANLINES   1
-#define MENUITEM_SLSTRENGTH  2
-#define MENUITEM_SLEVEN      3
-#define MENUITEM_SLALT       4
+enum {
+  MENUITEM_LINEDOUBLER,
+  MENUITEM_SCANLINES,
+  MENUITEM_SLSTRENGTH,
+  MENUITEM_SLEVEN,
+  MENUITEM_SLALT,
+  MODESET_COMMON_MENUITEM_COUNT
+};
 
 /* evil global variable */
 extern video_mode_t modeset_mode;
