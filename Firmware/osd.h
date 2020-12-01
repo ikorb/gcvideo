@@ -38,6 +38,9 @@
 #define ATTRIB_DIM_BG   0x80
 #define ATTRIB_DIM_TEXT 0x100
 
+#define OSD_CHARS_PER_LINE   45
+#define OSD_LINES_ON_SCREEN  35
+
 void osd_init(void);
 void osd_clrscr(void);
 void osd_putchar(const char c);

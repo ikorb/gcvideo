@@ -34,9 +34,6 @@
 #include "portdefs.h"
 #include "osd.h"
 
-#define CHARS_PER_LINE   45
-#define LINES_ON_SCREEN  35
-
 #define BOXCHAR_TOPLEFT  0x01
 #define BOXCHAR_TOP      0x06
 #define BOXCHAR_TOPRIGHT 0x02
@@ -51,7 +48,7 @@ static volatile uint32_t *writeptr;
 static unsigned int current_attr;
 
 static void update_writeptr(void) {
-  writeptr = OSDRAM->data + cursor_x + CHARS_PER_LINE * cursor_y;
+  writeptr = OSDRAM->data + cursor_x + OSD_CHARS_PER_LINE * cursor_y;
 }
 
 void osd_init(void) {
@@ -73,16 +70,16 @@ void osd_putchar(const char c) {
   if (c == '\n') {
     cursor_x = 0;
     cursor_y++;
-    if (cursor_y >= LINES_ON_SCREEN)
+    if (cursor_y >= OSD_LINES_ON_SCREEN)
       cursor_y = 0;
     update_writeptr();
   } else {
     *writeptr++ = c | current_attr;
     cursor_x++;
-    if (cursor_x == CHARS_PER_LINE) {
+    if (cursor_x == OSD_CHARS_PER_LINE) {
       cursor_x = 0;
       cursor_y++;
-      if (cursor_y >= LINES_ON_SCREEN) {
+      if (cursor_y >= OSD_LINES_ON_SCREEN) {
         cursor_y = 0;
         update_writeptr();
       }
@@ -91,7 +88,7 @@ void osd_putchar(const char c) {
 }
 
 void osd_putcharat(unsigned int xpos, unsigned int ypos, const char c, unsigned int attr) {
-  OSDRAM->data[xpos + CHARS_PER_LINE * ypos] = attr | c;
+  OSDRAM->data[xpos + OSD_CHARS_PER_LINE * ypos] = attr | c;
 }
 
 void osd_puts(const char *str) {
@@ -122,7 +119,7 @@ void osd_setattr(bool dim_background, bool dim_text) {
 void osd_fillbox(unsigned int xpos, unsigned int ypos,
                  unsigned int xsize, unsigned int ysize, uint32_t ch) {
   for (unsigned int y = 0; y < ysize; y++) {
-    volatile uint32_t *ptr = OSDRAM->data + xpos + CHARS_PER_LINE * (ypos + y);
+    volatile uint32_t *ptr = OSDRAM->data + xpos + OSD_CHARS_PER_LINE * (ypos + y);
     for (unsigned int x = 0; x < xsize; x++)
       *ptr++ = ch;
   }
@@ -130,8 +127,8 @@ void osd_fillbox(unsigned int xpos, unsigned int ypos,
 
 void osd_drawborder(unsigned int xpos, unsigned int ypos,
                     unsigned int xsize, unsigned int ysize) {
-  volatile uint32_t *ptr1 = OSDRAM->data + xpos + CHARS_PER_LINE * ypos;
-  volatile uint32_t *ptr2 = OSDRAM->data + xpos + CHARS_PER_LINE * (ypos + ysize - 1);
+  volatile uint32_t *ptr1 = OSDRAM->data + xpos + OSD_CHARS_PER_LINE * ypos;
+  volatile uint32_t *ptr2 = OSDRAM->data + xpos + OSD_CHARS_PER_LINE * (ypos + ysize - 1);
 
   /* horizontal edges and corners */
   *ptr1++ = BOXCHAR_TOPLEFT;
@@ -144,13 +141,13 @@ void osd_drawborder(unsigned int xpos, unsigned int ypos,
   *ptr2 = BOXCHAR_BOTRIGHT;
 
   /* vertical edges */
-  ptr1 = OSDRAM->data + CHARS_PER_LINE * (ypos + 1) + xpos;
-  ptr2 = OSDRAM->data + CHARS_PER_LINE * (ypos + 1) + xpos + xsize - 1;
+  ptr1 = OSDRAM->data + OSD_CHARS_PER_LINE * (ypos + 1) + xpos;
+  ptr2 = OSDRAM->data + OSD_CHARS_PER_LINE * (ypos + 1) + xpos + xsize - 1;
   for (unsigned int y = 1; y < ysize - 1; y++) {
     *ptr1 = BOXCHAR_LEFT;
     *ptr2 = BOXCHAR_RIGHT;
-    ptr1 += CHARS_PER_LINE;
-    ptr2 += CHARS_PER_LINE;
+    ptr1 += OSD_CHARS_PER_LINE;
+    ptr2 += OSD_CHARS_PER_LINE;
   }
 }
 
