@@ -45,6 +45,7 @@ enum {
   MENUITEM_PICTURESET,
   MENUITEM_OUTPUTSET,
   MENUITEM_VIEWALL,
+  MENUITEM_ADVANCED,
   MENUITEM_STORE,
   MENUITEM_ABOUT,
   MENUITEM_EXIT
@@ -64,9 +65,10 @@ static menuitem_t mainmenu_items[] = {
   { "Picture settings...",    NULL,                       9, 0 }, // 6
   { "Output settings...",     NULL,                      10, 0 }, // 7
   { "View all modes...",      NULL,                      11, 0 }, // 8
-  { "Store settings",         NULL,                      13, 0 }, // 9
-  { "About...",               NULL,                      14, 0 }, // 10
-  { "Exit",                   NULL,                      15, 0 }, // 11
+  { "Advanced settings...",   NULL,                      12, 0 }, // 9
+  { "Store settings",         NULL,                      14, 0 }, // 10
+  { "About...",               NULL,                      15, 0 }, // 11
+  { "Exit",                   NULL,                      16, 0 }, // 12
 };
 
 static void mainmenu_draw(menu_t *menu);
@@ -74,7 +76,7 @@ static void mainmenu_draw(menu_t *menu);
 #define MENU_POS_X  7
 #define MENU_POS_Y  7
 #define MENU_SIZE_X 31
-#define MENU_SIZE_Y 20
+#define MENU_SIZE_Y 21
 
 #define LOGO_POS_X  16
 #define LOGO_POS_Y  3
@@ -158,6 +160,10 @@ void screen_mainmenu(void) {
 
     case MENUITEM_VIEWALL:
       screen_allmodes();
+      break;
+
+    case MENUITEM_ADVANCED:
+      screen_advanced();
       break;
 
     case MENUITEM_ABOUT:

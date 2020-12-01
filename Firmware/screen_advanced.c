@@ -25,21 +25,44 @@
    THE POSSIBILITY OF SUCH DAMAGE.
 
 
-   screens.h: Declaration of all the screen_* functions
+   screen_advanced.c: Screen for advanced settings
 
 */
 
-#ifndef SCREENS_H
-#define SCREEN_H
+#include <stdbool.h>
+#include <stddef.h>
+#include "menu.h"
+#include "osd.h"
+#include "screens.h"
 
-void screen_about(void);
-void screen_advanced(void);
-void screen_allmodes(void);
-void screen_idle(void);
-void screen_irconfig(void);
-void screen_mainmenu(void);
-void screen_osdsettings(void);
-void screen_picturesettings(void);
-void screen_outputsettings(void);
+enum {
+  MENUITEM_EXIT
+};
 
-#endif
+/* --- valueitems --- */
+
+
+/* --- menu definition --- */
+
+static void advanced_draw(menu_t *menu);
+
+static menuitem_t advanced_items[] = {
+  { "Exit",                 NULL,                  9, 0 },
+};
+
+static menu_t advanced_menu = {
+  7, 9,
+  31, 11,
+  advanced_draw,
+  sizeof(advanced_items) / sizeof(*advanced_items),
+  advanced_items
+};
+
+static void advanced_draw(menu_t *menu) {
+}
+
+void screen_advanced(void) {
+  osd_clrscr();
+  menu_draw(&advanced_menu);
+  menu_exec(&advanced_menu, 0);
+}
