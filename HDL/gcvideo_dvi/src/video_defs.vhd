@@ -143,6 +143,8 @@ package video_defs is
     AnalogRGBOutput   : boolean;
     SyncOnGreen       : boolean;
     Volume            : unsigned(7 downto 0);
+    EnableReblanking  : boolean;
+    EnableResyncing   : boolean;
     SampleRateHack    : boolean;
     Matrix            : ColorMatrix_t;
     RBSettings        : ReblankerSettings_t;

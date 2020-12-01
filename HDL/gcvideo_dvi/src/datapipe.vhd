@@ -306,8 +306,8 @@ begin
     PORT MAP (
       PixelClock        => Clock54M,
       PixelClockEnable  => pixel_clk_en_ld,
-      ReblankingEnable  => true,
-      ResyncingEnable   => true,
+      ReblankingEnable  => video_settings.EnableReblanking,
+      ResyncingEnable   => video_settings.EnableResyncing,
       RBSettings        => video_settings.RBSettings,
       VideoMeasurements => video_measurements,
       VideoIn           => video_444,

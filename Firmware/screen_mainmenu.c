@@ -117,20 +117,41 @@ static void mainmenu_draw(menu_t *menu) {
     return;
   }
 
+  uint32_t outputpixels = 720;
   uint32_t outputlines  = video_out_lines[current_videomode];
   bool interlaced = false;
 
-  if (current_videomode <= VIDMODE_576i &&
-      (video_settings[current_videomode] & VIDEOIF_SET_LD_ENABLE))
-    outputlines *= 2;
+  if (video_settings_global & VIDEOIF_SET_ENABLEREBLANK) {
+    if (current_videomode <= VIDMODE_576i &&
+        (video_settings[current_videomode] & VIDEOIF_SET_LD_ENABLE))
+      outputlines *= 2;
 
-  if (outputlines & 1) {
-    outputlines *= 2;
-    interlaced   = true;
+    if (outputlines & 1) {
+      outputlines *= 2;
+      interlaced   = true;
+    }
+
+    outputlines &= ~3;
+
+  } else {
+    outputpixels = VIDEOIF->xres;
+    outputlines  = VIDEOIF->yres;
+
+    if (current_videomode <= VIDMODE_576i &&
+        (video_settings[current_videomode] & VIDEOIF_SET_LD_ENABLE)) {
+      outputlines *= 2;
+      interlaced = false;
+    } else {
+      if (!(VIDEOIF->flags & VIDEOIF_FLAG_IN_PROGRESSIVE)) {
+        outputlines *= 2;
+        interlaced = true;
+      }
+    }
   }
 
-  printf("Out: 720x%3d%c%d",
-         outputlines & ~3,
+  printf("Out: %3dx%3d%c%d",
+         outputpixels,
+         outputlines,
          interlaced  ? 'i' : 'p',
          (current_videomode & 1) ? 50 : 60);
 }

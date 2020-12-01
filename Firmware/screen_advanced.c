@@ -34,15 +34,22 @@
 #include "menu.h"
 #include "osd.h"
 #include "portdefs.h"
+#include "settings.h"
 #include "screens.h"
 
 enum {
+  MENUITEM_REBLANK,
+  MENUITEM_RESYNC,
   MENUITEM_SAMPLERATEHACK,
   MENUITEM_EXIT
 };
 
 /* --- valueitems --- */
 
+static valueitem_t value_reblanking     = { VALTYPE_BOOL, true,
+                                            { .field = { NULL, VIDEOIF_BIT_ENABLEREBLANK, 0, VIFLAG_ALLMODES | VIFLAG_REDRAW }} };
+static valueitem_t value_resync         = { VALTYPE_BOOL, true,
+                                            { .field = { NULL, VIDEOIF_BIT_ENABLERESYNC, 0, VIFLAG_ALLMODES | VIFLAG_REDRAW }} };
 static valueitem_t value_sampleratehack = { VALTYPE_BOOL, true,
                                             { .field = { NULL, VIDEOIF_BIT_SAMPLERATEHACK, 0, VIFLAG_ALLMODES }} };
 
@@ -51,6 +58,8 @@ static valueitem_t value_sampleratehack = { VALTYPE_BOOL, true,
 static void advanced_draw(menu_t *menu);
 
 static menuitem_t advanced_items[] = {
+  { "Fix resolution",       &value_reblanking,     2, 0 },
+  { "Fix sync timing",      &value_resync,         3, 0 },
   { "Sample rate hack",     &value_sampleratehack, 7, 0 },
   { "Exit",                 NULL,                  9, 0 },
 };
@@ -71,6 +80,12 @@ static void advanced_draw(menu_t *menu) {
     advanced_items[MENUITEM_SAMPLERATEHACK].flags = 0;
   }
 #endif
+
+  if (video_settings_global & VIDEOIF_SET_ENABLEREBLANK) {
+    advanced_items[MENUITEM_RESYNC].flags = 0;
+  } else {
+    advanced_items[MENUITEM_RESYNC].flags = MENU_FLAG_DISABLED;
+  }
 }
 
 void screen_advanced(void) {
