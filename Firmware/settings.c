@@ -305,7 +305,7 @@ void settings_init(void) {
   video_settings[VIDMODE_576i] = VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;
   video_settings[VIDMODE_480p] = 0;
   video_settings[VIDMODE_576p] = 0;
-  video_settings[VIDMODE_NONSTANDARD] = 0;
+  video_settings[VIDMODE_NONSTANDARD] = VIDEOIF_SET_NONSTD_MASK;
   osdbg_settings = 0x501bf8;  // partially transparent, blue tinted background
   picture_brightness = 0;
   picture_contrast   = 0;
