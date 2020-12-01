@@ -34,7 +34,6 @@
 #include "pad.h"
 
 /* button repeat settings */
-// FIXME: run-time configurable?
 #define INITIAL_DELAY     (HZ / 2)
 #define REPEAT_DELAY_SLOW (HZ / 10)
 #define REPEAT_DELAY_FAST  1
