@@ -32,6 +32,7 @@
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdio.h>
+#include <string.h>
 #include "menu.h"
 #include "osd.h"
 #include "pad.h"
@@ -53,6 +54,7 @@
 #endif
 
 void screen_about(void) {
+  int ver_len = strlen(VERSION);
   osd_clrscr();
 
   /* draw about-box */
@@ -61,9 +63,9 @@ void screen_about(void) {
   osd_setattr(true, false);
   if (MODE_WII) {
     if (DUAL_OUT) {
-      osd_putsat(13, 11, "WiiVideo Dual v" VERSION);
-    } else {
-      osd_putsat(14, 11, "WiiVideo DVI v" VERSION);
+      osd_putsat(11 + (23 - (15 + ver_len)) / 2, 11, "WiiVideo Dual v" VERSION);
+    } else { //                                       123456789012345
+      osd_putsat(11 + (23 - (14 + ver_len)) / 2, 11, "WiiVideo DVI v" VERSION);
     }
 
     if (VIDEOIF->flags & VIDEOIF_FLAG_MODE_WII) {
@@ -74,9 +76,9 @@ void screen_about(void) {
 
   } else {
     if (DUAL_OUT) {
-      osd_putsat(14, 11, "GCVideo Dual v" VERSION);
-    } else {
-      osd_putsat(14, 11, "GCVideo DVI v" VERSION);
+      osd_putsat(11 + (23 - (14 + ver_len)) / 2, 11, "GCVideo Dual v" VERSION);
+    } else { //                                       12345678901234
+      osd_putsat(11 + (23 - (13 + ver_len)) / 2, 11, "GCVideo DVI v" VERSION);
     }
   }
   osd_putsat(12, 13, "Copyright \013 2015-2020");
