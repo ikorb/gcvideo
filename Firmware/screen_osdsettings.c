@@ -70,8 +70,8 @@ static menuitem_t osdset_items[] = {
 };
 
 static menu_t osdset_menu = {
-  10, 11,
-  24, 8,
+  11, 11,
+  23, 8,
   NULL,
   sizeof(osdset_items) / sizeof(*osdset_items),
   osdset_items
