@@ -30,8 +30,10 @@
 */
 
 #include <stdio.h>
+#include "modeset_common.h"
 #include "osd.h"
 #include "pad.h"
+#include "settings.h"
 #include "utils.h"
 #include "menu.h"
 
@@ -71,9 +73,79 @@ static void mark_item(menu_t *menu, unsigned int item, char ch) {
   osd_putcharat(menu->xpos + 1, menu->ypos + menu->items[item].line, ch, ATTRIB_DIM_BG);
 }
 
+static int get_value(const valueitem_t *value) {
+  if (value->is_field) {
+    uint32_t data, mask;
+
+    mask = 1 << value->field.width;
+
+    if (value->field.flags & VIFLAG_ALLMODES) {
+      data = video_settings_global & mask;
+
+    } else if (value->field.flags & VIFLAG_MODESET) {
+      data = video_settings[modeset_mode] & mask;
+
+    } else {
+      mask -= 1;
+
+      data = *((uint32_t*)value->field.data);
+      data = (data >> value->field.shift) & mask;
+    }
+
+    if (value->field.flags & VIFLAG_SBYTE) {
+      data = (data ^ 0x80) - 128;
+    }
+
+    return data;
+
+  } else {
+    return value->functions.get();
+  }
+}
+
+static bool set_value(const valueitem_t *value, int newval) {
+  if (value->is_field) {
+    uint32_t mask = 1 << value->field.width;
+
+    if (value->field.flags & VIFLAG_ALLMODES) {
+      set_all_modes(mask, newval);
+
+    } else if (value->field.flags & VIFLAG_MODESET) {
+      if (newval) {
+        video_settings[modeset_mode] |= mask;
+      } else {
+        video_settings[modeset_mode] &= ~mask;
+      }
+
+      if (current_videomode == modeset_mode)
+        VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
+
+    } else {
+      uint32_t data = *((uint32_t*)value->field.data);
+      mask = (mask - 1) << value->field.shift;
+
+      if (value->field.flags & VIFLAG_SBYTE) {
+        newval = (newval + 128) ^ 0x80;
+      }
+
+      data = (data & ~mask) | (newval << value->field.shift);
+      *((uint32_t*)value->field.data) = data;
+    }
+
+    if (value->field.flags & VIFLAG_UPDATE_VIDEOIF) {
+      VIDEOIF->osd_bg = osdbg_settings;
+      VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
+    }
+
+    return value->field.flags & VIFLAG_REDRAW;
+
+  } else {
+    return value->functions.set(newval);
+  }
+}
 
 static void print_value(menu_t *menu, unsigned int itemnum) {
-  int value = menu->items[itemnum].value->get();
+  int value = get_value(menu->items[itemnum].value);
   const valuetype_t type = menu->items[itemnum].value->type;
 
   osd_gotoxy(menu->xpos + menu->xsize - value_widths[type],
@@ -127,7 +199,7 @@ static void print_value(menu_t *menu, unsigned int itemnum) {
 /* update a valueitem */
 static void update_value(menu_t *menu, unsigned int itemid, updatetype_t upd) {
   valueitem_t *value = menu->items[itemid].value;
-  int curval = value->get();
+  int curval = get_value(value);
 
   if (upd == UPDATE_INCREMENT) {
     curval++;
@@ -138,12 +210,12 @@ static void update_value(menu_t *menu, unsigned int itemid, updatetype_t upd) {
   if (value->type == VALTYPE_BOOL ||
       value->type == VALTYPE_EVENODD) {
     /* bool always toggles */
-    curval = value->get();
+    curval = !get_value(value);
   }
 
   clip_value(&curval, clipranges[value->type].lower, clipranges[value->type].upper);
 
-  if (value->set(curval)) {
+  if (set_value(value, curval)) {
     /* need a full redraw */
     menu_draw(menu);
     mark_item(menu, itemid, MENUMARKER_LEFT);

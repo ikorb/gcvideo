@@ -61,6 +61,7 @@ extern video_mode_t current_videomode;
 extern uint8_t      audio_volume;
 extern bool         audio_mute;
 
+void set_all_modes(uint32_t flag, bool state);
 void update_imagecontrols(void);
 video_mode_t detect_inputmode(void);
 void print_resolution(void);

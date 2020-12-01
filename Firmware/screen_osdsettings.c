@@ -44,40 +44,18 @@
 #define MENUITEM_TINTCR 3
 #define MENUITEM_EXIT   4
 
-/* --- getters and setters --- */
+/* --- valueitems --- */
 
-static int get_resbox(void)  { return resbox_enabled; }
-static int get_alpha(void)   { return ( (osdbg_settings >> VIDEOIF_OSDBG_ALPHA_SHIFT ) & 0xff);               }
-static int get_tint_cb(void) { return (((osdbg_settings >> VIDEOIF_OSDBG_TINTCB_SHIFT) & 0xff) ^ 0x80) - 128; }
-static int get_tint_cr(void) { return (((osdbg_settings >> VIDEOIF_OSDBG_TINTCR_SHIFT) & 0xff) ^ 0x80) - 128; }
-
-static bool set_resbox(int value) {
-  resbox_enabled = !!value;
-  return false;
-}
-
-static bool set_alpha(int value) {
-  osdbg_settings = (osdbg_settings & ~VIDEOIF_OSDBG_ALPHA_MASK) | (value << VIDEOIF_OSDBG_ALPHA_SHIFT);
-  VIDEOIF->osd_bg = osdbg_settings;
-  return false;
-}
-
-static bool set_tint_cb(int value) {
-  osdbg_settings = (osdbg_settings & ~VIDEOIF_OSDBG_TINTCB_MASK) | (((value + 128) ^ 0x80) << VIDEOIF_OSDBG_TINTCB_SHIFT);
-  VIDEOIF->osd_bg = osdbg_settings;
-  return false;
-}
-
-static bool set_tint_cr(int value) {
-  osdbg_settings = (osdbg_settings & ~VIDEOIF_OSDBG_TINTCR_MASK) | (((value + 128) ^ 0x80) << VIDEOIF_OSDBG_TINTCR_SHIFT);
-  VIDEOIF->osd_bg = osdbg_settings;
-  return false;
-}
-
-static valueitem_t value_resbox      = { get_resbox,   set_resbox,   VALTYPE_BOOL     };
-static valueitem_t value_alpha       = { get_alpha,    set_alpha,    VALTYPE_BYTE     };
-static valueitem_t value_tint_cb     = { get_tint_cb,  set_tint_cb,  VALTYPE_SBYTE_99 };
-static valueitem_t value_tint_cr     = { get_tint_cr,  set_tint_cr,  VALTYPE_SBYTE_99 };
+static valueitem_t value_resbox  = { VALTYPE_BOOL,     true,
+                                     { .field = { &resbox_enabled, 8, 24, 0 }} };
+static valueitem_t value_alpha   = { VALTYPE_BYTE,     true,
+                                     { .field = { &osdbg_settings, 32, VIDEOIF_OSDBG_ALPHA_SHIFT,  VIFLAG_UPDATE_VIDEOIF }} };
+static valueitem_t value_tint_cb = { VALTYPE_SBYTE_99, true,
+                                     { .field = { &osdbg_settings,  8, VIDEOIF_OSDBG_TINTCB_SHIFT,
+                                                  VIFLAG_UPDATE_VIDEOIF | VIFLAG_SBYTE }} };
+static valueitem_t value_tint_cr = { VALTYPE_SBYTE_99, true,
+                                     { .field = { &osdbg_settings,  8, VIDEOIF_OSDBG_TINTCR_SHIFT,
+                                                  VIFLAG_UPDATE_VIDEOIF | VIFLAG_SBYTE }} };
 
 /* --- menu definition --- */
 

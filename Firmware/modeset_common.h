@@ -56,16 +56,4 @@ extern valueitem_t modeset_value_linedoubler;
 /* draw function */
 void modeset_draw(menu_t *menu);
 
-/* setters and getters */
-int  modeset_get_scanlines(void);
-int  modeset_get_slstrength(void);
-int  modeset_get_sleven(void);
-int  modeset_get_slalt(void);
-int  modeset_get_linedoubler(void);
-bool modeset_set_scanlines(int value);
-bool modeset_set_slstrength(int value);
-bool modeset_set_sleven(int value);
-bool modeset_set_slalt(int value);
-bool modeset_set_linedoubler(int value);
-
 #endif

@@ -37,22 +37,7 @@
 
 video_mode_t modeset_mode;
 
-int modeset_get_scanlines(void)   { return video_settings[modeset_mode] & VIDEOIF_SET_SL_ENABLE;        }
 int modeset_get_slstrength(void)  { return video_settings[modeset_mode] & VIDEOIF_SET_SL_STRENGTH_MASK; }
-int modeset_get_sleven(void)      { return video_settings[modeset_mode] & VIDEOIF_SET_SL_EVEN;          }
-int modeset_get_slalt(void)       { return video_settings[modeset_mode] & VIDEOIF_SET_SL_ALTERNATE;     }
-int modeset_get_linedoubler(void) { return video_settings[modeset_mode] & VIDEOIF_SET_LD_ENABLE;        }
-
-bool modeset_set_scanlines(int value) {
-  if (value)
-    video_settings[modeset_mode] |= VIDEOIF_SET_SL_ENABLE;
-  else
-    video_settings[modeset_mode] &= ~VIDEOIF_SET_SL_ENABLE;
-
-  if (current_videomode == modeset_mode)
-    VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
-  return true;
-}
 
 bool modeset_set_slstrength(int value) {
   video_settings[modeset_mode] = (video_settings[modeset_mode] & ~VIDEOIF_SET_SL_STRENGTH_MASK) | value;
@@ -62,58 +47,16 @@ bool modeset_set_slstrength(int value) {
   return false;
 }
 
-bool modeset_set_sleven(int value) {
-  if (value)
-    video_settings[modeset_mode] |=  VIDEOIF_SET_SL_EVEN;
-  else
-    video_settings[modeset_mode] &= ~VIDEOIF_SET_SL_EVEN;
-
-  if (current_videomode == modeset_mode)
-    VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
-  return false;
-}
-
-bool modeset_set_slalt(int value) {
-  if (value)
-    video_settings[modeset_mode] |=  VIDEOIF_SET_SL_ALTERNATE;
-  else
-    video_settings[modeset_mode] &= ~VIDEOIF_SET_SL_ALTERNATE;
-
-  if (current_videomode == modeset_mode)
-    VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
-  return false;
-}
-
-bool modeset_set_linedoubler(int value) {
-  if (value)
-    video_settings[modeset_mode] |= VIDEOIF_SET_LD_ENABLE;
-  else
-    video_settings[modeset_mode] &= ~VIDEOIF_SET_LD_ENABLE;
-
-  if (current_videomode == modeset_mode)
-    VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
-  return true;
-}
-
-valueitem_t modeset_value_scanlines = {
-  modeset_get_scanlines, modeset_set_scanlines, VALTYPE_BOOL
-};
-
-valueitem_t modeset_value_slstrength = {
-  modeset_get_slstrength, modeset_set_slstrength, VALTYPE_BYTE
-};
-
-valueitem_t modeset_value_sleven = {
-  modeset_get_sleven, modeset_set_sleven, VALTYPE_EVENODD
-};
-
-valueitem_t modeset_value_slalt = {
-  modeset_get_slalt, modeset_set_slalt, VALTYPE_BOOL
-};
-
-valueitem_t modeset_value_linedoubler = {
-  modeset_get_linedoubler, modeset_set_linedoubler, VALTYPE_BOOL
-};
+valueitem_t modeset_value_scanlines   = { VALTYPE_BOOL, true,
+                                          { .field = { NULL, VIDEOIF_BIT_SL_ENABLE, 0, VIFLAG_MODESET | VIFLAG_REDRAW }} };
+valueitem_t modeset_value_slstrength  = { VALTYPE_BYTE, false,
+                                          { .functions = { modeset_get_slstrength, modeset_set_slstrength }} };
+valueitem_t modeset_value_sleven      = { VALTYPE_EVENODD, true,
+                                          { .field = { NULL, VIDEOIF_BIT_SL_EVEN,      0, VIFLAG_MODESET }} };
+valueitem_t modeset_value_slalt       = { VALTYPE_BOOL, true,
+                                          { .field = { NULL, VIDEOIF_BIT_SL_ALTERNATE, 0, VIFLAG_MODESET }} };
+valueitem_t modeset_value_linedoubler = { VALTYPE_BOOL, true,
+                                          { .field = { NULL, VIDEOIF_BIT_LD_ENABLE,    0, VIFLAG_MODESET | VIFLAG_REDRAW }} };
 
 void modeset_draw(menu_t *menu) {
   /* update the item-enable flags based on current settings */

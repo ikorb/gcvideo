@@ -57,10 +57,7 @@
 
 /* --- getters and setters --- */
 
-static int get_cabledetect(void) { return video_settings_global & VIDEOIF_SET_CABLEDETECT; }
-static int get_rgblimited(void)  { return video_settings_global & VIDEOIF_SET_RGBLIMITED;  }
 static int get_dvienhanced(void) { return video_settings_global & VIDEOIF_SET_DVIENHANCED; }
-static int get_169(void)         { return video_settings_global & VIDEOIF_SET_169;         }
 static int get_switchdelay(void) { return mode_switch_delay;                               }
 static int get_volume(void)      { return audio_volume;                                    }
 static int get_mute(void)        { return audio_mute;                                      }
@@ -74,34 +71,9 @@ static int get_analogmode(void) {
     return val;
 }
 
-
-static void set_all_modes(uint32_t flag, bool state) {
-  if (state)
-    video_settings_global |=  flag;
-  else
-    video_settings_global &= ~flag;
-
-  VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
-}
-
-static bool set_cabledetect(int value) {
-  set_all_modes(VIDEOIF_SET_CABLEDETECT, value);
-  return false;
-}
-
-static bool set_rgblimited(int value) {
-  set_all_modes(VIDEOIF_SET_RGBLIMITED, value);
-  return false;
-}
-
 static bool set_dvienhanced(int value) {
   set_all_modes(VIDEOIF_SET_DVIENHANCED, value);
   return true;
-}
-
-static bool set_169(int value) {
-  set_all_modes(VIDEOIF_SET_169, value);
-  return false;
 }
 
 static bool set_switchdelay(int value) {
@@ -133,16 +105,20 @@ static bool set_analogmode(int value) {
   return false;
 }
 
-static valueitem_t value_cabledetect = { get_cabledetect, set_cabledetect, VALTYPE_BOOL };
-static valueitem_t value_rgblimited  = { get_rgblimited,  set_rgblimited,  VALTYPE_BOOL };
-static valueitem_t value_dvienhanced = { get_dvienhanced, set_dvienhanced, VALTYPE_BOOL };
-static valueitem_t value_169         = { get_169,         set_169,         VALTYPE_BOOL };
-static valueitem_t value_switchdelay = { get_switchdelay, set_switchdelay, VALTYPE_BYTE };
-static valueitem_t value_volume      = { get_volume,      set_volume,      VALTYPE_BYTE };
-static valueitem_t value_mute        = { get_mute,        set_mute,        VALTYPE_BOOL };
+static valueitem_t value_cabledetect = { VALTYPE_BOOL, true,
+                                         { .field = { NULL, VIDEOIF_BIT_CABLEDETECT, 0, VIFLAG_ALLMODES }} };
+static valueitem_t value_rgblimited  = { VALTYPE_BOOL, true,
+                                         { .field = { NULL, VIDEOIF_BIT_RGBLIMITED, 0, VIFLAG_ALLMODES }} };
+static valueitem_t value_169         = { VALTYPE_BOOL, true,
+                                         { .field = { NULL, VIDEOIF_BIT_169, 0, VIFLAG_ALLMODES }} };
+static valueitem_t value_dvienhanced = { VALTYPE_BOOL, false, {{ get_dvienhanced, set_dvienhanced }} };
+static valueitem_t value_switchdelay = { VALTYPE_BYTE, false, {{ get_switchdelay, set_switchdelay }} };
+static valueitem_t value_volume      = { VALTYPE_BYTE, false, {{ get_volume,      set_volume      }} };
+static valueitem_t value_mute        = { VALTYPE_BOOL, false, {{ get_mute,        set_mute        }} };
+
 
 static valueitem_t __attribute__((unused)) value_analogmode =
-  { get_analogmode, set_analogmode, VALTYPE_ANALOGMODE };
+  { VALTYPE_ANALOGMODE, false, {{ get_analogmode, set_analogmode }} };
 
 /* --- menu definition --- */
 

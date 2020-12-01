@@ -68,9 +68,12 @@ static bool set_saturation(int value) {
   return true;
 }
 
-static valueitem_t value_brightness = { get_brightness, set_brightness, VALTYPE_SBYTE_127 };
-static valueitem_t value_contrast   = { get_contrast,   set_contrast,   VALTYPE_SBYTE_127 };
-static valueitem_t value_saturation = { get_saturation, set_saturation, VALTYPE_SBYTE_127 };
+static valueitem_t value_brightness = { VALTYPE_SBYTE_127, false,
+                                        { .functions = { get_brightness, set_brightness }} };
+static valueitem_t value_contrast   = { VALTYPE_SBYTE_127, false,
+                                        { .functions = { get_contrast,   set_contrast   }} };
+static valueitem_t value_saturation = { VALTYPE_SBYTE_127, false,
+                                        { .functions = { get_saturation, set_saturation }} };
 
 /* --- menu definition --- */
 

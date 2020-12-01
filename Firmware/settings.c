@@ -60,6 +60,15 @@ int8_t       picture_brightness;
 int8_t       picture_contrast;
 int8_t       picture_saturation;
 
+void set_all_modes(uint32_t flag, bool state) {
+  if (state)
+    video_settings_global |=  flag;
+  else
+    video_settings_global &= ~flag;
+
+  VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
+}
+
 void update_imagecontrols(void) {
   uint32_t imgctl;
   uint8_t  contrast   = picture_contrast + 0x80;

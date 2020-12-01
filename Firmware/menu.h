@@ -33,6 +33,7 @@
 #define MENU_H
 
 #include <stdbool.h>
+#include <stdint.h>
 
 typedef enum {
   VALTYPE_BOOL,
@@ -43,10 +44,28 @@ typedef enum {
   VALTYPE_SBYTE_127, // -128 to 127
 } valuetype_t;
 
+#define VIFLAG_REDRAW         (1<<0)
+#define VIFLAG_UPDATE_VIDEOIF (1<<1)
+#define VIFLAG_ALLMODES       (1<<2)
+#define VIFLAG_SBYTE          (1<<3)
+#define VIFLAG_MODESET        (1<<4)
+
 typedef struct {
-  int  (*get)(void);
-  bool (*set)(int value);
-  valuetype_t type;
+  valuetype_t type:7;
+  bool        is_field:1;
+  union {
+    struct {
+      int  (*get)(void);
+      bool (*set)(int value);
+    } functions;
+
+    struct {
+      void    *data;
+      uint8_t width; // MODESET/ALLMODES reads the bit num from here
+      uint8_t shift;
+      uint8_t flags;
+    } field;
+  };
 } valueitem_t;
 
 typedef struct {
