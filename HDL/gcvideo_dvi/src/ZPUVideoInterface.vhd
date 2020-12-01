@@ -48,6 +48,7 @@ entity ZPUVideoInterface is
     ZPUBusOut       : out ZPUDeviceOut;
     IRQ             : out std_logic;
     VSettings       : out VideoSettings_t;
+    VMeasure        : in  VideoMeasurements_t;
     OSDSettings     : out OSDSettings_t
   );
 end ZPUVideoInterface;
@@ -73,6 +74,7 @@ architecture Behavioral of ZPUVideoInterface is
   signal vid_settings      : std_logic_vector(11 downto 0) := VidSettingsDefault;
   signal osd_bgsettings    : std_logic_vector(24 downto 0) := OSDBGSettingsDefault;
   signal color_matrix      : ColorMatrix_t;
+  signal reblanker_settings: ReblankerSettings_t;
 
   signal stored_flags_in   : std_logic_vector(3 downto 0);
   signal stored_flags_ld   : std_logic_vector(2 downto 0);
@@ -98,6 +100,7 @@ begin
   VSettings.SampleRateHack     <= (vid_settings(11) = '1');
   VSettings.Volume             <= unsigned(volume_setting);
   VSettings.Matrix             <= color_matrix;
+  VSettings.RBSettings         <= reblanker_settings;
 
   -- putting this bit in an unrelated register simplifies the software side
   VSettings.DisableOutput      <= (osd_bgsettings(24) = '1');
@@ -125,16 +128,25 @@ begin
       end if;
 
       -- read path
-      case ZPUBusIn.mem_addr(4 downto 2) is
-        when "000"  => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(pixel_counter, 32));
-        when "001"  => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(line_counter,  32));
+      case ZPUBusIn.mem_addr(5 downto 2) is
+        when "0000" => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(pixel_counter, 32));
+        when "0001" => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(line_counter,  32));
 
-        when "010"  => ZPUBusOut.mem_read             <= (others => '0');
+        when "0010" => ZPUBusOut.mem_read             <= (others => '0');
                        ZPUBusOut.mem_read(8 downto 6) <= stored_flags_ld;
                        ZPUBusOut.mem_read(5)          <= stored_flags_in(3);
                        ZPUBusOut.mem_read(4)          <= force_ypbpr;
                        ZPUBusOut.mem_read(3)          <= console_mode;
                        ZPUBusOut.mem_read(2 downto 0) <= stored_flags_in(2 downto 0);
+
+        when "0011" => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(VMeasure.HTotal, 32));
+        when "0100" => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(VMeasure.HActiveStart, 32));
+        when "0101" => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(VMeasure.VTotal, 32));
+
+        when "0110" => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(VMeasure.VActiveStart0, 32));
+        when "0111" => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(VMeasure.VHOffset0, 32));
+        when "1000" => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(VMeasure.VActiveStart1, 32));
+        when "1001" => ZPUBusOut.mem_read <= std_logic_vector(to_unsigned(VMeasure.VHOffset1, 32));
 
         when others => ZPUBusOut.mem_read <= (others => '-');  -- undefined
       end case;
@@ -159,11 +171,37 @@ begin
             color_matrix.CrRFactor <= signed(ZPUBusIn.mem_write(15 downto  0));
             color_matrix.CrGFactor <= signed(ZPUBusIn.mem_write(31 downto 16));
 
+          when "0111" =>
+            reblanker_settings.HSyncStart <= to_integer(unsigned(ZPUBusIn.mem_write(15 downto 0)));
+            reblanker_settings.HSyncEnd   <= to_integer(unsigned(ZPUBusIn.mem_write(31 downto 16)));
+
+          when "1000" =>
+            reblanker_settings.HActiveStart <= to_integer(unsigned(ZPUBusIn.mem_write(15 downto 0)));
+            reblanker_settings.HActiveEnd   <= to_integer(unsigned(ZPUBusIn.mem_write(31 downto 16)));
+
+          when "1001" =>
+            reblanker_settings.VSyncStart <= to_integer(unsigned(ZPUBusIn.mem_write(19 downto 0)));
+
+          when "1010" =>
+            reblanker_settings.VSyncEnd   <= to_integer(unsigned(ZPUBusIn.mem_write(19 downto 0)));
+
+          when "1011" =>
+            reblanker_settings.VActiveStart <= to_integer(unsigned(ZPUBusIn.mem_write(9 downto 0)));
+
+          when "1100" =>
+            reblanker_settings.VActiveLines <= to_integer(unsigned(ZPUBusIn.mem_write(9 downto 0)));
+
+          -- Note: There must be at least one unused register that is written
+          -- to for clearing the IRQ flag!
+          when "1101" => null;
+
           when others => null;
         end case;
       end if;
 
       ---- update signal measurements
+      -- (note: this measures the raw input signal, the BlankingRegen measures
+      --        the result of the linedoubler)
       if PixelClockEnable then
         prev_vsync <= VideoIn.VSync;
         prev_hsync <= VideoIn.HSync;

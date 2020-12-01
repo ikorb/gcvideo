@@ -140,11 +140,36 @@ package component_defs is
     );
   end component;
 
+  component Blanking_Regenerator is
+    port (
+      PixelClock       : in  std_logic;
+      PixelClockEnable : in  boolean;
+
+      -- control
+      ReblankingEnable : in  boolean;
+      ResyncingEnable  : in  boolean;
+      RBSettings       : in  ReblankerSettings_t;
+
+      -- measurements
+      VideoMeasurements: out VideoMeasurements_t;
+
+      -- input video
+      VideoIn          : in  VideoYCbCr;
+
+      -- output video
+      VideoOut         : out VideoYCbCr
+    );
+  end component;
+
   component Blanking_Regenerator_Fixed is
     port (
       PixelClock      : in  std_logic;
       PixelClockEnable: in  boolean;
+
+      -- input video
       VideoIn         : in  VideoYCbCr;
+
+      -- output video
       VideoOut        : out VideoYCbCr
     );
   end component;
@@ -284,7 +309,8 @@ package component_defs is
       OSDRamAddr      : in  std_logic_vector(10 downto 0);
       OSDRamData      : out std_logic_vector(8 downto 0);
       OSDSettings     : out OSDSettings_t;
-      VSettings       : out VideoSettings_t
+      VSettings       : out VideoSettings_t;
+      VMeasure        : in  VideoMeasurements_t
     );
   end component;
 

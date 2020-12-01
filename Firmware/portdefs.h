@@ -67,6 +67,13 @@ typedef union {
     __I uint32_t xres;
     __I uint32_t yres;
     __I uint32_t flags;
+    __I uint32_t htotal;
+    __I uint32_t hactive_start;
+    __I uint32_t vtotal;
+    __I uint32_t vactive_start0;
+    __I uint32_t vhoffset0;
+    __I uint32_t vactive_start1;
+    __I uint32_t vhoffset1;
   };
   struct {
     __O uint32_t settings;
@@ -76,6 +83,12 @@ typedef union {
     __O uint32_t yb_yg_factor;
     __O uint32_t cbb_cbg_factor;
     __O uint32_t crg_crr_factor;
+    __O uint32_t hsync_end_start;
+    __O uint32_t hactive_end_start;
+    __O uint32_t vsync_start;
+    __O uint32_t vsync_end;
+    __O uint32_t vactive_start;
+    __O uint32_t vactive_lines;
     // "virtual" register, any write clears IRQ flag
     __O uint32_t clear_irq;
   };

@@ -253,7 +253,7 @@ begin
       video_ld.CSync         <= video_ld.HSync xor video_ld.VSync;
       video_ld.Is30kHz       <= true;
       video_ld.IsProgressive <= true;
-      video_ld.IsEvenField   <= false;
+      video_ld.IsEvenField   <= VideoIn.IsEvenField;
       video_ld.IsPAL         <= VideoIn.IsPAL;
     end if;
   end process;

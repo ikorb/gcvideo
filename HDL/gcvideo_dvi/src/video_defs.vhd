@@ -115,6 +115,21 @@ package video_defs is
     CrGFactor: signed(15 downto 0);
   end record;
 
+  subtype HorizontalPixels is natural range 0 to 880;
+  subtype VerticalPixels is natural range 0 to 880*650;
+  subtype VerticalLines is natural range 0 to 625;
+
+  type ReblankerSettings_t is record
+    HSyncStart  : HorizontalPixels;
+    HSyncEnd    : HorizontalPixels;
+    HActiveStart: HorizontalPixels;
+    HActiveEnd  : HorizontalPixels;
+    VSyncStart  : VerticalPixels;
+    VSyncEnd    : VerticalPixels;
+    VActiveStart: VerticalLines;
+    VActiveLines: VerticalLines;
+  end record;
+
   type VideoSettings_t is record
     ScanlineProfile   : std_logic_vector(1 downto 0);
     ScanlinesAlternate: boolean;
@@ -130,6 +145,17 @@ package video_defs is
     Volume            : unsigned(7 downto 0);
     SampleRateHack    : boolean;
     Matrix            : ColorMatrix_t;
+    RBSettings        : ReblankerSettings_t;
+  end record;
+
+  type VideoMeasurements_t is record
+    HTotal       : HorizontalPixels;
+    HActiveStart : HorizontalPixels;
+    VTotal       : VerticalPixels;
+    VActiveStart0: VerticalLines;
+    VHOffset0    : HorizontalPixels;
+    VActiveStart1: VerticalLines;
+    VHOffset1    : HorizontalPixels;
   end record;
 
   -- 8 bit unsigned to 9 bit signed, no modifications

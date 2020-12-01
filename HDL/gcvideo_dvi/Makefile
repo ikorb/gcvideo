@@ -3,7 +3,7 @@
 VERSION := 2.4d
 
 SRC_COMMON := \
-	src/Blanking_Regenerator_Fixed.vhd \
+	src/Blanking_Regenerator.vhd       \
 	src/CPUSubsystem.vhd               \
 	src/ClockGen.vhd                   \
 	src/Deglitcher.vhd                 \

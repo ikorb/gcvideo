@@ -146,10 +146,11 @@ architecture Behavioral of Datapipe is
   signal scanline_ram_data: std_logic_vector(8 downto 0);
 
   -- misc
-  signal video_settings : VideoSettings_t;
-  signal clock_locked   : std_logic;
-  signal obuf_oe        : std_logic;
-  signal force_ypbpr    : boolean;
+  signal video_settings    : VideoSettings_t;
+  signal clock_locked      : std_logic;
+  signal obuf_oe           : std_logic;
+  signal force_ypbpr       : boolean;
+  signal video_measurements: VideoMeasurements_t;
 
 begin
 
@@ -210,7 +211,8 @@ begin
     OSDRamAddr       => osd_ram_addr,
     OSDRamData       => osd_ram_data,
     OSDSettings      => osd_settings,
-    VSettings        => video_settings
+    VSettings        => video_settings,
+    VMeasure         => video_measurements
   );
 
   -- DVI output
@@ -300,12 +302,16 @@ begin
     );
 
   -- regenerate blanking signal
-  Inst_Reblanking: Blanking_Regenerator_Fixed
+  Inst_Reblanking: Blanking_Regenerator
     PORT MAP (
-      PixelClock       => Clock54M,
-      PixelClockEnable => pixel_clk_en_ld,
-      VideoIn          => video_444,
-      VideoOut         => video_444_rb
+      PixelClock        => Clock54M,
+      PixelClockEnable  => pixel_clk_en_ld,
+      ReblankingEnable  => true,
+      ResyncingEnable   => true,
+      RBSettings        => video_settings.RBSettings,
+      VideoMeasurements => video_measurements,
+      VideoIn           => video_444,
+      VideoOut          => video_444_rb
     );
 
   -- overlay scanlines

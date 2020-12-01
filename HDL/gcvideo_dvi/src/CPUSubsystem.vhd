@@ -60,7 +60,8 @@ entity CPUSubsystem is
     OSDRamAddr       : in  std_logic_vector(10 downto 0);
     OSDRamData       : out std_logic_vector(8 downto 0);
     OSDSettings      : out OSDSettings_t;
-    VSettings        : out VideoSettings_t
+    VSettings        : out VideoSettings_t;
+    VMeasure         : in  VideoMeasurements_t
   );
 end CPUSubsystem;
 
@@ -127,7 +128,7 @@ begin
     IMPL_EQBRANCH       => true,  -- Include eqbranch and neqbranch
     IMPL_STOREBH        => false, -- Include halfword and byte writes [external RAM only!]
     IMPL_LOADBH         => false, -- Include halfword and byte reads  [external RAM only!]
-	  IMPL_CALL           => true,  -- Include call
+    IMPL_CALL           => true,  -- Include call
     IMPL_SHIFT          => true,  -- Include lshiftright, ashiftright and ashiftleft
     IMPL_XOR            => true,  -- include xor instruction
     EXECUTE_RAM         => false, -- Map the stack / Boot ROM to 0x40000000, to allow pushsp, store to work.
@@ -211,6 +212,7 @@ begin
     ZPUBusOut        => VideoIFOut,
     IRQ              => VSyncIRQ,
     VSettings        => vid_settings,
+    VMeasure         => VMeasure,
     OSDSettings      => OSDSettings
   );
   VSettings <= vid_settings;
