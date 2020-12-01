@@ -8,7 +8,6 @@ SRC_COMMON := \
 	src/ClockGen.vhd                   \
 	src/Deglitcher.vhd                 \
 	src/Linedoubler.vhd                \
-	src/PadAnalyzer.vhd                \
 	src/PadReader.vhd                  \
 	src/SPDIF_Encoder.vhd              \
 	src/SimpleROM.vhd                  \
