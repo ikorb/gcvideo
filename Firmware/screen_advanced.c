@@ -33,20 +33,25 @@
 #include <stddef.h>
 #include "menu.h"
 #include "osd.h"
+#include "portdefs.h"
 #include "screens.h"
 
 enum {
+  MENUITEM_SAMPLERATEHACK,
   MENUITEM_EXIT
 };
 
 /* --- valueitems --- */
 
+static valueitem_t value_sampleratehack = { VALTYPE_BOOL, true,
+                                            { .field = { NULL, VIDEOIF_BIT_SAMPLERATEHACK, 0, VIFLAG_ALLMODES }} };
 
 /* --- menu definition --- */
 
 static void advanced_draw(menu_t *menu);
 
 static menuitem_t advanced_items[] = {
+  { "Sample rate hack",     &value_sampleratehack, 7, 0 },
   { "Exit",                 NULL,                  9, 0 },
 };
 
@@ -59,6 +64,13 @@ static menu_t advanced_menu = {
 };
 
 static void advanced_draw(menu_t *menu) {
+#ifdef CONSOLE_WII
+  if (VIDEOIF->flags & VIDEOIF_FLAG_MODE_WII) {
+    advanced_items[MENUITEM_SAMPLERATEHACK].flags = MENU_FLAG_DISABLED;
+  } else {
+    advanced_items[MENUITEM_SAMPLERATEHACK].flags = 0;
+  }
+#endif
 }
 
 void screen_advanced(void) {

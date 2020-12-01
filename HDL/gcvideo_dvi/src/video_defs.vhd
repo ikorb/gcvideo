@@ -124,6 +124,7 @@ package video_defs is
     RGBOutput         : boolean;
     SyncOnGreen       : boolean;
     Volume            : unsigned(7 downto 0);
+    SampleRateHack    : boolean;
   end record;
 
   -- 8 bit unsigned to 9 bit signed, no modifications

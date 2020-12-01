@@ -33,6 +33,7 @@ entity dvid is
            EnhancedMode  : in  boolean;
            Limited_Range : in  boolean;
            Widescreen    : in  boolean;
+           SampleRateHack: in  boolean;
            Audio         : in  AudioData;
 
            -- test signals for simulation
@@ -141,6 +142,7 @@ architecture Behavioral of dvid is
   signal audio_sample_ready: boolean := false;
   signal audio_samples_sent: natural range 0 to 47 := 0;
   signal audio_needs_acr   : boolean := false;
+  signal sample_drop_count : natural range 0 to 1124 := 0;
 
   ---- helper functions
   -- extract even bits of word
@@ -208,7 +210,7 @@ begin
     Data        => ifr_data
   );
 
-  wii_acr <= '1' when ConsoleMode = MODE_WII else '0';
+  wii_acr <= '1' when ConsoleMode = MODE_WII or SampleRateHack else '0';
   ifr_fulladdr <= wii_acr & "0000" & ifr_addr when ifr_send_acr
                    else ifr_select & ifr_addr;
 
@@ -355,60 +357,71 @@ begin
       end if;
 
       if EnhancedMode and not seq_active and audio_sample_ready then
-        -- only queue new audio data while the sequencer is not running
-        -- (a new sample is available every 281 pixels,
-        --  a worst-case packet is <80 pixels long -> no additional buffer needed)
-        audio_packet := (others => '0');
-        audio_packet(23 downto  8) := std_logic_vector(left_buffer);
-        audio_packet(47 downto 32) := std_logic_vector(right_buffer);
-        audio_packet(50) := channel_status(0);
-        audio_packet(54) := channel_status(0);
-        audio_packet(51) := parity(std_logic_vector(left_buffer))  xor channel_status(0);
-        audio_packet(55) := parity(std_logic_vector(right_buffer)) xor channel_status(0);
-
-        -- move sample data into the correct subpacket
-        case sample_count is
-          when 0 =>
-            subpacket1_even <= extract_even(audio_packet);
-            subpacket1_odd  <= extract_odd(audio_packet);
-
-          when 1 =>
-            subpacket2_even <= extract_even(audio_packet);
-            subpacket2_odd  <= extract_odd(audio_packet);
-
-          when 2 =>
-            subpacket3_even <= extract_even(audio_packet);
-            subpacket3_odd  <= extract_odd(audio_packet);
-
-          when 3 =>
-            subpacket4_even <= extract_even(audio_packet);
-            subpacket4_odd  <= extract_odd(audio_packet);
-        end case;
-
-        -- set flags in packet header
-        packet_header(8 + sample_count) <= '1';
-        if channel_bit = 0 then
-          packet_header(20 + sample_count) <= '1';
-        end if;
-
-        -- count samples sent
-        sample_count <= sample_count + 1;
-        if audio_samples_sent = 47 then
-          audio_samples_sent <= 0;
-          audio_needs_acr    <= true;
-        else
-          audio_samples_sent <= audio_samples_sent + 1;
-        end if;
-
-        -- shift channel status
-        channel_status <= channel_status(0) & channel_status(191 downto 1);
-        if channel_bit = 0 then
-          channel_bit <= 191;
-        else
-          channel_bit <= channel_bit - 1;
-        end if;
-
         audio_sample_ready <= false;
+
+        if sample_drop_count = 0 then
+          -- drop one in every 1124 sample to adjust the Gamecube sample rate to
+          -- exactly 48000Hz
+          sample_drop_count <= 1124;
+        else
+          sample_drop_count <= sample_drop_count - 1;
+        end if;
+
+        if ConsoleMode = MODE_WII or not SampleRateHack or sample_drop_count /= 0 then
+          -- only queue new audio data while the sequencer is not running
+          -- (a new sample is available every 281 pixels,
+          --  a worst-case packet is <80 pixels long -> no additional buffer needed)
+          audio_packet := (others => '0');
+          audio_packet(23 downto  8) := std_logic_vector(left_buffer);
+          audio_packet(47 downto 32) := std_logic_vector(right_buffer);
+          audio_packet(50) := channel_status(0);
+          audio_packet(54) := channel_status(0);
+          audio_packet(51) := parity(std_logic_vector(left_buffer))  xor channel_status(0);
+          audio_packet(55) := parity(std_logic_vector(right_buffer)) xor channel_status(0);
+
+          -- move sample data into the correct subpacket
+          case sample_count is
+            when 0 =>
+              subpacket1_even <= extract_even(audio_packet);
+              subpacket1_odd  <= extract_odd(audio_packet);
+
+            when 1 =>
+              subpacket2_even <= extract_even(audio_packet);
+              subpacket2_odd  <= extract_odd(audio_packet);
+
+            when 2 =>
+              subpacket3_even <= extract_even(audio_packet);
+              subpacket3_odd  <= extract_odd(audio_packet);
+
+            when 3 =>
+              subpacket4_even <= extract_even(audio_packet);
+              subpacket4_odd  <= extract_odd(audio_packet);
+          end case;
+
+          -- set flags in packet header
+          packet_header(8 + sample_count) <= '1';
+          if channel_bit = 0 then
+            packet_header(20 + sample_count) <= '1';
+          end if;
+
+          -- count samples sent
+          sample_count <= sample_count + 1;
+          if audio_samples_sent = 47 then
+            audio_samples_sent <= 0;
+            audio_needs_acr    <= true;
+          else
+            audio_samples_sent <= audio_samples_sent + 1;
+          end if;
+
+          -- shift channel status
+          channel_status <= channel_status(0) & channel_status(191 downto 1);
+          if channel_bit = 0 then
+            channel_bit <= 191;
+          else
+            channel_bit <= channel_bit - 1;
+          end if;
+
+        end if;
       end if;
 
       -- sequencer control

@@ -156,6 +156,7 @@ package component_defs is
       EnhancedMode  : in  boolean;
       Limited_Range : in  boolean;
       Widescreen    : in  boolean;
+      SampleRateHack: in  boolean;
       Audio         : in  AudioData;
       TMDSWord_Red  : out std_logic_vector(9 downto 0);
       TMDSWord_Green: out std_logic_vector(9 downto 0);

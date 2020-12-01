@@ -212,25 +212,26 @@ begin
 
   -- DVI output
   Inst_DVI: dvid port map (
-    clk           => DVIClockP,
-    clk_n         => DVIClockN,
-    clk_pixel     => Clock54M,
-    clk_pixel_en  => pixel_clk_en_27,
-    ConsoleMode   => console_mode,
-    Video         => video_out,
-    EnhancedMode  => video_settings.EnhancedMode,
-    Limited_Range => video_settings.LimitedRange,
-    Widescreen    => video_settings.Widescreen,
-    Audio         => audio,
+    clk            => DVIClockP,
+    clk_n          => DVIClockN,
+    clk_pixel      => Clock54M,
+    clk_pixel_en   => pixel_clk_en_27,
+    ConsoleMode    => console_mode,
+    Video          => video_out,
+    EnhancedMode   => video_settings.EnhancedMode,
+    Limited_Range  => video_settings.LimitedRange,
+    Widescreen     => video_settings.Widescreen,
+    SampleRateHack => video_settings.SampleRateHack,
+    Audio          => audio,
     -- outputs
-    Pair_Red      => Pair_Red,
-    Pair_Green    => Pair_Green,
-    Pair_Blue     => Pair_Blue,
-    Pair_Clock    => Pair_Clock,
-    red_s         => red_enc,
-    green_s       => green_enc,
-    blue_s        => blue_enc,
-    clock_s       => clock_enc
+    Pair_Red       => Pair_Red,
+    Pair_Green     => Pair_Green,
+    Pair_Blue      => Pair_Blue,
+    Pair_Clock     => Pair_Clock,
+    red_s          => red_enc,
+    green_s        => green_enc,
+    blue_s         => blue_enc,
+    clock_s        => clock_enc
   );
 
   OBUFDS_red   : OBUFTDS port map ( O => DVI_Red(0),   OB => DVI_Red(1),   I => red_enc,   T => obuf_oe);
