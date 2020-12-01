@@ -56,6 +56,7 @@ CC := $(CROSS_PREFIX)gcc
 LD := $(CROSS_PREFIX)ld
 AS := $(CROSS_PREFIX)as
 CFLAGS = -Wall -Werror -Os -g -std=gnu99 -ffunction-sections -fdata-sections -I. \
+         -finline-limit=11 \
          -DVERSION=\"$(VERSION)\" $(EXTRA_CFLAGS) $(patsubst %,-D%,$(FEATURE_FLAGS))
 LDFLAGS := -Tstandalone-bsd.ld -Wl,--gc-sections -Wl,--relax -nostartfiles
 
