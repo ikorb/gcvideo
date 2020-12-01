@@ -56,7 +56,7 @@ architecture Behavioral of ZPU_DPRAM is
 
   signal write_delay: std_logic := '0';
   signal addr_a     : std_logic_vector(AddressBits-1 downto 0) := (others => '0');
-  signal addr_b     : std_logic_vector(AddressBits-1 downto 0) := (others => '0');
+
 begin
 
   ZPUBusOut.mem_read(31 downto DataBits) <= (others => '0');
@@ -87,8 +87,7 @@ begin
       end if;
 
       -- port B is read-only and thus simpler
-      addr_b  <= RAMAddr;
-      RAMData <= dpram(to_integer(unsigned(addr_b)));
+      RAMData <= dpram(to_integer(unsigned(RAMAddr)));
     end if;
   end process;
 

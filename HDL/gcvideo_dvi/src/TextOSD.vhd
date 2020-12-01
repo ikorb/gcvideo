@@ -105,7 +105,7 @@ begin
       elsif not prev_blanking and VideoIn.Blanking then
         -- end of active area
         char_pixel   <= 7;
-        pixel_toggle <= false;
+        pixel_toggle <= true;
         video_addr   <= linestart_addr;
 
         if line_toggle then
