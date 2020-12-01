@@ -82,6 +82,10 @@ bool         audio_mute;
 int8_t       picture_brightness;
 int8_t       picture_contrast;
 int8_t       picture_saturation;
+uint8_t      scanline_selected_profile;
+uint16_t     scanline_strength;
+uint16_t     scanline_hybrid;
+bool         scanline_custom;
 
 static uint16_t current_setid;
 
@@ -92,6 +96,23 @@ void set_all_modes(uint32_t flag, bool state) {
     video_settings_global &= ~flag;
 
   VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
+}
+
+void update_scanlines(void) {
+  if (scanline_custom) {
+    // profile uses custom setting, no update needed
+    return;
+  }
+
+  for (unsigned int i = 0; i <= 235 - 16; i++) { // 219
+    unsigned int str_adjusted = 0;
+
+    if (scanline_hybrid * i < 128 * 219) {
+      str_adjusted = (256 - scanline_strength) * (128 * 219 - scanline_hybrid * i) / (128 * 219);
+    }
+
+    SCANLINERAM->profiles[scanline_selected_profile * 256 + i] = 256 - str_adjusted;
+  }
 }
 
 void update_imagecontrols(void) {
@@ -265,12 +286,12 @@ void settings_init(void) {
   resbox_enabled = true;
 
   video_settings_global = VIDEOIF_SET_CABLEDETECT;
-  video_settings[VIDMODE_240p] = 0x80 | VIDEOIF_SET_LD_ENABLE;
-  video_settings[VIDMODE_288p] = 0x80 | VIDEOIF_SET_LD_ENABLE;
-  video_settings[VIDMODE_480i] = 0x80 | VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;
-  video_settings[VIDMODE_576i] = 0x80 | VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;
-  video_settings[VIDMODE_480p] = 0x80;
-  video_settings[VIDMODE_576p] = 0x80;
+  video_settings[VIDMODE_240p] = VIDEOIF_SET_LD_ENABLE;
+  video_settings[VIDMODE_288p] = VIDEOIF_SET_LD_ENABLE;
+  video_settings[VIDMODE_480i] = VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;
+  video_settings[VIDMODE_576i] = VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;
+  video_settings[VIDMODE_480p] = 0;
+  video_settings[VIDMODE_576p] = 0;
   osdbg_settings = 0x501bf8;  // partially transparent, blue tinted background
   picture_brightness = 0;
   picture_contrast   = 0;
@@ -279,6 +300,31 @@ void settings_init(void) {
   audio_mute        = false;
   audio_volume      = 255;
   current_videomode = detect_inputmode();
+
+  /* initialize scanline profiles */
+  scanline_selected_profile = 1;
+  scanline_strength = 192;
+  scanline_hybrid   = 0;
+  SCANLINERAM->profiles[1 * 256 + 250] = 0;
+  SCANLINERAM->profiles[1 * 256 + 251] = scanline_strength;
+  SCANLINERAM->profiles[1 * 256 + 252] = scanline_hybrid;
+  update_scanlines();
+
+  scanline_selected_profile = 2;
+  scanline_strength = 128;
+  scanline_hybrid   = 96;
+  SCANLINERAM->profiles[2 * 256 + 250] = 0;
+  SCANLINERAM->profiles[2 * 256 + 251] = scanline_strength;
+  SCANLINERAM->profiles[2 * 256 + 252] = scanline_hybrid;
+  update_scanlines();
+
+  scanline_selected_profile = 3;
+  scanline_strength = 64;
+  scanline_hybrid   = 160;
+  SCANLINERAM->profiles[3 * 256 + 250] = 0;
+  SCANLINERAM->profiles[3 * 256 + 251] = scanline_strength;
+  SCANLINERAM->profiles[3 * 256 + 252] = scanline_hybrid;
+  update_scanlines();
 
   VIDEOIF->settings       = video_settings[current_videomode] | video_settings_global;
   VIDEOIF->osd_bg         = osdbg_settings;

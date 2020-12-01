@@ -143,10 +143,15 @@ architecture Behavioral of Datapipe is
   -- console mode detection
   signal console_mode   : console_mode_t := MODE_GC;
 
+  -- scanlines
+  signal scanlines_enabled: boolean;
+  signal scanline_even    : boolean;
+  signal scanline_ram_addr: std_logic_vector(7 downto 0);
+  signal scanline_ram_data: std_logic_vector(8 downto 0);
+
   -- misc
   signal video_settings : VideoSettings_t;
   signal clock_locked   : std_logic;
-  signal scanline_even  : boolean;
   signal obuf_oe        : std_logic;
   signal force_ypbpr    : boolean;
 
@@ -203,6 +208,8 @@ begin
     SPI_MISO         => Flash_MISO,
     SPI_SCK          => Flash_SCK,
     SPI_SSEL         => Flash_SSEL,
+    ScanlineRamAddr  => scanline_ram_addr,
+    ScanlineRamData  => scanline_ram_data,
     OSDRamAddr       => osd_ram_addr,
     OSDRamData       => osd_ram_data,
     OSDSettings      => osd_settings,
@@ -320,13 +327,15 @@ begin
     PORT MAP (
       PixelClock       => Clock54M,
       PixelClockEnable => pixel_clk_en_ld,
-      Enable           => video_settings.ScanlinesEnabled,
-      Strength         => video_settings.ScanlineStrength,
+      Enable           => scanlines_enabled,
       Use_Even         => scanline_even,
+      PixelY           => scanline_ram_addr,
+      ScanlineStrength => scanline_ram_data,
       VideoIn          => video_444_adj,
       VideoOut         => video_444_sl
     );
 
+  scanlines_enabled <= video_settings.ScanlineProfile /= "00";
   scanline_even <= video_settings.ScanlinesEven xor
                    (not video_422.IsProgressive and video_422.IsEvenField and video_settings.ScanlinesAlternate);
 

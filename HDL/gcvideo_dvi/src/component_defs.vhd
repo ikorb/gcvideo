@@ -125,8 +125,10 @@ package component_defs is
       PixelClockEnable: in  boolean;
 
       Enable          : in  boolean;
-      Strength        : in  unsigned(7 downto 0);
       Use_Even        : in  boolean;
+
+      PixelY          : out std_logic_vector(7 downto 0);
+      ScanlineStrength: in  std_logic_vector(8 downto 0);
 
       -- input video
       VideoIn         : in  VideoYCbCr;
@@ -274,6 +276,8 @@ package component_defs is
       SPI_MISO        : in  std_logic;
       SPI_SCK         : out std_logic;
       SPI_SSEL        : out std_logic;
+      ScanlineRamAddr : in  std_logic_vector(7 downto 0);
+      ScanlineRamData : out std_logic_vector(8 downto 0);
       OSDRamAddr      : in  std_logic_vector(10 downto 0);
       OSDRamData      : out std_logic_vector(8 downto 0);
       OSDSettings     : out OSDSettings_t;

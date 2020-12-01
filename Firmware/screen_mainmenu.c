@@ -57,18 +57,17 @@ static menuitem_t mainmenu_items[];
 
 static menuitem_t mainmenu_items[] = {
   { "Linedoubler",            &modeset_value_linedoubler, 2, 0 }, // 0
-  { "Scanlines",              &modeset_value_scanlines,   3, 0 }, // 1
-  { " Scanline strength",     &modeset_value_slstrength,  4, 0 }, // 2
-  { " Scanlines on",          &modeset_value_sleven,      5, 0 }, // 3
-  { " Alternating scanlines", &modeset_value_slalt,       6, 0 }, // 4
-  { "OSD settings...",        NULL,                       8, 0 }, // 5
-  { "Picture settings...",    NULL,                       9, 0 }, // 6
-  { "Output settings...",     NULL,                      10, 0 }, // 7
-  { "View all modes...",      NULL,                      11, 0 }, // 8
-  { "Advanced settings...",   NULL,                      12, 0 }, // 9
-  { "Store settings",         NULL,                      14, 0 }, // 10
-  { "About...",               NULL,                      15, 0 }, // 11
-  { "Exit",                   NULL,                      16, 0 }, // 12
+  { "Scanline Profile",       &modeset_value_slprofile,   3, 0 }, // 1
+  { " Apply to",              &modeset_value_sleven,      4, 0 }, // 2
+  { " Alternating scanlines", &modeset_value_slalt,       5, 0 }, // 3
+  { "OSD settings...",        NULL,                       7, 0 }, // 4
+  { "Picture settings...",    NULL,                       8, 0 }, // 5
+  { "Output settings...",     NULL,                       9, 0 }, // 6
+  { "View all modes...",      NULL,                      10, 0 }, // 7
+  { "Advanced settings...",   NULL,                      11, 0 }, // 8
+  { "Store settings",         NULL,                      13, 0 }, // 9
+  { "About...",               NULL,                      14, 0 }, // 10
+  { "Exit",                   NULL,                      15, 0 }, // 11
 };
 
 static void mainmenu_draw(menu_t *menu);

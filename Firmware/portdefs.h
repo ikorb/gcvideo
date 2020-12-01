@@ -78,21 +78,18 @@ typedef struct {
 #define VIDEOIF_FLAG_MODE_WII    (1<<3)
 #define VIDEOIF_FLAG_FORCE_YPBPR (1<<4)
 
-#define VIDEOIF_BIT_SL_ENABLE        8
-#define VIDEOIF_BIT_SL_EVEN          9
-#define VIDEOIF_BIT_SL_ALTERNATE     10
-#define VIDEOIF_BIT_LD_ENABLE        11
-#define VIDEOIF_BIT_DISABLE_OUTPUT   12
-#define VIDEOIF_BIT_CABLEDETECT      13
-#define VIDEOIF_BIT_RGBLIMITED       14
-#define VIDEOIF_BIT_DVIENHANCED      15
-#define VIDEOIF_BIT_169              16
-#define VIDEOIF_BIT_ANALOGMODE       17
-#define VIDEOIF_BIT_ANALOGSOG        18
-#define VIDEOIF_BIT_SAMPLERATEHACK   19
+#define VIDEOIF_BIT_SL_EVEN          2
+#define VIDEOIF_BIT_SL_ALTERNATE     3
+#define VIDEOIF_BIT_LD_ENABLE        4
+#define VIDEOIF_BIT_DISABLE_OUTPUT   5
+#define VIDEOIF_BIT_CABLEDETECT      6
+#define VIDEOIF_BIT_RGBLIMITED       7
+#define VIDEOIF_BIT_DVIENHANCED      8
+#define VIDEOIF_BIT_169              9
+#define VIDEOIF_BIT_ANALOGMODE       10
+#define VIDEOIF_BIT_ANALOGSOG        11
+#define VIDEOIF_BIT_SAMPLERATEHACK   12
 
-#define VIDEOIF_SET_SL_STRENGTH_MASK 0xff
-#define VIDEOIF_SET_SL_ENABLE        (1<<VIDEOIF_BIT_SL_ENABLE)
 #define VIDEOIF_SET_SL_EVEN          (1<<VIDEOIF_BIT_SL_EVEN)
 #define VIDEOIF_SET_SL_ALTERNATE     (1<<VIDEOIF_BIT_SL_ALTERNATE)
 #define VIDEOIF_SET_LD_ENABLE        (1<<VIDEOIF_BIT_LD_ENABLE)
@@ -105,8 +102,10 @@ typedef struct {
 #define VIDEOIF_SET_ANALOGSOG        (1<<VIDEOIF_BIT_ANALOGSOG)
 #define VIDEOIF_SET_SAMPLERATEHACK   (1<<VIDEOIF_BIT_SAMPLERATEHACK)
 
-#define VIDEOIF_SET_ANALOG_MASK      (3 << 17)
-#define VIDEOIF_SET_ANALOG_SHIFT     17
+#define VIDEOIF_SET_SLPROFILE_MASK   3
+
+#define VIDEOIF_SET_ANALOG_MASK      (3 << VIDEOIF_BIT_ANALOGMODE)
+#define VIDEOIF_SET_ANALOG_SHIFT     VIDEOIF_BIT_ANALOGMODE
 
 #define VIDEOIF_OSDBG_ALPHA_MASK     0xff0000
 #define VIDEOIF_OSDBG_ALPHA_SHIFT    16
@@ -132,6 +131,16 @@ typedef struct {
 } PadReader_TypeDef;
 
 #define PADREADER_BITS_SHIFTFLAG 0x80
+
+/* --- Scanline RAM --- */
+
+#define SCANLINERAM_ENTRIES (256 * 4)
+
+typedef struct {
+  // profile 0 is unused (scanlines hardware-disabled)
+  // no IO declaration because it is never written to by hardware
+  /*__IO*/ uint32_t profiles[SCANLINERAM_ENTRIES];
+} SCANLINERAM_TypeDef;
 
 /* --- SPI --- */
 
@@ -164,6 +173,7 @@ typedef struct {
 /* --- mixing it all together --- */
 
 #define OSDRAM_BASE        ((uint32_t)0xffffc000UL)
+#define SCANLINERAM_BASE   ((uint32_t)0xffffe000UL)
 #define PERIPH_BASE        ((uint32_t)0xfffff000UL)
 #define IRQController_BASE (PERIPH_BASE)
 #define VIDEOIF_BASE       (PERIPH_BASE + 0x100)
@@ -174,6 +184,7 @@ typedef struct {
 #define IRQController ((IRQController_TypeDef *)IRQController_BASE)
 #define VIDEOIF       ((VideoInterface_TypeDef *)VIDEOIF_BASE)
 #define PADREADER     ((PadReader_TypeDef *)PADREADER_BASE)
+#define SCANLINERAM   ((SCANLINERAM_TypeDef *)SCANLINERAM_BASE)
 #define OSDRAM        ((OSDRAM_TypeDef *)OSDRAM_BASE)
 #define SPI           ((SPI_TypeDef *)SPI_BASE)
 #define IRRX          ((IRRX_TypeDef *)IRRX_BASE)

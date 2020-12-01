@@ -111,10 +111,9 @@ package video_defs is
   end record;
 
   type VideoSettings_t is record
-    ScanlineStrength  : unsigned(7 downto 0);
+    ScanlineProfile   : std_logic_vector(1 downto 0);
     ScanlinesAlternate: boolean;
     ScanlinesEven     : boolean;
-    ScanlinesEnabled  : boolean;
     LinedoublerEnabled: boolean;
     DisableOutput     : boolean;
     CableDetect       : boolean;

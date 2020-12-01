@@ -54,6 +54,8 @@ entity CPUSubsystem is
     SPI_MISO         : in  std_logic;
     SPI_SCK          : out std_logic;
     SPI_SSEL         : out std_logic;
+    ScanlineRamAddr  : in  std_logic_vector(7 downto 0);
+    ScanlineRamData  : out std_logic_vector(8 downto 0);
     OSDRamAddr       : in  std_logic_vector(10 downto 0);
     OSDRamData       : out std_logic_vector(8 downto 0);
     OSDSettings      : out OSDSettings_t;
@@ -69,7 +71,7 @@ architecture Behavioral of CPUSubsystem is
   constant ZPUBRAMSize: natural := 13;
 
   -- number of devices on the I/O bus
-  constant DeviceCount: Natural := 6;
+  constant DeviceCount: Natural := 7;
 
   -- number of interrupt-generating devices
   constant IRQDeviceCount: Natural := 3;
@@ -94,6 +96,7 @@ architecture Behavioral of CPUSubsystem is
   signal IRQControllerSel: std_logic;
   signal VideoIFSel      : std_logic;
   signal PadSel          : std_logic;
+  signal ScanlineRAMSel  : std_logic;
   signal OSDRAMSel       : std_logic;
   signal SPISel          : std_logic;
   signal IRRxSel         : std_logic;
@@ -102,6 +105,7 @@ architecture Behavioral of CPUSubsystem is
   signal IRQControllerOut: ZPUDeviceOut;
   signal VideoIFOut      : ZPUDeviceOut;
   signal PadOut          : ZPUDeviceOut;
+  signal ScanlineRAMOut  : ZPUDeviceOut;
   signal OSDRAMOut       : ZPUDeviceOut;
   signal SPIOut          : ZPUDeviceOut;
   signal IRRxOut         : ZPUDeviceOut;
@@ -113,6 +117,9 @@ architecture Behavioral of CPUSubsystem is
 
   signal DeviceSels      : ZPUMuxSelects(0 to DeviceCount-1);
   signal DeviceOuts      : ZPUMuxDevOuts(0 to DeviceCount-1);
+
+  signal scanline_ram_addr_ext: std_logic_vector(9 downto 0);
+  signal vid_settings         : VideoSettings_t;
 
 begin
 
@@ -220,10 +227,27 @@ begin
     ZPUBusIn         => ZPUIn,
     ZPUBusOut        => VideoIFOut,
     IRQ              => VSyncIRQ,
-    VSettings        => VSettings,
+    VSettings        => vid_settings,
     OSDSettings      => OSDSettings,
     ImageControls    => ImageControls
   );
+  VSettings <= vid_settings;
+
+  -- Scanline strength RAM
+  Inst_ScanlineRAM: ZPU_DPRAM generic map (
+    AddressBits => 10,
+    DataBits    => 9
+    --InitValue   => x"00000100" -- factor 1.00
+  ) port map (
+    Clock       => Clock,
+    ZSelect     => ScanlineRAMSel,
+    ZPUBusIn    => ZPUIn,
+    ZPUBusOut   => ScanlineRAMOut,
+    RAMAddr     => scanline_ram_addr_ext,
+    RAMData     => ScanlineRAMData
+  );
+
+  scanline_ram_addr_ext <= vid_settings.ScanlineProfile & ScanlineRAMAddr;
 
   -- OSD RAM
   Inst_OSDRAM: ZPU_DPRAM GENERIC MAP (
@@ -280,6 +304,7 @@ begin
     IRQControllerSel <= '0';
     VideoIFSel       <= '0';
     PadSel           <= '0';
+    ScanlineRAMSel   <= '0';
     OSDRAMSel        <= '0';
     SPISel           <= '0';
     IRRxSel          <= '0';
@@ -294,6 +319,9 @@ begin
           elsif cpu_mem_addr(13) = '0' then
             -- OSD RAM needs 8k: 0xffffc000-dfff
             OSDRAMSel <= '1';
+          elsif cpu_mem_addr(12) = '0' then
+            -- 0xffffe000-efff
+            ScanlineRAMSel <= '1';
           else -- 0xffff f_00
             case cpu_mem_addr(11 downto 8) is -- select with 256-byte granularity
               when x"0"   => IRQControllerSel <= '1';
@@ -315,18 +343,20 @@ begin
     0 => IRQControllerSel,
     1 => VideoIFSel,
     2 => PadSel,
-    3 => OSDRAMSel,
-    4 => SPISel,
-    5 => IRRxSel
+    3 => ScanlineRAMSel,
+    4 => OSDRAMSel,
+    5 => SPISel,
+    6 => IRRxSel
   );
 
   DeviceOuts <= (
     0 => IRQControllerOut,
     1 => VideoIFOut,
     2 => PadOut,
-    3 => OSDRAMOut,
-    4 => SPIOut,
-    5 => IRRxOut
+    3 => ScanlineRAMOut,
+    4 => OSDRAMOut,
+    5 => SPIOut,
+    6 => IRRxOut
   );
 
   MainZPUBusMux: ZPUBusMux
@@ -343,4 +373,3 @@ begin
     );
 
 end Behavioral;
-

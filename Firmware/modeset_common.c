@@ -37,20 +37,23 @@
 
 video_mode_t modeset_mode;
 
-int modeset_get_slstrength(void)  { return video_settings[modeset_mode] & VIDEOIF_SET_SL_STRENGTH_MASK; }
+int modeset_get_slprofile(void) {
+  return video_settings[modeset_mode] & VIDEOIF_SET_SLPROFILE_MASK;
+}
 
-bool modeset_set_slstrength(int value) {
-  video_settings[modeset_mode] = (video_settings[modeset_mode] & ~VIDEOIF_SET_SL_STRENGTH_MASK) | value;
+bool modeset_set_slprofile(int value) {
+  video_settings[modeset_mode] =
+    (video_settings[modeset_mode] & ~VIDEOIF_SET_SLPROFILE_MASK) | value;
 
   if (current_videomode == modeset_mode)
     VIDEOIF->settings = video_settings[modeset_mode] | video_settings_global;
-  return false;
+  return true;
 }
 
-valueitem_t modeset_value_scanlines   = { VALTYPE_BOOL, true,
-                                          { .field = { NULL, VIDEOIF_BIT_SL_ENABLE, 0, VIFLAG_MODESET | VIFLAG_REDRAW }} };
-valueitem_t modeset_value_slstrength  = { VALTYPE_BYTE, false,
-                                          { .functions = { modeset_get_slstrength, modeset_set_slstrength }} };
+valueitem_t modeset_value_slprofile = {
+  VALTYPE_SLPROFILEOFF, false, {{ modeset_get_slprofile, modeset_set_slprofile }}
+};
+
 valueitem_t modeset_value_sleven      = { VALTYPE_EVENODD, true,
                                           { .field = { NULL, VIDEOIF_BIT_SL_EVEN,      0, VIFLAG_MODESET }} };
 valueitem_t modeset_value_slalt       = { VALTYPE_BOOL, true,
@@ -61,24 +64,20 @@ valueitem_t modeset_value_linedoubler = { VALTYPE_BOOL, true,
 void modeset_draw(menu_t *menu) {
   /* update the item-enable flags based on current settings */
   if (modeset_mode <= VIDMODE_576i && !(video_settings[modeset_mode] & VIDEOIF_SET_LD_ENABLE)) {
-    menu->items[MENUITEM_SCANLINES ].flags = MENU_FLAG_DISABLED;
-    menu->items[MENUITEM_SLSTRENGTH].flags = MENU_FLAG_DISABLED;
-    menu->items[MENUITEM_SLEVEN    ].flags = MENU_FLAG_DISABLED;
-    menu->items[MENUITEM_SLALT     ].flags = MENU_FLAG_DISABLED;
-  } else {
-    menu->items[MENUITEM_SCANLINES ].flags = 0;
-    menu->items[MENUITEM_SLSTRENGTH].flags = 0;
-    menu->items[MENUITEM_SLEVEN    ].flags = 0;
-    menu->items[MENUITEM_SLALT     ].flags = 0;
+    /* no scanlines in non-doubled 240p/288p */
+    menu->items[MENUITEM_SLPROFILE].flags = MENU_FLAG_DISABLED;
+    menu->items[MENUITEM_SLEVEN   ].flags = MENU_FLAG_DISABLED;
+    menu->items[MENUITEM_SLALT    ].flags = MENU_FLAG_DISABLED;
 
-    if (video_settings[modeset_mode] & VIDEOIF_SET_SL_ENABLE) {
-      menu->items[MENUITEM_SLSTRENGTH].flags = 0;
-      menu->items[MENUITEM_SLEVEN    ].flags = 0;
-      menu->items[MENUITEM_SLALT     ].flags = 0;
+  } else {
+    menu->items[MENUITEM_SLPROFILE].flags = 0;
+
+    if (video_settings[modeset_mode] & VIDEOIF_SET_SLPROFILE_MASK) {
+      menu->items[MENUITEM_SLEVEN].flags = 0;
+      menu->items[MENUITEM_SLALT ].flags = 0;
     } else {
-      menu->items[MENUITEM_SLSTRENGTH].flags = MENU_FLAG_DISABLED;
-      menu->items[MENUITEM_SLEVEN    ].flags = MENU_FLAG_DISABLED;
-      menu->items[MENUITEM_SLALT     ].flags = MENU_FLAG_DISABLED;
+      menu->items[MENUITEM_SLEVEN].flags = MENU_FLAG_DISABLED;
+      menu->items[MENUITEM_SLALT ].flags = MENU_FLAG_DISABLED;
     }
   }
 

@@ -57,6 +57,7 @@ static const cliprange_t clipranges[] = {
   [ VALTYPE_BYTE ]         = {    0,   255 },
   [ VALTYPE_SBYTE_99 ]     = {   -99,   99 },
   [ VALTYPE_SBYTE_127 ]    = {  -128,  127 },
+  [ VALTYPE_SLPROFILEOFF ] = {     0,    3 },
 };
 
 static const uint8_t value_widths[] = {
@@ -66,6 +67,7 @@ static const uint8_t value_widths[] = {
   [ VALTYPE_BYTE ]         = 6,
   [ VALTYPE_SBYTE_99 ]     = 6,
   [ VALTYPE_SBYTE_127 ]    = 6,
+  [ VALTYPE_SLPROFILEOFF ] = 6,
 };
 
 /* (un)draw marker on a menu item */
@@ -191,6 +193,14 @@ static void print_value(menu_t *menu, unsigned int itemnum) {
       printf("   0");
     else
       printf("%+4d", value);
+    break;
+
+  case VALTYPE_SLPROFILEOFF:
+    if (value) {
+      printf("%4d", value);
+    } else {
+      osd_puts(" Off");
+    }
     break;
   }
 }

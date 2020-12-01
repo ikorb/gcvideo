@@ -40,8 +40,9 @@ typedef enum {
   VALTYPE_EVENODD,
   VALTYPE_ANALOGMODE,
   VALTYPE_BYTE,
-  VALTYPE_SBYTE_99,  // -99 to 99
-  VALTYPE_SBYTE_127, // -128 to 127
+  VALTYPE_SBYTE_99,     // -99 to 99
+  VALTYPE_SBYTE_127,    // -128 to 127
+  VALTYPE_SLPROFILEOFF, // 0 to 3 shown as Off, 1 to 3
 } valuetype_t;
 
 #define VIFLAG_REDRAW         (1<<0)
@@ -49,6 +50,7 @@ typedef enum {
 #define VIFLAG_ALLMODES       (1<<2)
 #define VIFLAG_SBYTE          (1<<3)
 #define VIFLAG_MODESET        (1<<4)
+#define VIFLAG_SLUPDATE       (1<<5)
 
 typedef struct {
   valuetype_t type:7;

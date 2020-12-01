@@ -39,8 +39,7 @@
 /* positions are assumed to be fixed for now */
 enum {
   MENUITEM_LINEDOUBLER,
-  MENUITEM_SCANLINES,
-  MENUITEM_SLSTRENGTH,
+  MENUITEM_SLPROFILE,
   MENUITEM_SLEVEN,
   MENUITEM_SLALT,
   MODESET_COMMON_MENUITEM_COUNT
@@ -50,8 +49,7 @@ enum {
 extern video_mode_t modeset_mode;
 
 /* valueitems */
-extern valueitem_t modeset_value_scanlines;
-extern valueitem_t modeset_value_slstrength;
+extern valueitem_t modeset_value_slprofile;
 extern valueitem_t modeset_value_sleven;
 extern valueitem_t modeset_value_slalt;
 extern valueitem_t modeset_value_linedoubler;

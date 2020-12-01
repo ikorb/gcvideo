@@ -43,16 +43,15 @@
 
 static menuitem_t modeset_items[] = {
   { "Linedoubler",            &modeset_value_linedoubler, 2, 0 }, // 0
-  { "Scanlines",              &modeset_value_scanlines,   3, 0 }, // 1
-  { " Scanline strength",     &modeset_value_slstrength,  4, 0 }, // 2
-  { " Scanlines on",          &modeset_value_sleven,      5, 0 }, // 3
-  { " Alternating scanlines", &modeset_value_slalt,       6, 0 }, // 4
-  { "Exit",                   NULL,                       8, 0 }, // 5
+  { "Scanline Profile",       &modeset_value_slprofile,   3, 0 }, // 1
+  { " Apply to",              &modeset_value_sleven,      4, 0 }, // 2
+  { " Alternating scanlines", &modeset_value_slalt,       5, 0 }, // 3
+  { "Exit",                   NULL,                       7, 0 }, // 4
 };
 
 static menu_t modeset_menu = {
   7, 9,
-  31, 10,
+  31, 9,
   modeset_draw,
   sizeof(modeset_items) / sizeof(*modeset_items),
   modeset_items
