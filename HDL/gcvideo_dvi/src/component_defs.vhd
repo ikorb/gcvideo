@@ -93,6 +93,24 @@ package component_defs is
     );
   end component;
 
+  component ycrange is
+    port (
+      Clock      : in  std_logic;
+      ClockEnable: in  boolean;
+
+      -- input video
+      PixelY     : in  unsigned(7 downto 0);
+      PixelCb    : in    signed(7 downto 0);
+      PixelCr    : in    signed(7 downto 0);
+
+      -- output video
+      OutY       : out unsigned(7 downto 0);
+      OutCb      : out unsigned(7 downto 0);
+      OutCr      : out unsigned(7 downto 0)
+    );
+  end component;
+
+
   component colormatrix is
     port (
       PixelClock      : in  std_logic;

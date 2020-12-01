@@ -122,6 +122,7 @@ architecture Behavioral of Datapipe is
   signal video_osd_out      : VideoYCbCr;
   signal video_cmatrix_in   : VideoYCbCr;
   signal video_cmatrix_out  : VideoRGB;
+  signal video_ycrange_in   : VideoYCbCr;
   signal video_dvienc_in    : VideoRGB;
   signal video_dac_in       : VideoRGB;
 
@@ -135,9 +136,13 @@ architecture Behavioral of Datapipe is
   signal pixel_clk_en_scanliner: boolean := false;
   signal pixel_clk_en_osd      : boolean := false;
   signal pixel_clk_en_cmatrix  : boolean := false;
+  signal pixel_clk_en_ycrange  : boolean := false;
   signal pixel_clk_en_dac      : boolean := false;
 
   -- analog output
+  signal pixel_y_range  : unsigned(7 downto 0);
+  signal pixel_cb_range : unsigned(7 downto 0);
+  signal pixel_cr_range : unsigned(7 downto 0);
   signal use_syncongreen: boolean;
 
   -- encoded DVI signals
@@ -374,6 +379,19 @@ begin
       RAMData          => osd_ram_data
     );
 
+  -- value range rescaling for analog output
+  Inst_ycrange: ycrange
+    port map (
+      Clock       => Clock54M,
+      ClockEnable => pixel_clk_en_ycrange,
+      PixelY      => video_ycrange_in.PixelY,
+      PixelCb     => video_ycrange_in.PixelCb,
+      PixelCr     => video_ycrange_in.PixelCr,
+      OutY        => pixel_y_range,
+      OutCb       => pixel_cb_range,
+      OutCr       => pixel_cr_range
+    );
+
   -- convert color space
   Inst_colormatrix: ColorMatrix
     PORT MAP (
@@ -475,6 +493,7 @@ begin
   video_scanliner_in <= video_reblanker_out;
   video_osd_in       <= video_scanliner_out;
   video_cmatrix_in   <= video_osd_out;
+  video_ycrange_in   <= video_osd_out;
   video_dvienc_in    <= video_cmatrix_out;
 
   pixel_clk_en_422conv   <= pixel_clk_en_ld_out;
@@ -482,6 +501,7 @@ begin
   pixel_clk_en_scanliner <= pixel_clk_en_ld_out;
   pixel_clk_en_osd       <= pixel_clk_en_ld_out;
   pixel_clk_en_cmatrix   <= pixel_clk_en_ld_out;
+  pixel_clk_en_ycrange   <= pixel_clk_en_ld_out;
   pixel_clk_en_dac       <= pixel_clk_en_ld_out;
 
   process(Clock54M, pixel_clk_en_ld_out)
@@ -492,9 +512,9 @@ begin
         DAC_RGBMode     <= false;
         use_syncongreen <= true;
 
-        video_dac_in.PixelR <= unsigned(video_osd_out.PixelCr + 128);
-        video_dac_in.PixelG <= video_osd_out.PixelY;
-        video_dac_in.PixelB <= unsigned(video_osd_out.PixelCb + 128);
+        video_dac_in.PixelR <= pixel_cr_range;
+        video_dac_in.PixelG <= pixel_y_range;
+        video_dac_in.PixelB <= pixel_cb_range;
         video_dac_in.HSync  <= video_osd_out.HSync;
         video_dac_in.VSync  <= video_osd_out.VSync;
         video_dac_in.CSync  <= video_osd_out.CSync;

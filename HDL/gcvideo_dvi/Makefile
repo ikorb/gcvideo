@@ -40,6 +40,7 @@ SRC_COMMON := \
 	src/led_heartbeat.vhd              \
 	src/scanline_generator.vhd         \
 	src/video_defs.vhd                 \
+	src/ycrange.vhd                    \
 	src/zpu_core_flex.vhd              \
 	src/zpu_rom.vhd                    \
 	src/zpupkg.vhd
