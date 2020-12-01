@@ -39,7 +39,6 @@
 #include "portdefs.h"
 #include "screens.h"
 #include "settings.h"
-#include "spiflash.h"
 #include "vsync.h"
 
 #define barrier() asm volatile("" : : : "memory")
@@ -74,7 +73,7 @@ int main(int argc, char **argv) {
   /* run initializations */
   settings_init();
   osd_init();
-  spiflash_init();
+  settings_load();
 
   VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
   VIDEOIF->osd_bg   = osdbg_settings;

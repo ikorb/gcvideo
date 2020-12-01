@@ -39,7 +39,6 @@
 #include "portdefs.h"
 #include "screens.h"
 #include "settings.h"
-#include "spiflash.h"
 
 // 0-4 are from modeset_common.h
 #define MENUITEM_OSDSET      5
@@ -173,7 +172,7 @@ void screen_mainmenu(void) {
       osd_gotoxy(15, 14);
       osd_puts("Saving...");
 
-      spiflash_write_settings();
+      settings_save();
 
       osd_gotoxy(15, 14);
       osd_puts("Settings saved");

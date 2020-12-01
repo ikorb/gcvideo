@@ -35,6 +35,8 @@
 #include <stdbool.h>
 #include <stdint.h>
 
+#define SETTINGS_OFFSET 0x70000
+
 typedef enum {
   VIDMODE_240p,
   VIDMODE_288p,
@@ -65,6 +67,8 @@ void set_all_modes(uint32_t flag, bool state);
 void update_imagecontrols(void);
 video_mode_t detect_inputmode(void);
 void print_resolution(void);
+void settings_load(void);
+void settings_save(void);
 void settings_init(void);
 
 #endif

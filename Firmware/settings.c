@@ -31,9 +31,34 @@
 
 #include <stdio.h>
 #include <stdint.h>
+#include <string.h>
+#include "irrx.h"
 #include "portdefs.h"
+#include "spiflash.h"
 #include "vsync.h"
 #include "settings.h"
+
+#define SETTINGS_VERSION 5
+#define SETTINGS_SIZE_V4 60
+#define SETTINGS_SIZE_V5 63
+
+typedef struct {
+  uint8_t  checksum;
+  uint8_t  version;
+  uint8_t  flags;
+  uint8_t  volume;
+  uint32_t video_settings[VIDMODE_COUNT];
+  uint32_t osdbg_settings;
+  uint32_t mode_switch_delay;
+  uint32_t ir_codes[NUM_IRCODES];
+  int8_t   brightness;
+  int8_t   contrast;
+  int8_t   saturation;
+} storedsettings_t;
+
+#define SET_FLAG_RESBOX (1<<0)
+#define SET_FLAG_MUTE   (1<<1)
+
 
 /* number of lines per frame in each video mode */
 /* order matters! even are 60Hz, odd are 50Hz   */
@@ -59,6 +84,8 @@ bool         audio_mute;
 int8_t       picture_brightness;
 int8_t       picture_contrast;
 int8_t       picture_saturation;
+
+static uint16_t current_setid;
 
 void set_all_modes(uint32_t flag, bool state) {
   if (state)
@@ -121,6 +148,122 @@ void print_resolution(void) {
          (flags & VIDEOIF_FLAG_PROGRESSIVE) ? 'p' : 'i',
          (flags & VIDEOIF_FLAG_PAL        ) ? 50  : 60);
 }
+
+
+void settings_load(void) {
+  storedsettings_t set;
+  unsigned int i;
+  bool valid = false;
+
+  /* scan for the first valid settings record */
+  for (i = 0; i < 256; i++) {
+    spiflash_read_block(&set, SETTINGS_OFFSET + 256 * i, sizeof(storedsettings_t));
+    if (set.version == SETTINGS_VERSION ||
+        set.version == 4) {
+      /* found a record with the expected version, verify checksum */
+      uint8_t *byteset = (uint8_t *)&set;
+      uint8_t sum = 0;
+      uint8_t size = 0;
+
+      switch (set.version) {
+      case 4: size = SETTINGS_SIZE_V4; break;
+      case 5: size = SETTINGS_SIZE_V5; break;
+      }
+
+      for (unsigned int j = 1; j < size; j++)
+        sum += byteset[j];
+
+      if (size != 0 && sum == set.checksum) {
+        /* found a valid setting record */
+        valid = true;
+        break;
+      }
+    }
+
+    if (set.version  != 0xff ||
+        set.checksum != 0xff) {
+      /* found an invalid, but non-empty record */
+      /* stop here because we can only write to empty records */
+      break;
+    }
+  }
+
+  current_setid = i;
+  if (valid) {
+    /* valid settings found, copy to main vars */
+    for (i = 0; i < VIDMODE_COUNT; i++)
+      video_settings[i] = set.video_settings[i];
+
+    osdbg_settings    = set.osdbg_settings;
+    mode_switch_delay = set.mode_switch_delay;
+
+    if (set.flags & SET_FLAG_RESBOX)
+      resbox_enabled = true;
+    else
+      resbox_enabled = false;
+
+    audio_volume = set.volume & 0xff;
+    if (set.flags & SET_FLAG_MUTE)
+      audio_mute = true;
+    else
+      audio_mute = false;
+
+    memcpy(ir_codes, set.ir_codes, sizeof(ir_codes));
+
+    if (set.version >= 5) {
+      picture_brightness = set.brightness;
+      picture_contrast   = set.contrast;
+      picture_saturation = set.saturation;
+      update_imagecontrols();
+    }
+  }
+}
+
+void settings_save(void) {
+  storedsettings_t set;
+  uint8_t *byteset = (uint8_t *)&set;
+  uint8_t sum = 0;
+
+  /* create settings record */
+  memset(&set, 0, sizeof(storedsettings_t));
+  set.version = SETTINGS_VERSION;
+
+  for (unsigned int i = 0; i < VIDMODE_COUNT; i++)
+    set.video_settings[i] = video_settings[i];
+
+  set.osdbg_settings    = osdbg_settings;
+  set.mode_switch_delay = mode_switch_delay;
+
+  if (resbox_enabled)
+    set.flags |= SET_FLAG_RESBOX;
+
+  set.volume = audio_volume;
+  if (audio_mute)
+    set.flags |= SET_FLAG_MUTE;
+
+  memcpy(set.ir_codes, ir_codes, sizeof(ir_codes));
+
+  set.brightness = picture_brightness;
+  set.contrast   = picture_contrast;
+  set.saturation = picture_saturation;
+
+  /* calculate checksum */
+  for (unsigned int i = 1; i < sizeof(storedsettings_t); i++)
+    sum += byteset[i];
+
+  set.checksum = sum;
+
+  /* check if erase cycle is needed */
+  if (current_setid == 0) {
+    spiflash_erase_sector(SETTINGS_OFFSET);
+    current_setid = 256;
+  }
+
+  /* write data to flash */
+  current_setid--;
+  spiflash_write_page(SETTINGS_OFFSET + 256 * current_setid, &set, sizeof(storedsettings_t));
+}
+
 
 void settings_init(void) {
   resbox_enabled = true;

@@ -44,8 +44,4 @@ unsigned int spiflash_send_byte(unsigned int byte);
 void spiflash_end_read(void);
 void spiflash_end_write(void);
 
-void spiflash_init(void);
-void spiflash_read_settings(void);
-void spiflash_write_settings(void);
-
 #endif
