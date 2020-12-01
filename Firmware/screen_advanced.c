@@ -41,6 +41,7 @@ enum {
   MENUITEM_CHROMAINTERPOL,
   MENUITEM_REBLANK,
   MENUITEM_RESYNC,
+  MENUITEM_REGENCSYNC,
   MENUITEM_SPOOFINTERLACE,
   MENUITEM_COLORMODE,
   MENUITEM_SAMPLERATEHACK,
@@ -55,6 +56,8 @@ static valueitem_t value_reblanking     = { VALTYPE_BOOL, true,
                                             { .field = { NULL, VIDEOIF_BIT_ENABLEREBLANK, 0, VIFLAG_ALLMODES | VIFLAG_REDRAW }} };
 static valueitem_t value_resync         = { VALTYPE_BOOL, true,
                                             { .field = { NULL, VIDEOIF_BIT_ENABLERESYNC, 0, VIFLAG_ALLMODES | VIFLAG_REDRAW }} };
+static valueitem_t value_regencsync     = { VALTYPE_BOOL, true,
+                                            { .field = { NULL, VIDEOIF_BIT_REGENCSYNC, 0, VIFLAG_ALLMODES }} };
 static valueitem_t value_spoofinterlace = { VALTYPE_BOOL, true,
                                             { .field = { NULL, VIDEOIF_BIT_SPOOFINTERLACE, 0, VIFLAG_ALLMODES }} };
 static valueitem_t value_colormode      = { VALTYPE_COLORMODE, true,
@@ -71,6 +74,7 @@ static menuitem_t advanced_items[] = {
   { "Chroma Interpolation", &value_chromainterpol, 1, 0 },
   { "Fix resolution",       &value_reblanking,     2, 0 },
   { "Fix sync timing",      &value_resync,         3, 0 },
+  { "Regenerate CSync",     &value_regencsync,     4, 0 },
   { "Digital color format", &value_colormode,      5, 0 },
   { "Report 240p as 480i",  &value_spoofinterlace, 6, 0 },
   { "Sample rate hack",     &value_sampleratehack, 7, 0 },

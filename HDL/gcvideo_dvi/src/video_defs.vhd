@@ -144,6 +144,7 @@ package video_defs is
     Volume            : unsigned(7 downto 0);
     EnableReblanking  : boolean;
     EnableResyncing   : boolean;
+    RebuildCSync      : boolean;
     SampleRateHack    : boolean;
     InterpolateChroma : boolean;
     ColorMode         : std_logic_vector(1 downto 0);

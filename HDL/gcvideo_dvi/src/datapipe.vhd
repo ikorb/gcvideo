@@ -410,10 +410,17 @@ begin
 
   -- parallel video data
   process(Clock54M, pixel_clk_en_dac)
+    variable csync: boolean;
   begin
     if rising_edge(Clock54M) and pixel_clk_en_dac then
+      if video_settings.RebuildCSync then
+        csync := video_dac_in.VSync xor video_dac_in.HSync;
+      else
+        csync := video_dac_in.CSync;
+      end if;
+
       if video_settings.SyncOnGreen then
-        if video_dac_in.CSync then
+        if csync then
           DAC_SyncN <= '0';
         else
           DAC_SyncN <= '1';
@@ -430,9 +437,16 @@ begin
 
   -- external Syncs
   process(Clock54M, pixel_clk_en_ld_out)
+    variable csync: boolean;
   begin
     if rising_edge(Clock54M) and pixel_clk_en_ld_out then
-      if video_dvienc_in.CSync then
+      if video_settings.RebuildCSync then
+        csync := video_dvienc_in.VSync xor video_dvienc_in.HSync;
+      else
+        csync := video_dvienc_in.CSync;
+      end if;
+
+      if csync then
         CSync_out <= '0';
       else
         CSync_out <= '1';
