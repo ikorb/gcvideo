@@ -54,8 +54,8 @@ architecture Behavioral of Blanking_Regenerator_Fixed is
   type blank_state_t is (BS_OUTSIDE_WIN, BS_INSIDE_WIN);
   signal vblank_state     : blank_state_t;
   signal hblank_state     : blank_state_t;
-  signal hor_active_start : natural range 121 to 131 := 121;
-  signal hor_active_end   : natural range 841 to 851 := 841;
+  signal hor_active_start : natural range 117 to 132 := 117;
+  signal hor_active_end   : natural range 830 to 852 := 839;
   signal vert_active_start: natural range  18 to  41 :=  18;
   signal vert_active_end  : natural range 258 to 617 := 258;
 
@@ -112,7 +112,7 @@ begin
       ---- count non-sync pixels/lines as reference
       -- pixels (first pixel of HSync is 0)
       if at_hsync_start then
-        current_pixel   <= 0;
+        current_pixel <= 0;
       else
         current_pixel <= current_pixel + 1;
       end if;
@@ -131,11 +131,19 @@ begin
 
         -- update blanking ranges
         if VideoIn.IsPAL then
-          hor_active_start <= 131;
-          hor_active_end   <= 851;
+          -- 576i/576p
+          hor_active_start <= 132 - 2;
+          hor_active_end   <= 852 - 2;
         else
-          hor_active_start <= 121;
-          hor_active_end   <= 841;
+          if VideoIn.Is30kHz then
+            -- 480p
+            hor_active_start <= 122 - 2;
+            hor_active_end   <= 842 - 2;
+          else
+            -- 480i
+            hor_active_start <= 119 - 2;
+            hor_active_end   <= 839 - 2;
+          end if;
         end if;
 
         if VideoIn.Is30kHz then
