@@ -50,7 +50,14 @@ dummy:
 	@false
 endif
 
-MODULE := main
+ifeq ($(MODULE),main)
+# nothing yet
+else
+dummy_mod:
+	@echo "MODULE variable invalid"
+	@false
+endif
+
 
 PERL := perl
 CROSS_PREFIX=zpu-elf-
@@ -73,13 +80,12 @@ else
 endif
 
 SRCFILES_COMMON := main.c osd.c printf.c pad.c vsync.c irrx.c \
-       spiflash.c utils.c icap.c screen_irconfig.c \
-       modeset_common.c screen_about.c screen_allmodes.c \
-       screen_idle.c screen_mainmenu.c screen_osdsettings.c screen_outputsettings.c \
-       screen_picturesettings.c screen_advanced.c screen_scanlines.c settings.c \
-       reblanker.c infoframe.c menu.c colormatrix.c
+	spiflash.c utils.c icap.c screen_irconfig.c
 
-SRCFILES_main :=
+SRCFILES_main := modeset_common.c screen_about.c screen_allmodes.c \
+	screen_idle.c screen_mainmenu.c screen_osdsettings.c screen_outputsettings.c \
+	screen_picturesettings.c screen_advanced.c screen_scanlines.c settings-main.c \
+	reblanker.c infoframe.c menu.c colormatrix.c
 
 COPYDIR     := build/$(MODULE)
 BASENAME    := gcvideo-sw-$(TARGET)

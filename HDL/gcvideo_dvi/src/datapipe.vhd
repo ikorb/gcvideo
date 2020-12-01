@@ -169,8 +169,16 @@ architecture Behavioral of Datapipe is
   signal scanline_ram_addr: std_logic_vector(7 downto 0);
   signal scanline_ram_data: std_logic_vector(8 downto 0);
 
+  -- video settings
+  signal video_settings   : VideoSettings_t;
+  signal vs_enhanced_mode : boolean;
+  signal vs_widescreen    : boolean;
+  signal vs_colormode     : std_logic_vector(1 downto 0);
+  signal vs_sampleratehack: boolean;
+  signal vs_analogrgbout  : boolean;
+  signal vs_rebuildcsync  : boolean;
+
   -- misc
-  signal video_settings    : VideoSettings_t;
   signal clock_locked      : std_logic;
   signal obuf_oe           : std_logic;
   signal force_ypbpr       : boolean;
@@ -253,10 +261,10 @@ begin
     clk_pixel_en      => pixel_clk_en_27,
     ConsoleMode       => console_mode,
     Video             => video_dvienc_in,
-    EnhancedMode      => video_settings.EnhancedMode,
-    Widescreen        => video_settings.Widescreen,
-    ColorMode         => video_settings.ColorMode,
-    SampleRateHack    => video_settings.SampleRateHack,
+    EnhancedMode      => vs_enhanced_mode,
+    Widescreen        => vs_widescreen,
+    ColorMode         => vs_colormode,
+    SampleRateHack    => vs_sampleratehack,
     InfoFrameRAM_Addr => infoframeram_addr,
     InfoFrameRAM_Data => infoframeram_data,
     Audio             => audio,
@@ -276,6 +284,15 @@ begin
   OBUFDS_blue  : OBUFTDS port map ( O => DVI_Blue(0),  OB => DVI_Blue(1),  I => blue_enc,  T => obuf_oe);
   OBUFDS_clock : OBUFTDS port map ( O => DVI_Clock(0), OB => DVI_Clock(1), I => clock_enc, T => obuf_oe);
 
+  vs_main: if Module = "main" generate
+    vs_enhanced_mode  <= video_settings.EnhancedMode;
+    vs_widescreen     <= video_settings.Widescreen;
+    vs_sampleratehack <= video_settings.SampleRateHack;
+    vs_colormode      <= video_settings.ColorMode;
+    vs_analogrgbout   <= video_settings.AnalogRGBOutput;
+    vs_rebuildcsync   <= video_settings.RebuildCSync;
+  end generate;
+
   -- master clock generator
   Inst_ClockGen: ClockGen
     port map (
@@ -288,18 +305,20 @@ begin
       Locked     => clock_locked
     );
 
-  -- audio module
-  Inst_Audio: Audio_SPDIF
-    port map (
-      Clock       => ClockAudio,
-      ConsoleMode => console_mode,
-      I2S_BClock  => I2S_BClock,
-      I2S_LRClock => I2S_LRClock,
-      I2S_Data    => I2S_Data,
-      Volume      => video_settings.Volume,
-      Audio       => audio,
-      SPDIF_Out   => SPDIF_Out
-    );
+  audio_main: if Module = "main" generate
+    -- audio module
+    Inst_Audio: Audio_SPDIF
+      port map (
+        Clock       => ClockAudio,
+        ConsoleMode => console_mode,
+        I2S_BClock  => I2S_BClock,
+        I2S_LRClock => I2S_LRClock,
+        I2S_Data    => I2S_Data,
+        Volume      => video_settings.Volume,
+        Audio       => audio,
+        SPDIF_Out   => SPDIF_Out
+      );
+  end generate;
 
   -- read gamecube video data
   Inst_GCVideo: GCDV_Decoder
@@ -337,37 +356,41 @@ begin
 
   output_422 <= (video_settings.ColorMode = "11");
 
-  -- regenerate blanking signal
-  Inst_Reblanking: Blanking_Regenerator
-    PORT MAP (
-      PixelClock        => Clock54M,
-      PixelClockEnable  => pixel_clk_en_reblanker,
-      ReblankingEnable  => video_settings.EnableReblanking,
-      ResyncingEnable   => video_settings.EnableResyncing,
-      RBSettings        => video_settings.RBSettings,
-      VideoMeasurements => video_measurements,
-      VideoIn           => video_reblanker_in,
-      VideoOut          => video_reblanker_out
-    );
+  blanking_regen_main: if Module = "main" generate
+    -- regenerate blanking signal
+    Inst_Reblanking: Blanking_Regenerator
+      PORT MAP (
+        PixelClock        => Clock54M,
+        PixelClockEnable  => pixel_clk_en_reblanker,
+        ReblankingEnable  => video_settings.EnableReblanking,
+        ResyncingEnable   => video_settings.EnableResyncing,
+        RBSettings        => video_settings.RBSettings,
+        VideoMeasurements => video_measurements,
+        VideoIn           => video_reblanker_in,
+        VideoOut          => video_reblanker_out
+      );
 
-  -- overlay scanlines
-  Inst_Scanliner: Scanline_Generator
-    PORT MAP (
-      PixelClock       => Clock54M,
-      PixelClockEnable => pixel_clk_en_scanliner,
-      Enable           => scanlines_enabled,
-      Use_Even         => scanline_even,
-      PixelY           => scanline_ram_addr,
-      ScanlineStrength => scanline_ram_data,
-      VideoIn          => video_scanliner_in,
-      VideoOut         => video_scanliner_out
-    );
+    -- overlay scanlines
+    Inst_Scanliner: Scanline_Generator
+      PORT MAP (
+        PixelClock       => Clock54M,
+        PixelClockEnable => pixel_clk_en_scanliner,
+        Enable           => scanlines_enabled,
+        Use_Even         => scanline_even,
+        PixelY           => scanline_ram_addr,
+        ScanlineStrength => scanline_ram_data,
+        VideoIn          => video_scanliner_in,
+        VideoOut         => video_scanliner_out
+      );
 
-  scanlines_enabled <= video_settings.ScanlineProfile /= "00";
-  scanline_even <= video_settings.ScanlinesEven xor
-                   (not video_gcdv_out.IsProgressive and
-                        video_gcdv_out.IsEvenField   and
-                        video_settings.ScanlinesAlternate);
+    scanlines_enabled <= video_settings.ScanlineProfile /= "00";
+    scanline_even <= video_settings.ScanlinesEven xor
+                     (not video_gcdv_out.IsProgressive and
+                          video_gcdv_out.IsEvenField   and
+                          video_settings.ScanlinesAlternate);
+
+  end generate;
+
 
   -- add OSD overlay
   Inst_OSD: TextOSD
@@ -394,15 +417,18 @@ begin
       OutCr       => pixel_cr_range
     );
 
-  -- convert color space
-  Inst_colormatrix: ColorMatrix
-    PORT MAP (
-      PixelClock       => Clock54M,
-      PixelClockEnable => pixel_clk_en_cmatrix,
-      Settings         => video_settings,
-      VideoIn          => video_cmatrix_in,
-      VideoOut         => video_cmatrix_out
-    );
+  -- color conversion
+  colorspace_main: if Module = "main" generate
+    -- convert color space
+    Inst_colormatrix: ColorMatrix
+      PORT MAP (
+        PixelClock       => Clock54M,
+        PixelClockEnable => pixel_clk_en_cmatrix,
+        Settings         => video_settings,
+        VideoIn          => video_cmatrix_in,
+        VideoOut         => video_cmatrix_out
+      );
+  end generate;
 
   -- create a fixed 27-MHz pixel clock
   process (Clock54M)
@@ -433,13 +459,13 @@ begin
     variable csync: boolean;
   begin
     if rising_edge(Clock54M) and pixel_clk_en_dac then
-      if video_settings.RebuildCSync then
+      if vs_rebuildcsync then
         csync := video_dac_in.VSync xor video_dac_in.HSync;
       else
         csync := video_dac_in.CSync;
       end if;
 
-      if video_settings.SyncOnGreen then
+      if use_syncongreen then
         if csync then
           DAC_SyncN <= '0';
         else
@@ -489,59 +515,62 @@ begin
 
 
   -- signal connections
-  video_ld_in        <= video_gcdv_out;
-  video_422conv_in   <= video_ld_out;
-  video_reblanker_in <= video_422conv_out;
-  video_scanliner_in <= video_reblanker_out;
-  video_osd_in       <= video_scanliner_out;
-  video_cmatrix_in   <= video_osd_out;
-  video_ycrange_in   <= video_osd_out;
-  video_dvienc_in    <= video_cmatrix_out;
+  Connections_Main: if Module = "main" generate
+    video_ld_in        <= video_gcdv_out;
+    video_422conv_in   <= video_ld_out;
+    video_reblanker_in <= video_422conv_out;
+    video_scanliner_in <= video_reblanker_out;
+    video_osd_in       <= video_scanliner_out;
+    video_cmatrix_in   <= video_osd_out;
+    video_ycrange_in   <= video_osd_out;
+    video_dvienc_in    <= video_cmatrix_out;
 
-  pixel_clk_en_422conv   <= pixel_clk_en_ld_out;
-  pixel_clk_en_reblanker <= pixel_clk_en_ld_out;
-  pixel_clk_en_scanliner <= pixel_clk_en_ld_out;
-  pixel_clk_en_osd       <= pixel_clk_en_ld_out;
-  pixel_clk_en_cmatrix   <= pixel_clk_en_ld_out;
-  pixel_clk_en_ycrange   <= pixel_clk_en_ld_out;
-  pixel_clk_en_dac       <= pixel_clk_en_ld_out;
+    pixel_clk_en_422conv   <= pixel_clk_en_ld_out;
+    pixel_clk_en_reblanker <= pixel_clk_en_ld_out;
+    pixel_clk_en_scanliner <= pixel_clk_en_ld_out;
+    pixel_clk_en_osd       <= pixel_clk_en_ld_out;
+    pixel_clk_en_cmatrix   <= pixel_clk_en_ld_out;
+    pixel_clk_en_ycrange   <= pixel_clk_en_ld_out;
+    pixel_clk_en_dac       <= pixel_clk_en_ld_out;
 
-  process(Clock54M, pixel_clk_en_ld_out)
-  begin
-    if rising_edge(Clock54M) and pixel_clk_en_ld_out then
-      if force_ypbpr or not video_settings.AnalogRGBOutput then
-        -- YPbPr output
-        DAC_RGBMode     <= false;
-        use_syncongreen <= true;
+    process(Clock54M, pixel_clk_en_ld_out)
+    begin
+      if rising_edge(Clock54M) and pixel_clk_en_ld_out then
+        if force_ypbpr or not video_settings.AnalogRGBOutput then
+          -- YPbPr output
+          DAC_RGBMode     <= false;
+          use_syncongreen <= true;
 
-        video_dac_in.PixelR <= pixel_cr_range;
-        video_dac_in.PixelG <= pixel_y_range;
-        video_dac_in.PixelB <= pixel_cb_range;
-        video_dac_in.HSync  <= video_osd_out.HSync;
-        video_dac_in.VSync  <= video_osd_out.VSync;
-        video_dac_in.CSync  <= video_osd_out.CSync;
+          video_dac_in.PixelR <= pixel_cr_range;
+          video_dac_in.PixelG <= pixel_y_range;
+          video_dac_in.PixelB <= pixel_cb_range;
+          video_dac_in.HSync  <= video_osd_out.HSync;
+          video_dac_in.VSync  <= video_osd_out.VSync;
+          video_dac_in.CSync  <= video_osd_out.CSync;
 
-        if video_osd_out.Blanking then
-          video_dac_in.PixelR <= x"80";
-          video_dac_in.PixelG <= x"00";
-          video_dac_in.PixelB <= x"80";
+          if video_osd_out.Blanking then
+            video_dac_in.PixelR <= x"80";
+            video_dac_in.PixelG <= x"00";
+            video_dac_in.PixelB <= x"80";
+          end if;
+
+        else
+          -- RGB output
+          DAC_RGBMode     <= true;
+          use_syncongreen <= video_settings.SyncOnGreen;
+
+          video_dac_in <= video_cmatrix_out;
+
+          if video_cmatrix_out.Blanking then
+            video_dac_in.PixelR <= x"00";
+            video_dac_in.PixelG <= x"00";
+            video_dac_in.PixelB <= x"00";
+          end if;
+
         end if;
-
-      else
-        -- RGB output
-        DAC_RGBMode     <= true;
-        use_syncongreen <= video_settings.SyncOnGreen;
-
-        video_dac_in <= video_cmatrix_out;
-
-        if video_cmatrix_out.Blanking then
-          video_dac_in.PixelR <= x"00";
-          video_dac_in.PixelG <= x"00";
-          video_dac_in.PixelB <= x"00";
-        end if;
-
       end if;
-    end if;
-  end process;
+    end process;
+
+  end generate;
 
 end Behavioral;

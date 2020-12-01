@@ -222,21 +222,23 @@ begin
   );
   VSettings <= vid_settings;
 
-  -- Scanline strength RAM
-  Inst_ScanlineRAM: ZPU_DPRAM generic map (
-    AddressBits => 10,
-    DataBits    => 9
-    --InitValue   => x"00000100" -- factor 1.00
-  ) port map (
-    Clock       => Clock,
-    ZSelect     => ScanlineRAMSel,
-    ZPUBusIn    => ZPUIn,
-    ZPUBusOut   => ScanlineRAMOut,
-    RAMAddr     => scanline_ram_addr_ext,
-    RAMData     => ScanlineRAMData
-  );
+  ramdevice_main: if Module = "main" generate
+    -- Scanline strength RAM
+    Inst_ScanlineRAM: ZPU_DPRAM generic map (
+      AddressBits => 10,
+      DataBits    => 9
+      --InitValue   => x"00000100" -- factor 1.00
+    ) port map (
+      Clock       => Clock,
+      ZSelect     => ScanlineRAMSel,
+      ZPUBusIn    => ZPUIn,
+      ZPUBusOut   => ScanlineRAMOut,
+      RAMAddr     => scanline_ram_addr_ext,
+      RAMData     => ScanlineRAMData
+    );
 
-  scanline_ram_addr_ext <= vid_settings.ScanlineProfile & ScanlineRAMAddr;
+    scanline_ram_addr_ext <= vid_settings.ScanlineProfile & ScanlineRAMAddr;
+  end generate;
 
   -- OSD RAM
   Inst_OSDRAM: ZPU_DPRAM GENERIC MAP (
@@ -279,18 +281,20 @@ begin
   );
 
   -- Infoframe-RAM
-  Inst_IFRam: ZPU_DPRAM generic map (
-    AddressBits => 9,
-    DataBits    => 9,
-    DataFile    => "infoframe_rom.mif"
-  ) port map (
-    Clock     => Clock,
-    ZSelect   => IFRSel,
-    ZPUBusIn  => ZPUIn,
-    ZPUBusOut => IFROut,
-    RAMAddr   => InfoFrameRAMAddr,
-    RAMData   => InfoFrameRAMData
-  );
+  InfoFrameRAM: if Module = "main" generate
+    Inst_IFRam: ZPU_DPRAM generic map (
+      AddressBits => 9,
+      DataBits    => 9,
+      DataFile    => "infoframe_rom.mif"
+      ) port map (
+        Clock     => Clock,
+        ZSelect   => IFRSel,
+        ZPUBusIn  => ZPUIn,
+        ZPUBusOut => IFROut,
+        RAMAddr   => InfoFrameRAMAddr,
+        RAMData   => InfoFrameRAMData
+      );
+  end generate;
 
   -- CPU-to-device signals
   ZPUIn.Reset           <= cpu_reset;

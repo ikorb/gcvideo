@@ -33,51 +33,56 @@ MODULE := main
 # values that are usually overriden by the main Makefile
 VERSION := dev
 
-CONSTRAINTS_MODULE :=
-SRC_MODULE :=
+ifeq ($(MODULE),main)
+  CONSTRAINTS_MODULE := src/constraints-audio.ucf
+  SRC_MODULE := \
+       src/Blanking_Regenerator.vhd       \
+       src/SPDIF_Encoder.vhd              \
+       src/audio_spdif.vhd                \
+       src/colormatrix.vhd                \
+       src/i2s_decoder.vhd                \
+       src/ZPU_SPICAP.vhd                 \
+       src/scanline_generator.vhd
+else
+moduledummy:
+       @echo "MODULE invalid or unspecified"
+endif
 
 SRC_COMMON := \
-	src/Blanking_Regenerator.vhd       \
-	src/CPUSubsystem.vhd               \
-	src/ClockGen.vhd                   \
-	src/Deglitcher.vhd                 \
-	src/Linedoubler.vhd                \
-	src/PadReader.vhd                  \
-	src/SPDIF_Encoder.vhd              \
-	src/SimpleROM.vhd                  \
-	src/TMDS_encoder.vhd               \
-	src/TextOSD.vhd                    \
-	src/ZPUBusMux.vhd                  \
-	src/ZPUDevices.vhd                 \
-	src/ZPUIRQController.vhd           \
-	src/ZPUVideoInterface.vhd          \
-	src/ZPUWatchdog.vhd                \
-	src/ZPUIRReceiver.vhd              \
-	src/ZPU_DPRAM.vhd                  \
-	src/ZPU_SPICAP.vhd                 \
-	src/audio_spdif.vhd                \
-	src/ConsoleModeDetect.vhd          \
-	src/aux_ecc1.vhd                   \
-	src/aux_ecc2.vhd                   \
-	src/aux_encoder.vhd                \
-	src/component_defs.vhd             \
-	src/convert_422_to_444.vhd         \
-	src/colormatrix.vhd                \
-	src/datapipe.vhd                   \
-	src/delayline_bool.vhd             \
-	src/delayline_unsigned.vhd         \
-	src/dvid.vhd                       \
-	src/dvienc_defs.vhd                \
-	src/edvi_ucode.vhd                 \
-	src/gcdv_decoder.vhd               \
-	src/i2s_decoder.vhd                \
-	src/led_heartbeat.vhd              \
-	src/scanline_generator.vhd         \
-	src/video_defs.vhd                 \
-	src/ycrange.vhd                    \
-	src/zpu_core_flex.vhd              \
-	src/zpu_rom.vhd                    \
-	src/zpupkg.vhd
+       src/CPUSubsystem.vhd               \
+       src/ClockGen.vhd                   \
+       src/Deglitcher.vhd                 \
+       src/Linedoubler.vhd                \
+       src/PadReader.vhd                  \
+       src/SimpleROM.vhd                  \
+       src/TMDS_encoder.vhd               \
+       src/TextOSD.vhd                    \
+       src/ZPUBusMux.vhd                  \
+       src/ZPUDevices.vhd                 \
+       src/ZPUIRQController.vhd           \
+       src/ZPUVideoInterface.vhd          \
+       src/ZPUWatchdog.vhd                \
+       src/ZPUIRReceiver.vhd              \
+       src/ZPU_DPRAM.vhd                  \
+       src/ConsoleModeDetect.vhd          \
+       src/aux_ecc1.vhd                   \
+       src/aux_ecc2.vhd                   \
+       src/aux_encoder.vhd                \
+       src/component_defs.vhd             \
+       src/convert_422_to_444.vhd         \
+       src/datapipe.vhd                   \
+       src/delayline_bool.vhd             \
+       src/delayline_unsigned.vhd         \
+       src/dvid.vhd                       \
+       src/dvienc_defs.vhd                \
+       src/edvi_ucode.vhd                 \
+       src/gcdv_decoder.vhd               \
+       src/led_heartbeat.vhd              \
+       src/video_defs.vhd                 \
+       src/ycrange.vhd                    \
+       src/zpu_core_flex.vhd              \
+       src/zpu_rom.vhd                    \
+       src/zpupkg.vhd
 
 
 SRC_P2XH     := src/toplevel_p2xh.vhd

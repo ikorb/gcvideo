@@ -34,6 +34,10 @@
 
 #include <stdint.h>
 
+#ifdef MODULE_main
+#  include "portdefs-main.h"
+#endif
+
 #ifdef __cplusplus
   #define __I volatile
 #else
@@ -170,16 +174,6 @@ typedef struct {
 
 #define PADREADER_BITS_SHIFTFLAG 0x80
 
-/* --- Scanline RAM --- */
-
-#define SCANLINERAM_ENTRIES (256 * 4)
-
-typedef struct {
-  // profile 0 is unused (scanlines hardware-disabled)
-  // no IO declaration because it is never written to by hardware
-  /*__IO*/ uint32_t profiles[SCANLINERAM_ENTRIES];
-} SCANLINERAM_TypeDef;
-
 /* --- SPI+ICAP --- */
 
 typedef struct {
@@ -226,7 +220,7 @@ typedef struct {
 
 #define IFRAM_BASE         ((uint32_t)0xffff8000UL)
 #define OSDRAM_BASE        ((uint32_t)0xffffc000UL)
-#define SCANLINERAM_BASE   ((uint32_t)0xffffe000UL)
+// ffffe000: module-specific
 #define PERIPH_BASE        ((uint32_t)0xfffff000UL)
 #define IRQController_BASE (PERIPH_BASE)
 #define VIDEOIF_BASE       (PERIPH_BASE + 0x100)
@@ -237,7 +231,6 @@ typedef struct {
 #define IRQController ((IRQController_TypeDef *)IRQController_BASE)
 #define VIDEOIF       ((VideoInterface_TypeDef *)VIDEOIF_BASE)
 #define PADREADER     ((PadReader_TypeDef *)PADREADER_BASE)
-#define SCANLINERAM   ((SCANLINERAM_TypeDef *)SCANLINERAM_BASE)
 #define OSDRAM        ((OSDRAM_TypeDef *)OSDRAM_BASE)
 #define IFRAM         ((IFRAM_TypeDef *)IFRAM_BASE)
 #define SPICAP        ((SPICAP_TypeDef *)SPICAP_BASE)
