@@ -71,12 +71,6 @@ static void mark_item(menu_t *menu, unsigned int item, char ch) {
   osd_putcharat(menu->xpos + 1, menu->ypos + menu->items[item].line, ch, ATTRIB_DIM_BG);
 }
 
-/* (un)draw marker on a value item */
-static void mark_value(menu_t *menu, unsigned int item, char ch) {
-  osd_putcharat(menu->xpos + menu->xsize - 7, menu->ypos + menu->items[item].line,
-                ch, ATTRIB_DIM_BG);
-}
-
 
 static void print_value(menu_t *menu, unsigned int itemnum) {
   int value = menu->items[itemnum].value->get();
@@ -158,42 +152,6 @@ static void update_value(menu_t *menu, unsigned int itemid, updatetype_t upd) {
     print_value(menu, itemid);
   }
 }
-
-
-/* submenu for changing numeric values */
-static void value_submenu(menu_t *menu, unsigned int itemid) {
-  mark_value(menu, itemid, MENUMARKER_LEFT);
-
-  while (1) {
-    /* wait for input */
-    while (!pad_buttons) ;
-
-    unsigned int curbtns = pad_buttons;
-
-    /* value change */
-    if (curbtns & (PAD_LEFT | IR_LEFT)) {
-      update_value(menu, itemid, UPDATE_DECREMENT);
-      pad_clear(PAD_LEFT | PAD_UP | PAD_DOWN |
-                IR_LEFT  | IR_UP  | IR_DOWN); // prioritize left/right
-    }
-
-    if (curbtns & (PAD_RIGHT | IR_RIGHT)) {
-      update_value(menu, itemid, UPDATE_INCREMENT);
-      pad_clear(PAD_RIGHT | PAD_UP | PAD_DOWN |
-                IR_RIGHT  | IR_UP  | IR_DOWN); // prioritize left/right
-    }
-
-    /* exit with X/Y */
-    if (curbtns & (PAD_X | PAD_Y | IR_OK | IR_BACK))
-      break;
-
-    /* video mode change is ignored */
-  }
-  pad_clear(PAD_ALL);
-
-  mark_value(menu, itemid, ' ');
-}
-
 
 void menu_draw(menu_t *menu) {
   const menuitem_t *items = menu->items;
@@ -310,13 +268,7 @@ int menu_exec(menu_t *menu, unsigned int initial_item) {
           update_value(menu, cur_item, UPDATE_INCREMENT); // bool always toggles
           break;
 
-        case VALTYPE_RGBMODE:
-        case VALTYPE_BYTE:
-        case VALTYPE_SBYTE_99:
-        case VALTYPE_SBYTE_127:
-          mark_item(menu, cur_item, ' ');
-          value_submenu(menu, cur_item);
-          mark_item(menu, cur_item, MENUMARKER_LEFT);
+        default:
           break;
         }
       }
