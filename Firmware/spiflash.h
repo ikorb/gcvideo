@@ -33,6 +33,16 @@
 #define SPIFLASH_H
 
 #include <stdint.h>
+#include <stdbool.h>
+
+void spiflash_erase_sector(uint32_t address);
+void spiflash_read_block(void* buffer, uint32_t address, uint32_t length);
+void spiflash_write_page(uint32_t address, void* buffer, uint32_t length);
+void spiflash_start_read(uint32_t address);
+void spiflash_start_write(uint32_t address);
+unsigned int spiflash_send_byte(unsigned int byte);
+void spiflash_end_read(void);
+void spiflash_end_write(void);
 
 void spiflash_init(void);
 void spiflash_read_settings(void);

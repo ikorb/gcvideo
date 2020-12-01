@@ -47,7 +47,7 @@
 #define CMD_RELEASE_PWDN   0xab
 #define CMD_READ_SIGNATURE 0xab // sic!
 
-#define STATUSREG_WIP      (1<<0)
+#define STATUSREG_WIP      (1<<0) // write in progress
 
 #define SETTINGS_OFFSET  0x70000
 #define SETTINGS_VERSION 5
@@ -80,7 +80,7 @@ static void set_cs(bool state) {
     SPI->flags &= ~SPI_FLAG_SSEL;
 }
 
-static unsigned int send_byte(unsigned int byte) {
+unsigned int spiflash_send_byte(unsigned int byte) {
   SPI->data = byte;
   while (SPI->flags & SPI_FLAG_BUSY) ;
   return SPI->data;
@@ -88,7 +88,7 @@ static unsigned int send_byte(unsigned int byte) {
 
 static void write_enable(void) {
   set_cs(false);
-  send_byte(CMD_WRITE_ENABLE);
+  spiflash_send_byte(CMD_WRITE_ENABLE);
   set_cs(true);
 }
 
@@ -97,42 +97,74 @@ static void wait_write_done(void) {
 
   do {
     set_cs(false);
-    send_byte(CMD_READ_STATUS);
-    result = send_byte(0x00);
+    spiflash_send_byte(CMD_READ_STATUS);
+    result = spiflash_send_byte(0x00);
     set_cs(true);
   } while (result & STATUSREG_WIP);
 }
 
-static void read_settings(unsigned int num, storedsettings_t *set) {
-  uint8_t *byteset = (uint8_t *)set;
-
+static void start_command_addr(uint8_t command, uint32_t address) {
   set_cs(false);
-  send_byte(CMD_READ_BYTES);
-  send_byte(SETTINGS_OFFSET >> 16);
-  send_byte(num);
-  send_byte(0);
-  for (unsigned int i = 0; i < sizeof(storedsettings_t); i++)
-    byteset[i] = send_byte(0x00);
+  spiflash_send_byte(command);
+  spiflash_send_byte((address >> 16) & 0xff);
+  spiflash_send_byte((address >> 8) & 0xff);
+  spiflash_send_byte(address & 0xff);
+}
+
+void spiflash_start_write(uint32_t address) {
+  write_enable();
+  start_command_addr(CMD_PAGE_PROGRAM, address);
+}
+
+void spiflash_end_write(void) {
+  set_cs(true);
+  wait_write_done();
+}
+
+void spiflash_start_read(uint32_t address) {
+  start_command_addr(CMD_READ_BYTES, address);
+}
+
+void spiflash_end_read(void) {
   set_cs(true);
 }
 
-static void write_settings(unsigned int num, storedsettings_t *set) {
-  uint8_t *byteset = (uint8_t *)set;
-
+void spiflash_erase_sector(uint32_t address) {
   write_enable();
-  set_cs(false);
-  send_byte(CMD_PAGE_PROGRAM);
-  send_byte(SETTINGS_OFFSET >> 16);
-  send_byte(num);
-  send_byte(0);
-  for (unsigned int i = 0; i < sizeof(storedsettings_t); i++)
-    send_byte(byteset[i]);
+  start_command_addr(CMD_SECTOR_ERASE, address);
+  spiflash_end_write();
+}
 
-  for (unsigned int i = sizeof(storedsettings_t); i < 256; i++)
-    send_byte(0xff);
+void spiflash_read_block(void* buffer, uint32_t address, uint32_t length) {
+  uint8_t *bytebuf = (uint8_t *)buffer;
+
+  spiflash_start_read(address);
+  for (unsigned int i = 0; i < length; i++)
+    bytebuf[i] = spiflash_send_byte(0x00);
   set_cs(true);
+}
 
-  wait_write_done();
+void spiflash_write_page(uint32_t address, void* buffer, uint32_t length) {
+  uint8_t *bytebuf = (uint8_t *)buffer;
+  while (length > 0) {
+   spiflash_start_write(address);
+
+    do {
+      spiflash_send_byte(*bytebuf++);
+      address++;
+      length--;
+    } while (length > 0 && (address & 0xff) != 0);
+
+    spiflash_end_write();
+  }
+}
+
+static void read_settings(unsigned int num, storedsettings_t *set) {
+  spiflash_read_block(set, SETTINGS_OFFSET + 256 * num, sizeof(storedsettings_t));
+}
+
+static void write_settings(unsigned int num, storedsettings_t *set) {
+  spiflash_write_page(SETTINGS_OFFSET + 256 * num, set, sizeof(storedsettings_t));
 }
 
 void spiflash_read_settings(void) {
@@ -240,15 +272,7 @@ void spiflash_write_settings(void) {
 
   /* check if erase cycle is needed */
   if (current_setid == 0) {
-    write_enable();
-    set_cs(false);
-    send_byte(CMD_SECTOR_ERASE);
-    send_byte(SETTINGS_OFFSET >> 16);
-    send_byte(0);
-    send_byte(0);
-    set_cs(true);
-
-    wait_write_done();
+    spiflash_erase_sector(SETTINGS_OFFSET);
     current_setid = 256;
   }
 
