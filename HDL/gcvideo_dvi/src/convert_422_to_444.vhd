@@ -24,11 +24,28 @@
 -- ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF ADVISED OF
 -- THE POSSIBILITY OF SUCH DAMAGE.
 --
--- convert_422_to_444.vhd: Interpolate 4:2:2 YCbCr to 4:4:4
+-- convert_422_to_444.vhd: Convert 4:2:2 YCbCr to 4:4:4
 --
--- This module uses linear interpolation to generate 4:4:4 YCbCr from 4:2:2 YCbCr
+-- This module converts from 4:2:2 to 4:4:4 YCbCr with optional interpolation
 --
 ----------------------------------------------------------------------------------
+
+-- timing diagram:
+-- * time moves downward
+-- * b12/r12 is Cb/Cr for y1/y2, b34 for y3/y4 etc.
+-- * when in blanking, the last color is held
+-- * assumes Cb-first
+-- * entries that still hold values from before the table start are left blank
+--
+-- Y_in CbCr IsCb|current_c1 current_c2 prev_c2 prev_c1 Y_out Cb_out       Cr_out
+-- --------------+---------------------------------------------------------------------
+-- y1   b12  t   |b12
+-- y2   r12  f   |b12        r12
+-- y3   b34  t   |b34        r12        b12     r12
+-- y4   r34  f   |b34        r34        b12     r12     y1    b12          r12
+-- y5   b56  t   |b56        r34        b34     r34     y2    avg(b12,b34) avg(r12,r34)
+-- y6   r56  f   |b56        r56        b34     r34     y3    b34          r34
+
 
 library IEEE;
 use IEEE.STD_LOGIC_1164.ALL;
@@ -39,14 +56,17 @@ use work.video_defs.all;
 
 entity convert_422_to_444 is
   port (
-    PixelClock      : in  std_logic;
-    PixelClockEnable: in  boolean;
+    PixelClock       : in  std_logic;
+    PixelClockEnable : in  boolean;
+
+    -- control
+    InterpolateChroma: in  boolean;
 
     -- input video
-    VideoIn         : in  VideoY422;
+    VideoIn          : in  VideoY422;
 
     -- output video
-    VideoOut        : out VideoYCbCr
+    VideoOut         : out VideoYCbCr
   );
 end convert_422_to_444;
 
@@ -100,12 +120,18 @@ begin
           current_c1 <= VideoIn.PixelCbCr;
         end if;
 
-        prev_c1 <= current_c1;
         prev_c2 <= current_c2;
+        prev_c1 <= current_c1;
 
         -- output interpolated chroma info for the delayed Y value
-        new_c1 := average(prev_c1, current_c1);
-        new_c2 := average(prev_c2, current_c2);
+        if InterpolateChroma then
+          new_c1 := average(prev_c1, current_c1);
+          new_c2 := average(prev_c2, current_c2);
+        else
+          new_c1 := signed(prev_c1 xor x"80");
+          new_c2 := signed(prev_c2 xor x"80");
+        end if;
+
       else
         -- pixel with the remainder of the current chroma information
         if not VideoIn.Blanking then
@@ -131,8 +157,8 @@ begin
   -- generate delayed signals
   Inst_LumaDelay: delayline_unsigned
     generic map (
-      Delayticks => Delayticks,
-      Width      => 8
+      Delayticks  => Delayticks,
+      Width       => 8
     )
     port map (
       Clock       => PixelClock,
@@ -143,7 +169,7 @@ begin
 
   Inst_HSyncDelay: delayline_bool
     generic map (
-      Delayticks => Delayticks
+      Delayticks  => Delayticks
     )
     port map (
       Clock       => PixelClock,
@@ -176,7 +202,7 @@ begin
 
   Inst_BlankingDelay: delayline_bool
     generic map (
-      Delayticks => Delayticks
+      Delayticks  => Delayticks
     )
     port map (
       Clock       => PixelClock,

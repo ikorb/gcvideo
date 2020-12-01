@@ -300,7 +300,7 @@ void settings_init(void) {
   resbox_enabled = true;
 
   video_settings_global = VIDEOIF_SET_ENABLEREBLANK | VIDEOIF_SET_ENABLERESYNC |
-                          VIDEOIF_SET_CABLEDETECT;
+                          VIDEOIF_SET_CABLEDETECT   | VIDEOIF_SET_CHROMAINTERP;
   video_settings[VIDMODE_240p] = VIDEOIF_SET_LD_ENABLE;
   video_settings[VIDMODE_288p] = VIDEOIF_SET_LD_ENABLE;
   video_settings[VIDMODE_480i] = VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;

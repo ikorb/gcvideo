@@ -146,6 +146,7 @@ package video_defs is
     EnableReblanking  : boolean;
     EnableResyncing   : boolean;
     SampleRateHack    : boolean;
+    InterpolateChroma : boolean;
     Matrix            : ColorMatrix_t;
     RBSettings        : ReblankerSettings_t;
   end record;

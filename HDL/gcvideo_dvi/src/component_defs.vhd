@@ -78,14 +78,17 @@ package component_defs is
 
   component convert_422_to_444 is
     port (
-      PixelClock      : in  std_logic;
-      PixelClockEnable: in  boolean;
+      PixelClock       : in  std_logic;
+      PixelClockEnable : in  boolean;
+
+      -- control
+      InterpolateChroma: in  boolean;
 
       -- input video
-      VideoIn         : in  VideoY422;
+      VideoIn          : in  VideoY422;
 
       -- output video
-      VideoOut        : out VideoYCbCr
+      VideoOut         : out VideoYCbCr
     );
   end component;
 

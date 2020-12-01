@@ -295,10 +295,11 @@ begin
   -- interpolate 4:2:2 to 4:4:4
   Inst_422_to_444: Convert_422_to_444
     PORT MAP (
-      PixelClock       => Clock54M,
-      PixelClockEnable => pixel_clk_en_ld,
-      VideoIn          => video_ld,
-      VideoOut         => video_444
+      PixelClock        => Clock54M,
+      PixelClockEnable  => pixel_clk_en_ld,
+      InterpolateChroma => video_settings.InterpolateChroma,
+      VideoIn           => video_ld,
+      VideoOut          => video_444
     );
 
   -- regenerate blanking signal

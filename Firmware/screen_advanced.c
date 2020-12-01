@@ -38,6 +38,7 @@
 #include "screens.h"
 
 enum {
+  MENUITEM_CHROMAINTERPOL,
   MENUITEM_REBLANK,
   MENUITEM_RESYNC,
   MENUITEM_SAMPLERATEHACK,
@@ -46,6 +47,8 @@ enum {
 
 /* --- valueitems --- */
 
+static valueitem_t value_chromainterpol = { VALTYPE_BOOL, true,
+                                            { .field = { NULL, VIDEOIF_BIT_CHROMAINTERP,  0, VIFLAG_ALLMODES }} };
 static valueitem_t value_reblanking     = { VALTYPE_BOOL, true,
                                             { .field = { NULL, VIDEOIF_BIT_ENABLEREBLANK, 0, VIFLAG_ALLMODES | VIFLAG_REDRAW }} };
 static valueitem_t value_resync         = { VALTYPE_BOOL, true,
@@ -58,6 +61,7 @@ static valueitem_t value_sampleratehack = { VALTYPE_BOOL, true,
 static void advanced_draw(menu_t *menu);
 
 static menuitem_t advanced_items[] = {
+  { "Chroma Interpolation", &value_chromainterpol, 1, 0 },
   { "Fix resolution",       &value_reblanking,     2, 0 },
   { "Fix sync timing",      &value_resync,         3, 0 },
   { "Sample rate hack",     &value_sampleratehack, 7, 0 },
