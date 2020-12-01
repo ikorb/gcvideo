@@ -122,18 +122,18 @@ begin
         Video.IsEvenField   <= (current_flags(6) = '1');
 
         if in_blanking then
+          -- send black video while in blanking
           Video.PixelY    <= x"00";
-          -- color during blanking is ignored by the 422-444 interpolator
-          --Video.PixelCbCr <= x"80";
+          Video.PixelCbCr <= x"80";
         else
           if current_y < x"10" then -- never triggers in my tests, but let's be paranoid anyway
             Video.PixelY <= x"00";
           else
-            Video.PixelY    <= current_y - x"10"; -- pre-subtract the offset
+            Video.PixelY <= current_y - x"10"; -- pre-subtract the offset
           end if;
           Video.PixelCbCr <= current_cbcr;
         end if;
-        Video.CurrentIsCb <= (csel_buf = '1');
+        Video.CurrentIsCb <= (prev_csel = '0');
 
         Video.Is30kHz <= input_30kHz;
 
