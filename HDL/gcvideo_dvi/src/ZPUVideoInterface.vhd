@@ -137,20 +137,16 @@ begin
                        ZPUBusOut.mem_read(3)          <= console_mode;
                        ZPUBusOut.mem_read(2 downto 0) <= stored_flags;
 
-        when "011"  => ZPUBusOut.mem_read <= x"00000"     & vid_settings;
-        when "100"  => ZPUBusOut.mem_read <= x"0" & "000" & osd_bgsettings;
-        when "101"  => ZPUBusOut.mem_read <= x"000000"    & volume_setting;
-        when "110"  => ZPUBusOut.mem_read <= x"0" & "000" & image_controls;
         when others => ZPUBusOut.mem_read <= (others => '-');  -- undefined
       end case;
 
       -- write path
       if ZSelect = '1' and ZPUBusIn.mem_writeEnable = '1' then
         case ZPUBusIn.mem_addr(4 downto 2) is
-          when "011"  => vid_settings   <= ZPUBusIn.mem_write(11 downto 0);
-          when "100"  => osd_bgsettings <= ZPUBusIn.mem_write(24 downto 0);
-          when "101"  => volume_setting <= ZPUBusIn.mem_write( 7 downto 0);
-          when "110"  => image_controls <= ZPUBusIn.mem_write(24 downto 0);
+          when "000"  => vid_settings   <= ZPUBusIn.mem_write(11 downto 0);
+          when "001"  => osd_bgsettings <= ZPUBusIn.mem_write(24 downto 0);
+          when "010"  => volume_setting <= ZPUBusIn.mem_write( 7 downto 0);
+          when "011"  => image_controls <= ZPUBusIn.mem_write(24 downto 0);
           when others => null;
         end case;
       end if;

@@ -62,14 +62,20 @@ typedef struct {
 
 /* --- Video Interface --- */
 
-typedef struct {
-  __I  uint32_t xres;
-  __I  uint32_t yres;
-  __IO uint32_t flags;
-  __IO uint32_t settings;
-  __IO uint32_t osd_bg;
-  __IO uint32_t audio_volume;
-  __IO uint32_t image_controls;
+typedef union {
+  struct {
+    __I uint32_t xres;
+    __I uint32_t yres;
+    __I uint32_t flags;
+  };
+  struct {
+    __O uint32_t settings;
+    __O uint32_t osd_bg;
+    __O uint32_t audio_volume;
+    __O uint32_t image_controls;
+    // "virtual" register, any write clears IRQ flag
+    __O uint32_t clear_irq;
+  };
 } VideoInterface_TypeDef;
 
 #define VIDEOIF_FLAG_PROGRESSIVE (1<<0)

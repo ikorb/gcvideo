@@ -49,7 +49,7 @@ void irq_handler(void) {
   while (IRQController->Flags & IRQ_FLAG_ANY) {
     if (IRQController->Flags & IRQ_FLAG_VSYNC) {
       vsync_handler();
-      VIDEOIF->flags = 0;
+      VIDEOIF->clear_irq = 0;
     }
     if (IRQController->Flags & IRQ_FLAG_PAD) {
       pad_handler();
@@ -66,7 +66,7 @@ void irq_handler(void) {
 
 int main(int argc, char **argv) {
   /* initialize interrupt handling */
-  VIDEOIF->flags = 0;
+  VIDEOIF->clear_irq = 0;
   IRQController->Enable = IRQ_FLAG_VSYNC | IRQ_FLAG_PAD | IRQ_FLAG_IRRX | IRQ_FLAG_GLOBALEN;
   VIDEOIF->settings = VIDEOIF_SET_CABLEDETECT; // temporary during init
 
