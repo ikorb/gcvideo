@@ -84,7 +84,7 @@ void screen_idle(void) {
       VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
 
       /* print resolution box */
-      if (resbox_enabled) {
+      if (resbox_enabled && current_videomode != VIDMODE_NONSTANDARD) {
         resbox_timeout = now + RESBOX_TIME;
         resbox_active  = true;
 

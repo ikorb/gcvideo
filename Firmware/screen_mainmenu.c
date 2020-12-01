@@ -111,7 +111,13 @@ static void mainmenu_draw(menu_t *menu) {
   print_resolution();
   osd_gotoxy(MENU_POS_X + MENU_SIZE_X - 17, MENU_POS_Y + MENU_SIZE_Y - 2);
 
-  uint32_t outputlines = video_out_lines[current_videomode];
+  if (current_videomode == VIDMODE_NONSTANDARD) {
+    osd_puts("Out: ");
+    print_resolution();
+    return;
+  }
+
+  uint32_t outputlines  = video_out_lines[current_videomode];
   bool interlaced = false;
 
   if (current_videomode <= VIDMODE_576i &&

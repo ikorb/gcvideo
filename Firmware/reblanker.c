@@ -51,10 +51,11 @@ static const VideoParameters_t ModeParameters[] = {
   { 63, 69, 288, 3, 20 }, // 576i
   { 62, 60, 480, 6, 31 }, // 480p
   { 64, 68, 576, 5, 40 }, // 576p
+  // no entry for non-standard modes needed, array isn't accessed when one is used
 };
 
-static video_mode_t prev_inmode  = VIDMODE_COUNT;
-static video_mode_t prev_outmode = VIDMODE_COUNT;
+static video_mode_t prev_inmode  = VIDMODE_NONSTANDARD;
+static video_mode_t prev_outmode = VIDMODE_NONSTANDARD;
 static uint32_t     prev_xres    = 0;
 static uint32_t     prev_yres    = 0;
 static uint8_t      disable_frames;
@@ -120,6 +121,12 @@ void update_reblanker(void) {
   video_mode_t cur_outmode = detect_output_videomode();
 
   check_modechange(cur_xres, cur_yres, cur_inmode, cur_outmode);
+
+  /* if input mode is nonstandard, enable bypass instead of trying to fix it */
+  if (cur_inmode == VIDMODE_NONSTANDARD) {
+    VIDEOIF->settings = video_settings[VIDMODE_NONSTANDARD] | video_settings_global;
+    return;
+  }
 
   int32_t actual_x_shift = 0;
   int32_t actual_y_shift = 0;

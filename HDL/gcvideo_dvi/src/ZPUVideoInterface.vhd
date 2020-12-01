@@ -61,10 +61,10 @@ architecture Behavioral of ZPUVideoInterface is
   -- output disabled, colors don't matter
   constant OSDBGSettingsDefault: std_logic_vector := "1------------------------";
 
-  signal current_pixelcount: natural range 0 to 880;
-  signal current_linecount : natural range 0 to 650;
-  signal pixel_counter     : natural range 0 to 880;
-  signal line_counter      : natural range 0 to 650;
+  signal current_pixelcount: natural range 0 to 2047;
+  signal current_linecount : natural range 0 to 1023;
+  signal pixel_counter     : natural range 0 to 2047;
+  signal line_counter      : natural range 0 to 1023;
 
   signal prev_hsync        : boolean;
   signal prev_vsync        : boolean;

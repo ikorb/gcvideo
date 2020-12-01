@@ -64,13 +64,14 @@ typedef struct {
 /* order matters! even are 60Hz, odd are 50Hz   */
 /* bit 0 is set for interlaced */
 const uint16_t video_out_lines[VIDMODE_COUNT] = {
-  240, 288, 240 | 1, 288 | 1, 480, 576
+  240, 288, 240 | 1, 288 | 1, 480, 576, 0
 };
 
 const char *mode_names[VIDMODE_COUNT] = {
   "240p", "288p",
   "480i", "576i",
-  "480p", "576p"
+  "480p", "576p",
+  "NonStd"
 };
 
 static const unsigned char vidmode_by_flags[] = {
@@ -126,12 +127,37 @@ void update_scanlines(void) {
 
 video_mode_t detect_videomode(bool inputmode) {
   uint32_t cur_flags = VIDEOIF->flags;
+  uint32_t cur_xres  = VIDEOIF->xres;
+  uint32_t cur_yres  = VIDEOIF->yres;
+  uint32_t htotal    = VIDEOIF->htotal;
+  uint32_t vtotal    = VIDEOIF->vtotal & 0xfffff;
 
   if (inputmode) {
     cur_flags &= (VIDEOIF_FLAG_IN_PROGRESSIVE | VIDEOIF_FLAG_IN_PAL | VIDEOIF_FLAG_IN_31KHZ);
   } else {
     cur_flags = (cur_flags & (VIDEOIF_FLAG_LD_PROGRESSIVE | VIDEOIF_FLAG_LD_PAL | VIDEOIF_FLAG_LD_31KHZ))
       >> 6;
+  }
+
+  if (htotal > 870 || htotal < 800 || cur_xres > 720 ||
+      vtotal > 540000 || cur_yres > 576 )
+    return VIDMODE_NONSTANDARD;
+
+  /* figure out the maximum number of lines based on mode flags */
+  unsigned int max_lines = 240;
+
+  if (cur_flags & VIDEOIF_FLAG_IN_PAL) {
+    max_lines = 288;
+  }
+
+  if ((cur_flags & VIDEOIF_FLAG_IN_31KHZ) ||
+      (inputmode && (video_settings[current_videomode] & VIDEOIF_SET_LD_ENABLE))) {
+    /* note: double-clocked SD modes are already detected by xres/htotal checks */
+    max_lines *= 2;
+  }
+
+  if (cur_yres > max_lines) {
+    return VIDMODE_NONSTANDARD;
   }
 
   return vidmode_by_flags[cur_flags];
@@ -142,12 +168,16 @@ void print_resolution(void) {
   uint32_t yres  = VIDEOIF->yres;
   uint32_t flags = VIDEOIF->flags;
 
-  if (!(flags & VIDEOIF_FLAG_IN_PROGRESSIVE))
-    yres *= 2;
+  if (current_videomode == VIDMODE_NONSTANDARD) {
+    printf("%4dx%3d", xres, yres);
+  } else {
+    if (!(flags & VIDEOIF_FLAG_IN_PROGRESSIVE))
+      yres *= 2;
 
-  printf("%3dx%3d%c%d", xres, yres,
-         (flags & VIDEOIF_FLAG_IN_PROGRESSIVE) ? 'p' : 'i',
-         (flags & VIDEOIF_FLAG_IN_PAL        ) ? 50  : 60);
+    printf("%3dx%3d%c%d", xres, yres,
+          (flags & VIDEOIF_FLAG_IN_PROGRESSIVE) ? 'p' : 'i',
+          (flags & VIDEOIF_FLAG_IN_PAL        ) ? 50  : 60);
+  }
 }
 
 
@@ -274,6 +304,7 @@ void settings_init(void) {
   video_settings[VIDMODE_576i] = VIDEOIF_SET_LD_ENABLE | VIDEOIF_SET_SL_ALTERNATE;
   video_settings[VIDMODE_480p] = 0;
   video_settings[VIDMODE_576p] = 0;
+  video_settings[VIDMODE_NONSTANDARD] = 0;
   osdbg_settings = 0x501bf8;  // partially transparent, blue tinted background
   picture_brightness = 0;
   picture_contrast   = 0;

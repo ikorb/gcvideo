@@ -45,6 +45,8 @@ typedef enum {
   /* the progressive modes must come last */
   VIDMODE_480p,
   VIDMODE_576p,
+  VIDMODE_NONSTANDARD,
+
   VIDMODE_COUNT
 } video_mode_t;
 

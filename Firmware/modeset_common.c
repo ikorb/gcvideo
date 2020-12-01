@@ -62,38 +62,48 @@ valueitem_t modeset_value_linedoubler = { VALTYPE_BOOL, true,
                                           { .field = { NULL, VIDEOIF_BIT_LD_ENABLE,    0, VIFLAG_MODESET | VIFLAG_REDRAW }} };
 
 void modeset_draw(menu_t *menu) {
-  /* update the item-enable flags based on current settings */
-  if (modeset_mode <= VIDMODE_576i && !(video_settings[modeset_mode] & VIDEOIF_SET_LD_ENABLE)) {
-    /* no scanlines in non-doubled 240p/288p */
+  /* header */
+  osd_setattr(true, false);
+
+  if (modeset_mode == VIDMODE_NONSTANDARD) {
+    osd_gotoxy(menu->xpos + 8, menu->ypos + 1);
+    osd_puts("NonStd settings");
+
     menu->items[MENUITEM_SLPROFILE].flags = MENU_FLAG_DISABLED;
     menu->items[MENUITEM_SLEVEN   ].flags = MENU_FLAG_DISABLED;
     menu->items[MENUITEM_SLALT    ].flags = MENU_FLAG_DISABLED;
-
   } else {
-    menu->items[MENUITEM_SLPROFILE].flags = 0;
+    osd_gotoxy(menu->xpos + 9, menu->ypos + 1);
+    printf("%s settings", mode_names[modeset_mode]);
 
-    if (video_settings[modeset_mode] & VIDEOIF_SET_SLPROFILE_MASK) {
-      menu->items[MENUITEM_SLEVEN].flags = 0;
-      menu->items[MENUITEM_SLALT ].flags = 0;
+    /* update the item-enable flags based on current settings */
+    if (modeset_mode <= VIDMODE_576i && !(video_settings[modeset_mode] & VIDEOIF_SET_LD_ENABLE)) {
+      /* no scanlines in non-doubled 240p/288p */
+      menu->items[MENUITEM_SLPROFILE].flags = MENU_FLAG_DISABLED;
+      menu->items[MENUITEM_SLEVEN   ].flags = MENU_FLAG_DISABLED;
+      menu->items[MENUITEM_SLALT    ].flags = MENU_FLAG_DISABLED;
+
     } else {
-      menu->items[MENUITEM_SLEVEN].flags = MENU_FLAG_DISABLED;
-      menu->items[MENUITEM_SLALT ].flags = MENU_FLAG_DISABLED;
-    }
-  }
+      menu->items[MENUITEM_SLPROFILE].flags = 0;
 
-  if (modeset_mode != VIDMODE_480i &&
-      modeset_mode != VIDMODE_576i &&
-      menu->items[MENUITEM_SLALT].flags == 0)
-    /* alternating needs a valid field flag and thus works only in interlaced modes */
-    menu->items[MENUITEM_SLALT].flags = MENU_FLAG_DISABLED;
+      if (video_settings[modeset_mode] & VIDEOIF_SET_SLPROFILE_MASK) {
+        menu->items[MENUITEM_SLEVEN].flags = 0;
+        menu->items[MENUITEM_SLALT ].flags = 0;
+      } else {
+        menu->items[MENUITEM_SLEVEN].flags = MENU_FLAG_DISABLED;
+        menu->items[MENUITEM_SLALT ].flags = MENU_FLAG_DISABLED;
+      }
+    }
+
+    if (modeset_mode != VIDMODE_480i &&
+        modeset_mode != VIDMODE_576i &&
+        menu->items[MENUITEM_SLALT].flags == 0)
+      /* alternating needs a valid field flag and thus works only in interlaced modes */
+      menu->items[MENUITEM_SLALT].flags = MENU_FLAG_DISABLED;
+  }
 
   if (modeset_mode >= VIDMODE_480p)
     menu->items[MENUITEM_LINEDOUBLER].flags = MENU_FLAG_DISABLED;
   else
     menu->items[MENUITEM_LINEDOUBLER].flags = 0;
-
-  /* header */
-  osd_gotoxy(menu->xpos + 9, menu->ypos + 1);
-  osd_setattr(true, false);
-  printf("%s settings", mode_names[modeset_mode]);
 }
