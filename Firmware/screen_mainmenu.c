@@ -76,7 +76,7 @@ static void mainmenu_draw(menu_t *menu);
 #define MENU_POS_X  7
 #define MENU_POS_Y  7
 #define MENU_SIZE_X 31
-#define MENU_SIZE_Y 21
+#define MENU_SIZE_Y 19
 
 #define LOGO_POS_X  16
 #define LOGO_POS_Y  3
@@ -105,10 +105,10 @@ static void mainmenu_draw(menu_t *menu) {
   osd_puts("\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d");
 
   /* draw the two video mode lines */
-  osd_gotoxy(MENU_POS_X + MENU_SIZE_X - 20, MENU_POS_Y + MENU_SIZE_Y - 3);
-  osd_puts("Input : ");
+  osd_gotoxy(MENU_POS_X + MENU_SIZE_X - 17, MENU_POS_Y + MENU_SIZE_Y - 3);
+  osd_puts("In : ");
   print_resolution();
-  osd_gotoxy(MENU_POS_X + MENU_SIZE_X - 20, MENU_POS_Y + MENU_SIZE_Y - 2);
+  osd_gotoxy(MENU_POS_X + MENU_SIZE_X - 17, MENU_POS_Y + MENU_SIZE_Y - 2);
 
   uint32_t outputlines = video_out_lines[current_videomode];
   bool interlaced = false;
@@ -122,7 +122,7 @@ static void mainmenu_draw(menu_t *menu) {
     interlaced   = true;
   }
 
-  printf("Output: 720x%3d%c%d",
+  printf("Out: 720x%3d%c%d",
          outputlines & ~3,
          interlaced  ? 'i' : 'p',
          (current_videomode & 1) ? 50 : 60);
