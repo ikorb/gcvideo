@@ -57,6 +57,8 @@ entity CPUSubsystem is
     SPI_SSEL         : out std_logic;
     ScanlineRamAddr  : in  std_logic_vector(7 downto 0);
     ScanlineRamData  : out std_logic_vector(8 downto 0);
+    InfoFrameRAMAddr : in  std_logic_vector(8 downto 0);
+    InfoFrameRAMData : out std_logic_vector(8 downto 0);
     OSDRamAddr       : in  std_logic_vector(10 downto 0);
     OSDRamData       : out std_logic_vector(8 downto 0);
     OSDSettings      : out OSDSettings_t;
@@ -70,7 +72,7 @@ architecture Behavioral of CPUSubsystem is
   constant ZPUBRAMSize: natural := 13;
 
   -- number of devices on the I/O bus
-  constant DeviceCount: Natural := 7;
+  constant DeviceCount: Natural := 8;
 
   -- number of interrupt-generating devices
   constant IRQDeviceCount: Natural := 3;
@@ -99,6 +101,7 @@ architecture Behavioral of CPUSubsystem is
   signal OSDRAMSel       : std_logic;
   signal SPISel          : std_logic;
   signal IRRxSel         : std_logic;
+  signal IFRSel          : std_logic;
 
   signal ZPUIn           : ZPUDeviceIn;
   signal IRQControllerOut: ZPUDeviceOut;
@@ -108,6 +111,7 @@ architecture Behavioral of CPUSubsystem is
   signal OSDRAMOut       : ZPUDeviceOut;
   signal SPIOut          : ZPUDeviceOut;
   signal IRRxOut         : ZPUDeviceOut;
+  signal IFROut          : ZPUDeviceOut;
 
   signal VSyncIRQ        : std_logic;
   signal PadIRQ          : std_logic;
@@ -273,6 +277,20 @@ begin
     IRButton   => IRButton
   );
 
+  -- Infoframe-RAM
+  Inst_IFRam: ZPU_DPRAM generic map (
+    AddressBits => 9,
+    DataBits    => 9,
+    DataFile    => "infoframe_rom.mif"
+  ) port map (
+    Clock     => Clock,
+    ZSelect   => IFRSel,
+    ZPUBusIn  => ZPUIn,
+    ZPUBusOut => IFROut,
+    RAMAddr   => InfoFrameRAMAddr,
+    RAMData   => InfoFrameRAMData
+  );
+
   -- CPU-to-device signals
   ZPUIn.Reset           <= cpu_reset;
   ZPUIn.mem_write       <= cpu_mem_write;
@@ -292,12 +310,16 @@ begin
     OSDRAMSel        <= '0';
     SPISel           <= '0';
     IRRxSel          <= '0';
+    IFRSel           <= '0';
 
     if cpu_mem_writeEnable = '1' or
        cpu_mem_readEnable  = '1' then
       case cpu_mem_addr(31 downto 28) is
         when x"f" => -- peripheral space
-          if cpu_mem_addr(13) = '0' then
+          if cpu_mem_addr(15 downto 13) = "100" then
+            -- 0xffff8000-9fff
+            IFRSel <= '1';
+          elsif cpu_mem_addr(13) = '0' then
             -- OSD RAM needs 8k: 0xffffc000-dfff
             OSDRAMSel <= '1';
           elsif cpu_mem_addr(12) = '0' then
@@ -327,7 +349,8 @@ begin
     3 => ScanlineRAMSel,
     4 => OSDRAMSel,
     5 => SPISel,
-    6 => IRRxSel
+    6 => IRRxSel,
+    7 => IFRSel
   );
 
   DeviceOuts <= (
@@ -337,7 +360,8 @@ begin
     3 => ScanlineRAMOut,
     4 => OSDRAMOut,
     5 => SPIOut,
-    6 => IRRxOut
+    6 => IRRxOut,
+    7 => IFROut
   );
 
   MainZPUBusMux: ZPUBusMux

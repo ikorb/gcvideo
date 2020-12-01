@@ -28,16 +28,16 @@
 # Makefile: program construction rules
 #
 
-all: edvi_ucode.vhd infoframe_rom.vhd
+all: edvi_ucode.vhd infoframe_rom.mif
 	-cp edvi_ucode.vhd ../src
-	-cp infoframe_rom.vhd ../src
+	-cp infoframe_rom.mif ../src
 
 clean:
 	-rm -f edvi_ucode.vhd edvi_ucode.mcout edvi_ucode-00.bin edvi_ucode-01.bin
-	-rm -f infoframe_rom.vhd
+	-rm -f infoframe_rom.mif
 
-%.vhd: %.txt
-	./build-framerom.pl $< template-ifrom.vhd $@
+%.mif: %.txt
+	./build-framerom-softavi.pl $< $@
 
 %.vhd: %.mcout
 	./parse-mcasm.pl $< template-ucode.vhd $@
@@ -48,4 +48,3 @@ clean:
 .PRECIOUS: %.mcout
 
 edvi_ucode.vhd: template-ucode.vhd
-infoframe_rom.vhd: template-ifrom.vhd

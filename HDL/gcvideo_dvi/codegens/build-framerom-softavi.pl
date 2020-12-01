@@ -35,47 +35,30 @@ use Data::Dumper;
 no warnings 'portable';  # Support for 64-bit ints required
 
 my @modes = ( # order matters!
-    # these four would be 960i/1152i, but the Cube can't output that
+    # non-AVI frames
     "Audio Clock Regeneration 48042",
     "Source Product Description",
     "Audio",
     "empty",
 
-    "480p full",
-    "480p limited",
-    "576p full",
-    "576p limited",
-
-    "480i full",
-    "480i limited",
-    "576i full",
-    "576i limited",
-
-    "240p full",
-    "240p limited",
-    "288p full",
-    "288p limited",
-
-    # four unused slots
+    # same, but for Wii
     "Audio Clock Regeneration 48000",
     "empty",
     "empty",
     "empty",
 
-    "480p full 169",
-    "480p limited 169",
-    "576p full 169",
-    "576p limited 169",
+    # four slots filled in software
+    "empty", # 256 - RGB full range 4:3
+    "empty", # 288 - RGB limited range 4:3
+    "empty", # 320 - YCbCr 4:4:4 4:3
+    "empty", # 352 - YCbCr 4:2:2 4:3
 
-    "480i full 169",
-    "480i limited 169",
-    "576i full 169",
-    "576i limited 169",
+    # four slots filled in software
+    "empty", # 384 - RGB full range 16:9
+    "empty", # 416 - RGB limited range 16:9
+    "empty", # 448 - YCbCr 4:4:4 16:9
+    "empty", # 480 - YCbCr 4:2:2 16:9
 
-    "240p full 169",
-    "240p limited 169",
-    "288p full 169",
-    "288p limited 169",
     );
 
 # ----
@@ -111,13 +94,14 @@ sub bitshuffle {
     return \@outwords;
 }
 
-sub print_frame {
+sub convert_frame {
     my $out    = shift;
     my $offset = shift;
+    my $romcontent = shift;
     my @data   = @{shift()};
 
     for (my $i = 0; $i < @data; $i++) {
-        printf $out "      when %4d => Data <= \"%09b\";\n", $i + $offset, $data[$i];
+        $$romcontent[$i + $offset] = sprintf("%09b", $data[$i]);
     }
 }
 
@@ -127,8 +111,8 @@ my %frames;
 my $curframe;
 my $framedata = [0,0,0,0,0];
 
-if (scalar(@ARGV) != 3) {
-    say "Usage: $0 infoframes.txt template.vhd output.vhd";
+if (scalar(@ARGV) != 2) {
+    say "Usage: $0 infoframes.txt output.mif";
     exit 1;
 }
 
@@ -169,35 +153,32 @@ if (defined($curframe)) {
 
 close IN;
 
-# start copying the template to the output file
-open TPL, "<", $ARGV[1] or die "Can't open template $ARGV[1]: $!";
-open my $out, ">", $ARGV[2] or die "Can't open output $ARGV[2]: $!";
-
-say $out "-- auto-generated from $ARGV[0] and $ARGV[1] on ", scalar(localtime);
-
-while (<TPL>) {
-    last if /^%%%/;
-    print $out $_;
-}
-
-### output when statements for the ROM
+# write to output
+open my $out, ">", $ARGV[1] or die "Can't open output $ARGV[1]: $!";
 
 my $ADDRESS_SCALE = 32;
 my $blocknum = 0;
+my @romcontent;
 
 foreach my $m (@modes) {
     my $address = $blocknum * $ADDRESS_SCALE;
 
-    say $out "\n      ---- $m";
-    print_frame($out, $address, bitshuffle($frames{$m}));
+    convert_frame($out, $address, \@romcontent, bitshuffle($frames{$m}));
     $address += 32;
     $blocknum++;
 }
 
-# copy the remainder of the template file
-while (<TPL>) {
-    print $out $_;
+# extend to a power of two
+while (scalar(@romcontent) & (scalar(@romcontent) - 1)) {
+    push @romcontent, "000000000";
+}
+
+for (my $i = 0; $i < scalar(@romcontent); $i++) {
+    if (!defined($romcontent[$i])) {
+        say $out "000000000";
+    } else {
+        say $out $romcontent[$i];
+    }
 }
 
 close $out;
-close TPL;

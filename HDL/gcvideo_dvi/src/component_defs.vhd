@@ -179,28 +179,30 @@ package component_defs is
 
   COMPONENT dvid
   PORT(
-      clk           : in  std_logic;
-      clk_n         : in  std_logic;
-      clk_pixel     : in  std_logic;
-      clk_pixel_en  : in  boolean;
-      ConsoleMode   : in  console_mode_t;
-      Video         : in  VideoRGB;
-      EnhancedMode  : in  boolean;
-      Limited_Range : in  boolean;
-      Widescreen    : in  boolean;
-      SampleRateHack: in  boolean;
-      Audio         : in  AudioData;
-      TMDSWord_Red  : out std_logic_vector(9 downto 0);
-      TMDSWord_Green: out std_logic_vector(9 downto 0);
-      TMDSWord_Blue : out std_logic_vector(9 downto 0);
-      Pair_Red      : in  Pair_Swap_t := Pair_Regular;
-      Pair_Green    : in  Pair_Swap_t := Pair_Regular;
-      Pair_Blue     : in  Pair_Swap_t := Pair_Regular;
-      Pair_Clock    : in  Pair_Swap_t := Pair_Regular;
-      red_s         : out std_logic;
-      green_s       : out std_logic;
-      blue_s        : out std_logic;
-      clock_s       : out std_logic
+      clk              : in  std_logic;
+      clk_n            : in  std_logic;
+      clk_pixel        : in  std_logic;
+      clk_pixel_en     : in  boolean;
+      ConsoleMode      : in  console_mode_t;
+      Video            : in  VideoRGB;
+      EnhancedMode     : in  boolean;
+      Limited_Range    : in  boolean;
+      Widescreen       : in  boolean;
+      SampleRateHack   : in  boolean;
+      Audio            : in  AudioData;
+      InfoFrameRAM_Addr: out std_logic_vector(8 downto 0);
+      InfoFrameRAM_Data: in  std_logic_vector(8 downto 0);
+      TMDSWord_Red     : out std_logic_vector(9 downto 0);
+      TMDSWord_Green   : out std_logic_vector(9 downto 0);
+      TMDSWord_Blue    : out std_logic_vector(9 downto 0);
+      Pair_Red         : in  Pair_Swap_t := Pair_Regular;
+      Pair_Green       : in  Pair_Swap_t := Pair_Regular;
+      Pair_Blue        : in  Pair_Swap_t := Pair_Regular;
+      Pair_Clock       : in  Pair_Swap_t := Pair_Regular;
+      red_s            : out std_logic;
+      green_s          : out std_logic;
+      blue_s           : out std_logic;
+      clock_s          : out std_logic
     );
   END COMPONENT;
 
@@ -309,6 +311,8 @@ package component_defs is
       SPI_SSEL        : out std_logic;
       ScanlineRamAddr : in  std_logic_vector(7 downto 0);
       ScanlineRamData : out std_logic_vector(8 downto 0);
+      InfoFrameRAMAddr: in  std_logic_vector(8 downto 0);
+      InfoFrameRAMData: out std_logic_vector(8 downto 0);
       OSDRamAddr      : in  std_logic_vector(10 downto 0);
       OSDRamData      : out std_logic_vector(8 downto 0);
       OSDSettings     : out OSDSettings_t;

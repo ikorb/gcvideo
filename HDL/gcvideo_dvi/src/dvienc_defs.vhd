@@ -99,16 +99,6 @@ package dvienc_defs is
     );
   end component;
 
-  component infoframe_rom is
-    port (
-      Clock      : in  std_logic;
-      ClockEnable: in  boolean;
-
-      Address    : in  unsigned(9 downto 0);
-      Data       : out std_logic_vector(8 downto 0)
-    );
-  end component;
-
 end dvienc_defs;
 
 package body dvienc_defs is

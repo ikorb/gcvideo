@@ -31,6 +31,7 @@
 
 #include <stdbool.h>
 #include <stdint.h>
+#include "infoframe.h"
 #include "pad.h"
 #include "portdefs.h"
 #include "settings.h"
@@ -91,6 +92,10 @@ static void check_modechange(uint32_t cur_xres, uint32_t cur_yres,
         /* done, reenable */
         if (inmode_changed) {
           pad_set_irq(PAD_VIDEOCHANGE);
+        }
+
+        if (outmode_changed) {
+          update_infoframe(outmode);
         }
 
         prev_inmode  = inmode;

@@ -23,34 +23,37 @@ use work.dvienc_defs.all;
 use work.video_defs.all;
 
 entity dvid is
-    Port ( clk           : in  STD_LOGIC;
-           clk_n         : in  STD_LOGIC;
-           clk_pixel     : in  STD_LOGIC;
-           clk_pixel_en  : in  boolean;
-           ConsoleMode   : in  console_mode_t;
-           Video         : in  VideoRGB;
+    Port ( clk              : in  STD_LOGIC;
+           clk_n            : in  STD_LOGIC;
+           clk_pixel        : in  STD_LOGIC;
+           clk_pixel_en     : in  boolean;
+           ConsoleMode      : in  console_mode_t;
+           Video            : in  VideoRGB;
 
-           EnhancedMode  : in  boolean;
-           Limited_Range : in  boolean;
-           Widescreen    : in  boolean;
-           SampleRateHack: in  boolean;
-           Audio         : in  AudioData;
+           EnhancedMode     : in  boolean;
+           Limited_Range    : in  boolean;
+           Widescreen       : in  boolean;
+           SampleRateHack   : in  boolean;
+           Audio            : in  AudioData;
+
+           InfoFrameRAM_Addr: out std_logic_vector(8 downto 0);
+           InfoFrameRAM_Data: in  std_logic_vector(8 downto 0);
 
            -- test signals for simulation
-           TMDSWord_Red  : out std_logic_vector(9 downto 0);
-           TMDSWord_Green: out std_logic_vector(9 downto 0);
-           TMDSWord_Blue : out std_logic_vector(9 downto 0);
+           TMDSWord_Red     : out std_logic_vector(9 downto 0);
+           TMDSWord_Green   : out std_logic_vector(9 downto 0);
+           TMDSWord_Blue    : out std_logic_vector(9 downto 0);
 
            -- allow inversion of each differential pair to account for pin swaps
-           Pair_Red      : in  Pair_Swap_t;
-           Pair_Green    : in  Pair_Swap_t;
-           Pair_Blue     : in  Pair_Swap_t;
-           Pair_Clock    : in  Pair_Swap_t;
+           Pair_Red         : in  Pair_Swap_t;
+           Pair_Green       : in  Pair_Swap_t;
+           Pair_Blue        : in  Pair_Swap_t;
+           Pair_Clock       : in  Pair_Swap_t;
 
-           red_s         : out STD_LOGIC;
-           green_s       : out STD_LOGIC;
-           blue_s        : out STD_LOGIC;
-           clock_s       : out STD_LOGIC);
+           red_s            : out STD_LOGIC;
+           green_s          : out STD_LOGIC;
+           blue_s           : out STD_LOGIC;
+           clock_s          : out STD_LOGIC);
 end dvid;
 
 architecture Behavioral of dvid is
@@ -106,10 +109,9 @@ architecture Behavioral of dvid is
   signal blank_d: std_logic;
 
   -- infoframe ROM signals
-  signal ifr_fulladdr  : unsigned(9 downto 0);
+  signal ifr_fulladdr  : unsigned(8 downto 0);
   signal ifr_addr      : unsigned(4 downto 0) := (others => '0'); -- address counter
-  signal ifr_select    : unsigned(4 downto 0) := (others => '0'); -- group selection
-  signal ifr_data      : std_logic_vector(8 downto 0) := (others => '0');
+  signal ifr_select    : unsigned(3 downto 0) := (others => '0'); -- group selection
   signal ifr_send_acr  : boolean := false;
   signal wii_acr       : std_logic := '0';
 
@@ -202,16 +204,16 @@ begin
     Done            => seq_done
   );
 
-  -- Infoframe ROM
-  Inst_InfoFrameROM: infoframe_rom PORT MAP (
-    Clock       => clk_pixel,
-    ClockEnable => clk_pixel_en,
-    Address     => ifr_fulladdr,
-    Data        => ifr_data
-  );
+  process(clk_pixel, clk_pixel_en)
+  begin
+    -- emulate read clock enable for DPRAM
+    if rising_edge(clk_pixel) and clk_pixel_en then
+      InfoframeRAM_Addr <= std_logic_vector(ifr_fulladdr);
+    end if;
+  end process;
 
   wii_acr <= '1' when ConsoleMode = MODE_WII or SampleRateHack else '0';
-  ifr_fulladdr <= wii_acr & "0000" & ifr_addr when ifr_send_acr
+  ifr_fulladdr <= "0" & wii_acr & "00" & ifr_addr when ifr_send_acr
                    else ifr_select & ifr_addr;
 
   -- TMDS
@@ -370,7 +372,7 @@ begin
         if ConsoleMode = MODE_WII or not SampleRateHack or sample_drop_count /= 0 then
           -- only queue new audio data while the sequencer is not running
           -- (a new sample is available every 281 pixels,
-          --  a worst-case packet is <80 pixels long -> no additional buffer needed)
+          -- a worst-case packet is <80 pixels long -> no additional buffer needed)
           audio_packet := (others => '0');
           audio_packet(23 downto  8) := std_logic_vector(left_buffer);
           audio_packet(47 downto 32) := std_logic_vector(right_buffer);
@@ -492,7 +494,7 @@ begin
               ifr_send_acr <= false;
 
             elsif per_frame_packets /= 0 then
-              ifr_select <= "000" & per_frame_packets;
+              ifr_select <= "00" & per_frame_packets;
             end if;
 
             -- clear audio data
@@ -521,39 +523,26 @@ begin
         per_frame_packets <= to_unsigned(3, 2);
 
         -- choose the packet sequence to send for the current video mode
-        ifr_select <= (others => '0');
-        if Limited_Range then
-          ifr_select(0) <= '1';
-        end if;
-
-        if Video.IsPAL then
-          ifr_select(1) <= '1';
-        end if;
-
-        if Video.IsProgressive then
+        ifr_select <= "1000";
+        if Widescreen then
           ifr_select(2) <= '1';
         end if;
-
-        if not Video.Is30kHz then
-          ifr_select(3) <= '1';
-        end if;
-
-        if Widescreen then
-          ifr_select(4) <= '1';
+        if Limited_Range then
+          ifr_select(0) <= '1';
         end if;
       end if;
 
       -- packet shifting
       if seq_shiftpkt then
-        packet_header   <= ifr_data(0) & packet_header(23 downto 1);
-        subpacket1_even <= ifr_data(1) & subpacket1_even(27 downto 1);
-        subpacket1_odd  <= ifr_data(2) & subpacket1_odd (27 downto 1);
-        subpacket2_even <= ifr_data(3) & subpacket2_even(27 downto 1);
-        subpacket2_odd  <= ifr_data(4) & subpacket2_odd (27 downto 1);
-        subpacket3_even <= ifr_data(5) & subpacket3_even(27 downto 1);
-        subpacket3_odd  <= ifr_data(6) & subpacket3_odd (27 downto 1);
-        subpacket4_even <= ifr_data(7) & subpacket4_even(27 downto 1);
-        subpacket4_odd  <= ifr_data(8) & subpacket4_odd (27 downto 1);
+        packet_header   <= InfoframeRAM_Data(0) & packet_header(23 downto 1);
+        subpacket1_even <= InfoframeRAM_Data(1) & subpacket1_even(27 downto 1);
+        subpacket1_odd  <= InfoframeRAM_Data(2) & subpacket1_odd (27 downto 1);
+        subpacket2_even <= InfoframeRAM_Data(3) & subpacket2_even(27 downto 1);
+        subpacket2_odd  <= InfoframeRAM_Data(4) & subpacket2_odd (27 downto 1);
+        subpacket3_even <= InfoframeRAM_Data(5) & subpacket3_even(27 downto 1);
+        subpacket3_odd  <= InfoframeRAM_Data(6) & subpacket3_odd (27 downto 1);
+        subpacket4_even <= InfoframeRAM_Data(7) & subpacket4_even(27 downto 1);
+        subpacket4_odd  <= InfoframeRAM_Data(8) & subpacket4_odd (27 downto 1);
       end if;
 
       if seq_shift2ndpkt then

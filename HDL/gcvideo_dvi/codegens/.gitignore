@@ -1,0 +1,6 @@
+infoframe_rom.mif
+edvi_ucode-00.bin
+edvi_ucode-01.bin
+edvi_ucode.mcout
+edvi_ucode.vhd
+.gitignore
