@@ -31,6 +31,7 @@
 
 #include <stdbool.h>
 #include <stddef.h>
+#include "colormatrix.h"
 #include "menu.h"
 #include "osd.h"
 #include "pad.h"
@@ -74,6 +75,12 @@ static int get_analogmode(void) {
 
 static bool set_dvienhanced(int value) {
   set_all_modes(VIDEOIF_SET_DVIENHANCED, value);
+  if (!value) {
+    /* reset to RGB mode */
+    set_all_modes(VIDEOIF_SET_COLORMODE_MASK, false);
+    VIDEOIF->osd_bg = osdbg_settings;
+    update_colormatrix();
+  }
   return true;
 }
 
@@ -104,13 +111,12 @@ static bool set_analogmode(int value) {
 static valueitem_t value_cabledetect = { VALTYPE_BOOL, true,
                                          { .field = { NULL, VIDEOIF_BIT_CABLEDETECT, 0, VIFLAG_ALLMODES }} };
 static valueitem_t value_rgblimited  = { VALTYPE_BOOL, true,
-                                         { .field = { NULL, VIDEOIF_BIT_RGBLIMITED, 0, VIFLAG_ALLMODES | VIFLAG_COLORMATRIX }} };
+                                         { .field = { NULL, VIDEOIF_BIT_COLOR_RGBLIMITED, 0, VIFLAG_ALLMODES | VIFLAG_COLORMATRIX }} };
 static valueitem_t value_169         = { VALTYPE_BOOL, true,
                                          { .field = { NULL, VIDEOIF_BIT_169, 0, VIFLAG_ALLMODES }} };
 static valueitem_t value_dvienhanced = { VALTYPE_BOOL, false, {{ get_dvienhanced, set_dvienhanced }} };
 static valueitem_t value_volume      = { VALTYPE_BYTE, false, {{ get_volume,      set_volume      }} };
 static valueitem_t value_mute        = { VALTYPE_BOOL, false, {{ get_mute,        set_mute        }} };
-
 
 static valueitem_t __attribute__((unused)) value_analogmode =
   { VALTYPE_ANALOGMODE, false, {{ get_analogmode, set_analogmode }} };
@@ -133,7 +139,7 @@ static menuitem_t outputset_items[] = {
 
 static menu_t outputset_menu = {
   9, 9,
-  26, 12,
+  26, 11,
   outputset_draw,
   sizeof(outputset_items) / sizeof(*outputset_items),
   outputset_items
@@ -151,7 +157,7 @@ static menuitem_t outputset_items[] = {
 
 static menu_t outputset_menu = {
   9, 9,
-  26, 11,
+  26, 10,
   outputset_draw,
   sizeof(outputset_items) / sizeof(*outputset_items),
   outputset_items
@@ -159,6 +165,12 @@ static menu_t outputset_menu = {
 #endif
 
 static void outputset_draw(menu_t *menu) {
+  if (video_settings_global & VIDEOIF_SET_TEST_YCBCR) {
+    outputset_items[MENUITEM_LIMITEDRGB].flags = MENU_FLAG_DISABLED;
+  } else {
+    outputset_items[MENUITEM_LIMITEDRGB].flags = 0;
+  }
+
   if (video_settings_global & VIDEOIF_SET_DVIENHANCED) {
     outputset_items[MENUITEM_169].flags = 0;
   } else {

@@ -83,6 +83,7 @@ package component_defs is
 
       -- control
       InterpolateChroma: in  boolean;
+      Output422        : in  boolean;
 
       -- input video
       VideoIn          : in  VideoY422;
@@ -186,8 +187,8 @@ package component_defs is
       ConsoleMode      : in  console_mode_t;
       Video            : in  VideoRGB;
       EnhancedMode     : in  boolean;
-      Limited_Range    : in  boolean;
       Widescreen       : in  boolean;
+      ColorMode        : in  std_logic_vector(1 downto 0);
       SampleRateHack   : in  boolean;
       Audio            : in  AudioData;
       InfoFrameRAM_Addr: out std_logic_vector(8 downto 0);

@@ -150,6 +150,7 @@ architecture Behavioral of Datapipe is
   signal clock_locked      : std_logic;
   signal obuf_oe           : std_logic;
   signal force_ypbpr       : boolean;
+  signal output_422        : boolean;
   signal video_measurements: VideoMeasurements_t;
   signal infoframeram_data : std_logic_vector(8 downto 0);
   signal infoframeram_addr : std_logic_vector(8 downto 0);
@@ -228,8 +229,8 @@ begin
     ConsoleMode       => console_mode,
     Video             => video_out,
     EnhancedMode      => video_settings.EnhancedMode,
-    Limited_Range     => video_settings.LimitedRange,
     Widescreen        => video_settings.Widescreen,
+    ColorMode         => video_settings.ColorMode,
     SampleRateHack    => video_settings.SampleRateHack,
     InfoFrameRAM_Addr => infoframeram_addr,
     InfoFrameRAM_Data => infoframeram_data,
@@ -304,9 +305,11 @@ begin
       PixelClock        => Clock54M,
       PixelClockEnable  => pixel_clk_en_ld,
       InterpolateChroma => video_settings.InterpolateChroma,
+      Output422         => output_422,
       VideoIn           => video_ld,
       VideoOut          => video_444
     );
+  output_422 <= (video_settings.ColorMode = "11");
 
   -- regenerate blanking signal
   Inst_Reblanking: Blanking_Regenerator

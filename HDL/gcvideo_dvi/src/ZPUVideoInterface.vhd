@@ -55,8 +55,8 @@ end ZPUVideoInterface;
 
 architecture Behavioral of ZPUVideoInterface is
   -- everything disabled by default
-  --                                                5432109876543210
-  constant VidSettingsDefault: std_logic_vector := "0000000000000000";
+  --                                                65432109876543210
+  constant VidSettingsDefault: std_logic_vector := "00000000000000000";
 
   -- output disabled, colors don't matter
   constant OSDBGSettingsDefault: std_logic_vector := "1------------------------";
@@ -71,7 +71,7 @@ architecture Behavioral of ZPUVideoInterface is
   signal active_line       : boolean;
   signal active_line_count : natural range 0 to 7;
   signal volume_setting    : std_logic_vector( 7 downto 0) := x"ff";
-  signal vid_settings      : std_logic_vector(15 downto 0) := VidSettingsDefault;
+  signal vid_settings      : std_logic_vector(16 downto 0) := VidSettingsDefault;
   signal osd_bgsettings    : std_logic_vector(24 downto 0) := OSDBGSettingsDefault;
   signal color_matrix      : ColorMatrix_t;
   signal reblanker_settings: ReblankerSettings_t;
@@ -92,16 +92,16 @@ begin
   VSettings.ScanlinesAlternate <= (vid_settings(3)  = '1');
   VSettings.LinedoublerEnabled <= (vid_settings(4)  = '1' and vid_settings(14) = '0');
   VSettings.CableDetect        <= (vid_settings(5)  = '1');
-  VSettings.LimitedRange       <= (vid_settings(6)  = '1');
-  VSettings.EnhancedMode       <= (vid_settings(7)  = '1');
-  VSettings.Widescreen         <= (vid_settings(8)  = '1');
-  VSettings.AnalogRGBOutput    <= (vid_settings(9)  = '1');
-  VSettings.SyncOnGreen        <= (vid_settings(10) = '1');
-  VSettings.SampleRateHack     <= (vid_settings(11) = '1');
-  VSettings.EnableReblanking   <= (vid_settings(12) = '1' and vid_settings(14) = '0');
-  VSettings.EnableResyncing    <= (vid_settings(13) = '1' and vid_settings(14) = '0');
+  VSettings.EnhancedMode       <= (vid_settings(6)  = '1');
+  VSettings.Widescreen         <= (vid_settings(7)  = '1');
+  VSettings.AnalogRGBOutput    <= (vid_settings(8)  = '1');
+  VSettings.SyncOnGreen        <= (vid_settings(9)  = '1');
+  VSettings.SampleRateHack     <= (vid_settings(10) = '1');
+  VSettings.EnableReblanking   <= (vid_settings(11) = '1' and vid_settings(14) = '0');
+  VSettings.EnableResyncing    <= (vid_settings(12) = '1' and vid_settings(14) = '0');
+  VSettings.InterpolateChroma  <= (vid_settings(13) = '1');
   -- bit 14 is the feature override bit set in non-standard modes
-  VSettings.InterpolateChroma  <= (vid_settings(15) = '1');
+  VSettings.ColorMode          <= vid_settings(16 downto 15);
   VSettings.Volume             <= unsigned(volume_setting);
   VSettings.Matrix             <= color_matrix;
   VSettings.RBSettings         <= reblanker_settings;
@@ -158,7 +158,7 @@ begin
       -- write path
       if ZSelect = '1' and ZPUBusIn.mem_writeEnable = '1' then
         case ZPUBusIn.mem_addr(5 downto 2) is
-          when "0000" => vid_settings   <= ZPUBusIn.mem_write(15 downto 0);
+          when "0000" => vid_settings   <= ZPUBusIn.mem_write(16 downto 0);
           when "0001" => osd_bgsettings <= ZPUBusIn.mem_write(24 downto 0);
           when "0010" => volume_setting <= ZPUBusIn.mem_write( 7 downto 0);
 

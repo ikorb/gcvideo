@@ -37,7 +37,6 @@ SRC_COMMON := \
 	src/edvi_ucode.vhd                 \
 	src/gcdv_decoder.vhd               \
 	src/i2s_decoder.vhd                \
-	src/infoframe_rom.vhd              \
 	src/led_heartbeat.vhd              \
 	src/scanline_generator.vhd         \
 	src/video_defs.vhd                 \

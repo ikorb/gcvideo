@@ -54,6 +54,13 @@ static const colormatrix_t matrix_rgbfull = {
   FIXPT( 1.596), FIXPT(-0.813)
 };
 
+static const colormatrix_t matrix_ycbcr = {
+  16,
+  FIXPT(0.000), FIXPT(1.000), FIXPT(0.000),
+  FIXPT(0.000), FIXPT(1.000),
+  FIXPT(1.000), FIXPT(0.000)
+};
+
 colormatrix_t matrix_custon = {
   // default is a copy of RGB limited
   16,
@@ -73,7 +80,9 @@ static void apply_factor(short *value, int factor) {
 void update_colormatrix(void) {
   colormatrix_t matrix;
 
-  if (video_settings_global & VIDEOIF_SET_RGBLIMITED) {
+  if (video_settings_global & VIDEOIF_SET_TEST_YCBCR) {
+    matrix_current = &matrix_ycbcr;
+  } else if ((video_settings_global & VIDEOIF_SET_COLORMODE_MASK) == VIDEOIF_SET_COLORMODE_RGBL) {
     matrix_current = &matrix_rgblimited;
   } else {
     matrix_current = &matrix_rgbfull;

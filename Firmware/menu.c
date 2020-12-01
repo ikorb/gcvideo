@@ -64,6 +64,7 @@ static const cliprange_t clipranges[] = {
   [ VALTYPE_SLPROFILEOFF ] = {     0,    3 },
   [ VALTYPE_SLPROFILE ]    = {     1,    3 },
   [ VALTYPE_SLINDEX ]      = {    16,  235 },
+  [ VALTYPE_COLORMODE ]    = {     0,    3 },
 };
 
 static const uint8_t value_widths[] = {
@@ -78,6 +79,7 @@ static const uint8_t value_widths[] = {
   [ VALTYPE_SLPROFILEOFF ] = 6,
   [ VALTYPE_SLPROFILE ]    = 6,
   [ VALTYPE_SLINDEX ]      = 6,
+  [ VALTYPE_COLORMODE ]    = 7,
 };
 
 /* (un)draw marker on a menu item */
@@ -148,7 +150,13 @@ static bool set_value(const valueitem_t *value, int newval) {
     }
 
     if (value->field.flags & VIFLAG_UPDATE_VIDEOIF) {
-      VIDEOIF->osd_bg = osdbg_settings;
+      if ((video_settings_global & VIDEOIF_SET_COLORMODE_MASK) ==
+          VIDEOIF_SET_COLORMODE_Y422) {
+        /* force black OSD background */
+        VIDEOIF->osd_bg = osdbg_settings & VIDEOIF_OSDBG_ALPHA_MASK;
+      } else {
+        VIDEOIF->osd_bg = osdbg_settings;
+      }
       VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
     }
 
@@ -231,6 +239,15 @@ static void print_value(menu_t *menu, unsigned int itemnum) {
       printf("%4d", value);
     } else {
       osd_puts(" Off");
+    }
+    break;
+
+  case VALTYPE_COLORMODE:
+    switch (value) {
+      case 0:  osd_puts("RGB-F"); break;
+      case 1:  osd_puts("RGB-L"); break;
+      case 2:  osd_puts("YC444"); break;
+      default: osd_puts("YC422"); break;
     }
     break;
   }

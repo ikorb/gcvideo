@@ -47,6 +47,7 @@ typedef enum {
   VALTYPE_SLPROFILEOFF, // 0 to 3 shown as Off, 1 to 3
   VALTYPE_SLPROFILE,    // 1 to 3
   VALTYPE_SLINDEX,      // 16 to 235
+  VALTYPE_COLORMODE,    // 0 to 3 shown as RGBF, RGBL, Y444, Y422
 } valuetype_t;
 
 #define VIFLAG_REDRAW         (1<<0)

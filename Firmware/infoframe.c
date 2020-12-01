@@ -151,6 +151,16 @@ static void build_one_set(uint32_t offset, uint8_t aspect, uint8_t vic, uint8_t 
   packetbody[3] = DB3_ITCONTENT | DB3_RGB_LIMITEDRANGE;
   update_checksum();
   store_shuffled(IFRAM->data + offset + 32);
+
+  packetbody[1] = DB1_SCANINFO_OVERSCAN | DB1_BARINFO_NONE | DB1_COLOR_YCBCR444;
+  packetbody[2] = aspect | DB2_COLORIMETRY_170M;
+  packetbody[3] = DB3_ITCONTENT;
+  update_checksum();
+  store_shuffled(IFRAM->data + offset + 64);
+
+  packetbody[1] = DB1_SCANINFO_OVERSCAN | DB1_BARINFO_NONE | DB1_COLOR_YCBCR422;
+  update_checksum();
+  store_shuffled(IFRAM->data + offset + 96);
 }
 
 

@@ -137,7 +137,6 @@ package video_defs is
     LinedoublerEnabled: boolean;
     DisableOutput     : boolean;
     CableDetect       : boolean;
-    LimitedRange      : boolean;
     EnhancedMode      : boolean;
     Widescreen        : boolean;
     AnalogRGBOutput   : boolean;
@@ -147,6 +146,7 @@ package video_defs is
     EnableResyncing   : boolean;
     SampleRateHack    : boolean;
     InterpolateChroma : boolean;
+    ColorMode         : std_logic_vector(1 downto 0);
     Matrix            : ColorMatrix_t;
     RBSettings        : ReblankerSettings_t;
   end record;

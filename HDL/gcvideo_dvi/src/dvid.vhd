@@ -31,8 +31,8 @@ entity dvid is
            Video            : in  VideoRGB;
 
            EnhancedMode     : in  boolean;
-           Limited_Range    : in  boolean;
            Widescreen       : in  boolean;
+           ColorMode        : in  std_logic_vector(1 downto 0);
            SampleRateHack   : in  boolean;
            Audio            : in  AudioData;
 
@@ -309,9 +309,15 @@ begin
       hsync_delay(0 to delay_clocks-2) <= hsync_delay(1 to delay_clocks-1);
       vsync_delay(0 to delay_clocks-2) <= vsync_delay(1 to delay_clocks-1);
       blank_delay(0 to delay_clocks-2) <= blank_delay(1 to delay_clocks-1);
+
       red_delay(delay_clocks-1)   <= std_logic_vector(Video.PixelR);
       green_delay(delay_clocks-1) <= std_logic_vector(Video.PixelG);
-      blue_delay(delay_clocks-1)  <= std_logic_vector(Video.PixelB);
+      if ColorMode = "11" then
+        -- YCbCr 4:2:2 needs 0-bits on the B channel
+        blue_delay(delay_clocks-1)  <= (others => '0');
+      else
+        blue_delay(delay_clocks-1)  <= std_logic_vector(Video.PixelB);
+      end if;
 
       if Video.VSync then
         vsync_delay(delay_clocks-1) <= '0';
@@ -523,12 +529,9 @@ begin
         per_frame_packets <= to_unsigned(3, 2);
 
         -- choose the packet sequence to send for the current video mode
-        ifr_select <= "1000";
+        ifr_select <= "10" & unsigned(ColorMode);
         if Widescreen then
           ifr_select(2) <= '1';
-        end if;
-        if Limited_Range then
-          ifr_select(0) <= '1';
         end if;
       end if;
 

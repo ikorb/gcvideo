@@ -61,6 +61,7 @@ entity convert_422_to_444 is
 
     -- control
     InterpolateChroma: in  boolean;
+    Output422        : in  boolean;
 
     -- input video
     VideoIn          : in  VideoY422;
@@ -124,7 +125,7 @@ begin
         prev_c1 <= current_c1;
 
         -- output interpolated chroma info for the delayed Y value
-        if InterpolateChroma then
+        if InterpolateChroma and not Output422 then
           new_c1 := average(prev_c1, current_c1);
           new_c2 := average(prev_c2, current_c2);
         else
@@ -139,8 +140,15 @@ begin
         end if;
 
         -- output the previous "full" chroma info to coincide with the delayed Y value
-        new_c1 := signed(prev_c1 xor x"80");
-        new_c2 := signed(prev_c2 xor x"80");
+        if Output422 then
+          -- 4:2:2 outputs all chroma over the red TMDS channel,
+          -- so swapping here results in a Cb/Cr/Cb/Cr output
+          new_c1 := signed(prev_c2 xor x"80");
+          new_c2 := signed(prev_c1 xor x"80");
+        else
+          new_c1 := signed(prev_c1 xor x"80");
+          new_c2 := signed(prev_c2 xor x"80");
+        end if;
       end if;
 
       -- forward to the correct output channels

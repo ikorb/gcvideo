@@ -42,6 +42,7 @@ enum {
   MENUITEM_REBLANK,
   MENUITEM_RESYNC,
   MENUITEM_SPOOFINTERLACE,
+  MENUITEM_COLORMODE,
   MENUITEM_SAMPLERATEHACK,
   MENUITEM_EXIT
 };
@@ -56,6 +57,9 @@ static valueitem_t value_resync         = { VALTYPE_BOOL, true,
                                             { .field = { NULL, VIDEOIF_BIT_ENABLERESYNC, 0, VIFLAG_ALLMODES | VIFLAG_REDRAW }} };
 static valueitem_t value_spoofinterlace = { VALTYPE_BOOL, true,
                                             { .field = { NULL, VIDEOIF_BIT_SPOOFINTERLACE, 0, VIFLAG_ALLMODES }} };
+static valueitem_t value_colormode      = { VALTYPE_COLORMODE, true,
+                                            { .field = { &video_settings_global, 2, VIDEOIF_SET_COLORMODE_SHIFT,
+                                                         VIFLAG_UPDATE_VIDEOIF | VIFLAG_COLORMATRIX }} };
 static valueitem_t value_sampleratehack = { VALTYPE_BOOL, true,
                                             { .field = { NULL, VIDEOIF_BIT_SAMPLERATEHACK, 0, VIFLAG_ALLMODES }} };
 
@@ -67,6 +71,7 @@ static menuitem_t advanced_items[] = {
   { "Chroma Interpolation", &value_chromainterpol, 1, 0 },
   { "Fix resolution",       &value_reblanking,     2, 0 },
   { "Fix sync timing",      &value_resync,         3, 0 },
+  { "Digital color format", &value_colormode,      5, 0 },
   { "Report 240p as 480i",  &value_spoofinterlace, 6, 0 },
   { "Sample rate hack",     &value_sampleratehack, 7, 0 },
   { "Exit",                 NULL,                  9, 0 },
@@ -93,6 +98,12 @@ static void advanced_draw(menu_t *menu) {
     advanced_items[MENUITEM_RESYNC].flags = 0;
   } else {
     advanced_items[MENUITEM_RESYNC].flags = MENU_FLAG_DISABLED;
+  }
+
+  if (video_settings_global & VIDEOIF_SET_DVIENHANCED) {
+    advanced_items[MENUITEM_COLORMODE].flags = 0;
+  } else {
+    advanced_items[MENUITEM_COLORMODE].flags = MENU_FLAG_DISABLED;
   }
 }
 

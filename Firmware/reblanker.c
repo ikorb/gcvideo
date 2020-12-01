@@ -101,7 +101,12 @@ static void check_modechange(uint32_t cur_xres, uint32_t cur_yres,
         prev_inmode  = inmode;
         prev_outmode = outmode;
         /* enable output again */
-        VIDEOIF->osd_bg = osdbg_settings;
+        if ((video_settings_global & VIDEOIF_SET_COLORMODE_MASK) ==
+            VIDEOIF_SET_COLORMODE_Y422) {
+          VIDEOIF->osd_bg = 0;
+        } else {
+          VIDEOIF->osd_bg = osdbg_settings;
+        }
       }
     } else {
       /* first detection of mode change, disable output for three frames */
