@@ -32,6 +32,7 @@
 #include <stdio.h>
 #include <stdint.h>
 #include <string.h>
+#include "flasher.h"
 #include "irrx.h"
 #include "portdefs.h"
 #include "spiflash.h"
@@ -70,5 +71,54 @@ void settings_init(void) {
 }
 
 void settings_load(void) {
-  // temporary dummy
+  union set_union {
+    storedsettings_flasher_t st;
+    uint8_t byteset[sizeof(storedsettings_flasher_t)];
+  } *set = (union set_union*)decodebuffer;
+
+  unsigned int setid;
+  bool valid = false;
+
+  /* scan for the first valid settings record */
+  for (setid = 0; setid < 256; setid += 8) {
+    spiflash_read_block(set, SETTINGS_OFFSET + setid * 256, sizeof(storedsettings_flasher_t));
+    if (set->st.version == 0xff) {
+      /* looks blank */
+      continue;
+    }
+
+    if (set->st.version == 0xff || set->st.version < SETTINGS_MINVERSION) {
+      /* invalid, but not blank - stop here */
+      break;
+    }
+
+    if (set->st.ir_codecount < NUM_IRCODES &&
+        set->st.ir_codecount > 63) {
+      /* number if IR codes does not look plausible, stop here */
+      break;
+    }
+
+    /* found a record with the expected version, verify IR codes */
+    uint8_t sum = 0;
+
+    for (unsigned int i = offsetof(storedsettings_flasher_t, ir_codecount);
+         i < 4 + set->st.ir_codecount * 4; i++) {
+      sum += set->byteset[i];
+    }
+
+    if (sum == set->st.ir_checksum) {
+      /* found a valid setting record */
+      valid = true;
+    }
+
+    /* record is non-blank, so stop here */
+    break;
+  }
+
+  if (!valid) {
+    return;
+  }
+
+   /* valid settings found, copy just the IR codes we know */
+   memcpy(ir_codes, set->st.ir_codes, sizeof(ir_codes));
 }

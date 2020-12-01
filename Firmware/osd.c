@@ -66,6 +66,12 @@ void osd_clrscr(void) {
   update_writeptr();
 }
 
+void osd_clearline(unsigned int y, unsigned int attr) {
+  for (unsigned int i = 0; i < OSD_CHARS_PER_LINE; i++) {
+    OSDRAM->data[i + y * OSD_CHARS_PER_LINE] = ' ' | attr;
+  }
+}
+
 void osd_putchar(const char c) {
   if (c == '\n') {
     cursor_x = 0;
