@@ -71,9 +71,19 @@ static menuitem_t mainmenu_items[] = {
 
 static void mainmenu_draw(menu_t *menu);
 
+#define MENU_POS_X  7
+#define MENU_POS_Y  7
+#define MENU_SIZE_X 31
+#define MENU_SIZE_Y 20
+
+#define LOGO_POS_X  16
+#define LOGO_POS_Y  3
+#define LOGO_SIZE_X 13
+#define LOGO_SIZE_Y 4
+
 static menu_t mainmenu = {
-  7, 7,
-  31, 20,
+  MENU_POS_X,  MENU_POS_Y,
+  MENU_SIZE_X, MENU_SIZE_Y,
   mainmenu_draw,
   sizeof(mainmenu_items) / sizeof(*mainmenu_items),
   mainmenu_items
@@ -85,18 +95,18 @@ static void mainmenu_draw(menu_t *menu) {
   modeset_draw(menu);
 
   /* draw the logo */
-  osd_fillbox(16, 3, 13, 4, ' ' | ATTRIB_DIM_BG);
-  osd_drawborder(16, 3, 13, 4);
-  osd_gotoxy(18, 4);
+  osd_fillbox(LOGO_POS_X, LOGO_POS_Y, LOGO_SIZE_X, LOGO_SIZE_Y, ' ' | ATTRIB_DIM_BG);
+  osd_drawborder(LOGO_POS_X, LOGO_POS_Y, LOGO_SIZE_X, LOGO_SIZE_Y);
+  osd_gotoxy(LOGO_POS_X + 2, LOGO_POS_Y + 1);
   osd_puts("\x0c\x0d\x0e\x0f\x10\x11\x12\x13\x14");
-  osd_gotoxy(18, 5);
+  osd_gotoxy(LOGO_POS_X + 2, LOGO_POS_Y + 2);
   osd_puts("\x15\x16\x17\x18\x19\x1a\x1b\x1c\x1d");
 
   /* draw the two video mode lines */
-  osd_gotoxy(menu->xpos + menu->xsize - 20, menu->ypos + menu->ysize - 3);
+  osd_gotoxy(MENU_POS_X + MENU_SIZE_X - 20, MENU_POS_Y + MENU_SIZE_Y - 3);
   osd_puts("Input : ");
   print_resolution();
-  osd_gotoxy(menu->xpos + menu->xsize - 20, menu->ypos + menu->ysize - 2);
+  osd_gotoxy(MENU_POS_X + MENU_SIZE_X - 20, MENU_POS_Y + MENU_SIZE_Y - 2);
 
   uint32_t outputlines = video_out_lines[current_videomode];
   bool interlaced = false;
