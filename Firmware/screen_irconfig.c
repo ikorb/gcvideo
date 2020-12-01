@@ -41,14 +41,17 @@
 #include "screens.h"
 #include "settings.h"
 
+static const char* keynames[] = {
+  "Up", "Down", "Left", "Right", "Enter", "Back"
+};
+
 void screen_irconfig(void) {
   ir_command_t newcmds[NUM_IRCODES];
-  bool debugmode = false;
 
   osd_clrscr();
-
   osd_fillbox(6, 8, 32, 13, ' ' | ATTRIB_DIM_BG);
   osd_drawborder(6, 8, 32, 13);
+
   osd_setattr(true, false);
   osd_putsat(12,  9, "IR Remote key config");
   osd_putsat( 8, 18, "Push key on remote to assign");
@@ -58,30 +61,14 @@ void screen_irconfig(void) {
 
   for (uint8_t btn_idx = 0; btn_idx < NUM_IRCODES; btn_idx++) {
   redo:
-    osd_setattr(true, btn_idx != IRCODE_UP);
-    osd_putsat(17, 11, "Up");
-    osd_setattr(true, btn_idx != IRCODE_DOWN);
-    osd_putsat(17, 12, "Down");
-    osd_setattr(true, btn_idx != IRCODE_LEFT);
-    osd_putsat(17, 13, "Left");
-    osd_setattr(true, btn_idx != IRCODE_RIGHT);
-    osd_putsat(17, 14, "Right");
-    osd_setattr(true, btn_idx != IRCODE_ENTER);
-    osd_putsat(17, 15, "Enter");
-    osd_setattr(true, btn_idx != IRCODE_BACK);
-    osd_putsat(17, 16, "Back");
+    for (uint8_t i = 0; i < NUM_IRCODES; i++) {
+      osd_setattr(true, btn_idx != i);
+      osd_putsat(17, 11 + i, keynames[i]);
+    }
 
     /* wait for input */
-    do {
-      if (pad_buttons & IRBUTTON_LONG) {
-        pad_clear(IRBUTTON_LONG);
-        debugmode = true;
-        osd_fillbox(11, 23, 22, 3, ' ' | ATTRIB_DIM_BG);
-        osd_drawborder(11, 23, 22, 3);
-        osd_setattr(true, false);
-        osd_putsat(13, 24, "Debug mode enabled");
-      }
-    } while (!ir_gotcommand && !(pad_buttons & (IRBUTTON_SHORT | PAD_ALL_GC)));
+    while (!ir_gotcommand && !(pad_buttons & (IRBUTTON_SHORT | PAD_ALL_GC)))
+      ;
 
     if (pad_buttons & (IRBUTTON_SHORT | PAD_ALL_GC))
       break;
@@ -99,12 +86,7 @@ void screen_irconfig(void) {
       }
     }
 
-    /* show received code */
-    if (debugmode) {
-      printf("%08x", command);
-    } else {
-      printf("Ok  ");
-    }
+    printf("Ok  ");
 
     /* store */
     newcmds[btn_idx] = command;
