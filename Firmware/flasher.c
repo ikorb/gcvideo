@@ -33,6 +33,7 @@
 #include <string.h>
 #include "crc32mpeg.h"
 #include "exodecr.h"
+#include "flashviewer.h"
 #include "icap.h"
 #include "menu-lite.h"
 #include "osd.h"
@@ -611,6 +612,10 @@ void run_mainloop(void) {
 
         screen_irconfig(false);
         goto retry;
+
+      } else if (pad_buttons & (PAD_Z | IR_LEFT)) {
+        pad_clear(PAD_ALL);
+        flash_viewer();
       }
 
       pad_clear(PAD_ALL);
