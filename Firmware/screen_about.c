@@ -33,6 +33,7 @@
 #include <stddef.h>
 #include <stdio.h>
 #include <string.h>
+#include "icap.h"
 #include "menu.h"
 #include "osd.h"
 #include "pad.h"
@@ -53,44 +54,66 @@
 #  define DUAL_OUT 0
 #endif
 
-void screen_about(void) {
-  int ver_len = strlen(VERSION);
-  osd_clrscr();
+enum {
+  MENUITEM_UPDATEFW,
+  MENUITEM_EXIT
+};
 
-  /* draw about-box */
-  osd_fillbox(10, 10, 25, 9, ' ' | ATTRIB_DIM_BG);
-  osd_drawborder(10, 10, 25, 9);
-  osd_setattr(true, false);
+static void about_draw(menu_t *menu);
+
+static menuitem_t about_items[] = {
+  { "Update Firmware", NULL, 7, 0 },
+  { "Back",            NULL, 8, 0 },
+};
+
+static menu_t about_menu = {
+  10, 9,
+  25, 10,
+  about_draw,
+  sizeof(about_items) / sizeof(*about_items),
+  about_items
+};
+
+static void about_draw(menu_t *menu) {
+  int ver_len = strlen(VERSION);
+
   if (MODE_WII) {
     if (DUAL_OUT) {
-      osd_putsat(11 + (23 - (15 + ver_len)) / 2, 11, "WiiVideo Dual v" VERSION);
+      osd_putsat(11 + (23 - (15 + ver_len)) / 2, 10, "WiiVideo Dual v" VERSION);
     } else { //                                       123456789012345
-      osd_putsat(11 + (23 - (14 + ver_len)) / 2, 11, "WiiVideo DVI v" VERSION);
+      osd_putsat(11 + (23 - (14 + ver_len)) / 2, 10, "WiiVideo DVI v" VERSION);
     }
 
     if (VIDEOIF->flags & VIDEOIF_FLAG_MODE_WII) {
-      osd_putsat(17, 12, "in Wii mode");
+      osd_putsat(17, 11, "in Wii mode");
     } else {
-      osd_putsat(17, 12, "in GC mode");
+      osd_putsat(17, 11, "in GC mode");
     }
 
   } else {
     if (DUAL_OUT) {
-      osd_putsat(11 + (23 - (14 + ver_len)) / 2, 11, "GCVideo Dual v" VERSION);
+      osd_putsat(11 + (23 - (14 + ver_len)) / 2, 10, "GCVideo Dual v" VERSION);
     } else { //                                       12345678901234
-      osd_putsat(11 + (23 - (13 + ver_len)) / 2, 11, "GCVideo DVI v" VERSION);
+      osd_putsat(11 + (23 - (13 + ver_len)) / 2, 10, "GCVideo DVI v" VERSION);
     }
   }
-  osd_putsat(12, 13, "Copyright \013 2015-2020");
-  osd_putsat(16, 14, "by Ingo Korb");
-  osd_putsat(15, 15, "ingo@akana.de");
+  osd_putsat(12, 12, "Copyright \013 2015-2020");
+  osd_putsat(16, 13, "by Ingo Korb");
+  osd_putsat(15, 14, "ingo@akana.de");
+}
 
-  /* wait until all buttons are released */
-  pad_wait_for_release();
+void screen_about(void) {
+  osd_clrscr();
 
-  /* now wait for any button press */
-  while (!(pad_buttons & PAD_ALL))
-    if (pad_buttons & PAD_VIDEOCHANGE)
-      return;
-  pad_clear(PAD_ALL);
+  menu_draw(&about_menu);
+  if (menu_exec(&about_menu, MENUITEM_EXIT) == MENUITEM_UPDATEFW) {
+    /* reboot to flasher */
+    icap_init();
+    icap_write_register(ICAP_REG_GENERAL1, 0x0001); // boot from address 1 instead of 0 as marker
+    icap_write_register(ICAP_REG_GENERAL2, 0x0300); // top byte is SPI read command
+    icap_write_register(ICAP_REG_MODE_REG, ICAP_MODE_NEW_MODE| ICAP_MODE_BOOT_SPI | ICAP_MODE_RESERVED);
+    icap_write_register(ICAP_REG_CMD, ICAP_CMD_REBOOT);
+    icap_noop();
+    icap_noop();
+  }
 }
