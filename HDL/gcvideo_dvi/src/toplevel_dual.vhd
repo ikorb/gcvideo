@@ -191,6 +191,6 @@ begin
     HeartbeatVSync => heartbeat_vsync
   );
 
-  LED <= heartbeat_clock xor heartbeat_vsync;
+  LED <= heartbeat_clock;
 
 end Behavioral;
