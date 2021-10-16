@@ -124,6 +124,12 @@ void update_reblanker(void) {
   uint32_t cur_xres = VIDEOIF->xres;
   uint32_t cur_yres = VIDEOIF->yres;
 
+  /* don't do anything while GC has disabled its output  */
+  /* (fixes menu transitions in Eternal Darkness and RE0) */
+  if (cur_xres == 0 || cur_yres == 0) {
+    return;
+  }
+
   /* set up reblanker */
   video_mode_t cur_inmode  = detect_input_videomode();
   video_mode_t cur_outmode = detect_output_videomode();
