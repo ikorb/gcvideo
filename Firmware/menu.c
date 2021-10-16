@@ -48,23 +48,23 @@ typedef enum {
 } updatetype_t;
 
 typedef struct {
-  int16_t lower;
-  int16_t upper;
+  int8_t  lower;
+  uint8_t upper; // actual max value is one higher
 } cliprange_t;
 
 static const cliprange_t clipranges[] = {
-  [ VALTYPE_BOOL ]         = {    0,     1 },
-  [ VALTYPE_EVENODD ]      = {    0,     1 },
-  [ VALTYPE_ANALOGMODE ]   = {    0,     2 },
-  [ VALTYPE_BYTE ]         = {    0,   255 },
-  [ VALTYPE_SBYTE_99 ]     = {   -99,   99 },
-  [ VALTYPE_SBYTE_127 ]    = {  -128,  127 },
-  [ VALTYPE_FIXPOINT1 ]    = {     0,  256 },
-  [ VALTYPE_FIXPOINT2 ]    = {     0,  255 },
-  [ VALTYPE_SLPROFILEOFF ] = {     0,    3 },
-  [ VALTYPE_SLPROFILE ]    = {     1,    3 },
-  [ VALTYPE_SLINDEX ]      = {    16,  235 },
-  [ VALTYPE_COLORMODE ]    = {     0,    3 },
+  [ VALTYPE_BOOL ]         = {     0,    1 -1 },
+  [ VALTYPE_EVENODD ]      = {     0,    1 -1 },
+  [ VALTYPE_ANALOGMODE ]   = {     0,    2 -1 },
+  [ VALTYPE_BYTE ]         = {     0,  255 -1 },
+  [ VALTYPE_SBYTE_99 ]     = {   -99,   99 -1 },
+  [ VALTYPE_SBYTE_127 ]    = {  -128,  127 -1 },
+  [ VALTYPE_FIXPOINT1 ]    = {     0,  256 -1 },
+  [ VALTYPE_FIXPOINT2 ]    = {     0,  255 -1 },
+  [ VALTYPE_SLPROFILEOFF ] = {     0,    3 -1 },
+  [ VALTYPE_SLPROFILE ]    = {     1,    3 -1 },
+  [ VALTYPE_SLINDEX ]      = {    16,  235 -1 },
+  [ VALTYPE_COLORMODE ]    = {     0,    3 -1 },
 };
 
 static const uint8_t value_widths[] = {
@@ -271,7 +271,7 @@ static void update_value(menu_t *menu, unsigned int itemid, updatetype_t upd) {
     curval = !get_value(value);
   }
 
-  clip_value(&curval, clipranges[value->type].lower, clipranges[value->type].upper);
+  clip_value(&curval, clipranges[value->type].lower, clipranges[value->type].upper + 1);
 
   if (set_value(value, curval)) {
     /* need a full redraw */

@@ -59,7 +59,7 @@ uint32_t     video_settings_global;
 video_mode_t current_videomode;
 uint32_t     osdbg_settings;
 uint8_t      audio_volume;
-bool         audio_mute;
+minibool     audio_mute;
 
 /* dummy functions */
 void update_colormatrix(void) {}

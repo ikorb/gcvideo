@@ -93,16 +93,16 @@ static const unsigned char vidmode_by_flags[] = {
 uint32_t     video_settings[VIDMODE_COUNT];
 uint32_t     video_settings_global;
 uint32_t     osdbg_settings;
-bool         resbox_enabled;
+minibool     resbox_enabled;
 video_mode_t current_videomode;
 uint8_t      audio_volume;
-bool         audio_mute;
+minibool     audio_mute;
 int8_t       screen_x_shift;
 int8_t       screen_y_shift;
 uint8_t      scanline_selected_profile;
 uint16_t     scanline_strength;
 uint16_t     scanline_hybrid;
-bool         scanline_custom;
+minibool     scanline_custom;
 
 static uint16_t current_setid;
 
@@ -134,7 +134,6 @@ void update_scanlines(void) {
 
 video_mode_t detect_videomode(bool inputmode) {
   uint32_t cur_flags = VIDEOIF->flags;
-  uint32_t cur_xres  = VIDEOIF->xres;
   uint32_t cur_yres  = VIDEOIF->yres;
   uint32_t htotal    = VIDEOIF->htotal;
   uint32_t vtotal    = VIDEOIF->vtotal & 0xfffff;
@@ -146,7 +145,7 @@ video_mode_t detect_videomode(bool inputmode) {
       >> 6;
   }
 
-  if (htotal > 870 || htotal < 800 || cur_xres > 720 ||
+  if (htotal > 870 || htotal < 800 || VIDEOIF->xres > 720 ||
       vtotal > 540000 || cur_yres > 576 )
     return VIDMODE_NONSTANDARD;
 
