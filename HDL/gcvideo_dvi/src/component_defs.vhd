@@ -261,18 +261,20 @@ package component_defs is
 
   component SPDIF_Encoder is
     port (
-      Clock      : in  std_logic;
-      ClockEnable: in  boolean;
-      AudioLeft  : in  signed(15 downto 0);
-      AudioRight : in  signed(15 downto 0);
-      EnableLeft : in  boolean;
-      SPDIF      : out std_logic
+      Clock54       : in  std_logic;
+      Clock162      : in  std_logic;
+      Clock162Enable: in  boolean;
+      AudioLeft     : in  signed(15 downto 0);
+      AudioRight    : in  signed(15 downto 0);
+      EnableLeft    : in  boolean;
+      SPDIF         : out std_logic
     );
   end component;
 
   component audio_spdif is
     port (
-      Clock      : in  std_logic; -- 3*54 MHz
+      Clock54    : in  std_logic;
+      Clock162   : in  std_logic;
       ConsoleMode: in  console_mode_t;
 
       I2S_BClock : in  std_logic;

@@ -38,12 +38,13 @@ use IEEE.NUMERIC_STD.ALL;
 
 entity SPDIF_Encoder is
   port (
-    Clock      : in  std_logic;
-    ClockEnable: in  boolean;
-    AudioLeft  : in  signed(15 downto 0);
-    AudioRight : in  signed(15 downto 0);
-    EnableLeft : in  boolean;
-    SPDIF      : out std_logic
+    Clock54       : in  std_logic;
+    Clock162      : in  std_logic;
+    Clock162Enable: in  boolean;
+    AudioLeft     : in  signed(15 downto 0);
+    AudioRight    : in  signed(15 downto 0);
+    EnableLeft    : in  boolean;
+    SPDIF         : out std_logic
   );
 end SPDIF_Encoder;
 
@@ -68,11 +69,28 @@ architecture Behavioral of SPDIF_Encoder is
   signal spdif_out      : std_logic  := '1';
 
   signal shift_delay    : natural range 0 to 2 := 0;
+
+  signal enable_slow     : std_logic;
+  signal enable_slow_sync: std_logic_vector(2 downto 0);
+
 begin
 
-  process(Clock, ClockEnable)
+  -- create a signal that toggles when EnableLeft is true
+  process(Clock54)
   begin
-    if rising_edge(Clock) and ClockEnable then
+    if rising_edge(Clock54) then
+      if EnableLeft then
+        enable_slow <= not enable_slow;
+      end if;
+    end if;
+  end process;
+
+  process(Clock162, Clock162Enable)
+  begin
+    if rising_edge(Clock162) and Clock162Enable then
+      -- sync EnableSlow into this clock domain
+      enable_slow_sync <= enable_slow & enable_slow_sync(2 downto 1);
+
       if shift_delay = 0 then
         shift_delay <= 2;
 
@@ -98,7 +116,7 @@ begin
       end if;
 
       -- check for new sample or empty shifter
-      if EnableLeft then
+      if enable_slow_sync(0) /= enable_slow_sync(1) then
         -- new sample, start from scratch at next bit
         -- (avoids synchronization issues)
         shifter_bits    <= 0;

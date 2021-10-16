@@ -130,18 +130,17 @@ architecture Behavioral of dvid is
          sub3_eccbits, sub4_eccbits: std_logic_vector(1 downto 0);
 
   -- audio
-  type enable_syncer_t is array(3 downto 0) of boolean;
-
   signal channel_status    : std_logic_vector(191 downto 0) := x"00000000000000000000000000000000000000d202000104";
   signal channel_bit       : natural range 0 to 191 := 0;
   signal sample_count      : natural range 0 to 3   := 0;
   signal left_buffer       : signed(15 downto 0);
   signal right_buffer      : signed(15 downto 0);
-  signal left_en_sync      : enable_syncer_t := (others => false);
-  signal right_en_sync     : enable_syncer_t := (others => false);
-  signal left_enable       : boolean := false;
-  signal right_enable      : boolean := false;
+  signal left_enable_edge  : boolean := false;
+  signal left_enable_prev  : boolean := false;
+  signal right_enable_edge : boolean := false;
+  signal right_enable_prev : boolean := false;
   signal audio_sample_ready: boolean := false;
+  signal audio_captured    : boolean := false;
   signal audio_samples_sent: natural range 0 to 47 := 0;
   signal audio_needs_acr   : boolean := false;
   signal sample_drop_count : natural range 0 to 1124 := 0;
@@ -288,6 +287,36 @@ begin
     end if;
   end process;
 
+  -- capture audio samples
+  -- Uses a separate process because the LeftEnable/RightEnable signals are
+  -- only one clock cycle long, but the main dvid process is gated by clk_pixel_en.
+  process(clk_pixel)
+  begin
+    if rising_edge(clk_pixel) then
+      -- assemble audio data
+      left_enable_prev <= Audio.LeftEnable;
+      left_enable_edge <= left_enable_prev and not Audio.LeftEnable; -- falling edge
+
+      right_enable_prev <= Audio.RightEnable;
+      right_enable_edge <= right_enable_prev and not Audio.RightEnable;
+
+      if left_enable_edge then
+        -- buffer until the right channel is also available
+        left_buffer <= Audio.Left;
+      end if;
+
+      if right_enable_edge then
+        -- buffering the right channel for one clock relaxes timing
+        right_buffer       <= Audio.Right;
+        audio_sample_ready <= true;
+      end if;
+
+      if audio_captured then
+        audio_sample_ready <= false;
+      end if;
+    end if;
+  end process;
+
   -- always send vsync+hsync on blue channel if in aux mode
   aux_blue(1 downto 0) <= (vsync_d, hsync_d);
   aux_blue(2) <= '1' when seq_bt4mux = BT4_Send_1 else header_eccbit;
@@ -345,27 +374,13 @@ begin
       blank_d <= blank_delay(0);
 
       -- assemble audio data
-      left_en_sync(2 downto 0)  <= left_en_sync(3 downto 1);
-      left_en_sync(3)           <= Audio.LeftEnable;
-      left_enable               <= left_en_sync(0) and not left_en_sync(1); -- falling edge
-
-      right_en_sync(2 downto 0) <= right_en_sync(3 downto 1);
-      right_en_sync(3)          <= Audio.RightEnable;
-      right_enable              <= right_en_sync(0) and not right_en_sync(1);
-
-      if left_enable then
-        -- buffer until the right channel is also available
-        left_buffer <= Audio.Left;
+      if audio_captured and not audio_sample_ready then
+        audio_captured <= false;
       end if;
 
-      if right_enable then
-        -- buffering the right channel for one clock relaxes timing
-        right_buffer       <= Audio.Right;
-        audio_sample_ready <= true;
-      end if;
-
-      if EnhancedMode and not seq_active and audio_sample_ready then
-        audio_sample_ready <= false;
+      if EnhancedMode and not seq_active and
+        audio_sample_ready and not audio_captured then
+        audio_captured <= true;
 
         if sample_drop_count = 0 then
           -- drop one in every 1124 sample to adjust the Gamecube sample rate to

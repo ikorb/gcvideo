@@ -27,7 +27,7 @@
 -- audio_spdif.vhd: Audio-handling module
 --
 -- This module convers the I2S signal from the Gamecube into SPDIF.
--- Since there is no suitable 128fs clock available, the module
+-- Since there is no suitable 384fs clock available, the module
 -- generates one using a phase accumulator. The resulting clock has
 -- a bit of jitter, but it appears to be good enough for all SPDIF
 -- receivers I can test.
@@ -47,7 +47,8 @@ use work.video_defs.all;
 
 entity audio_spdif is
   port (
-    Clock      : in  std_logic; -- 3*54 MHz
+    Clock54    : in  std_logic;
+    Clock162   : in  std_logic; -- 3*54 MHz
     ConsoleMode: in  console_mode_t;
 
     I2S_BClock : in  std_logic;
@@ -98,13 +99,10 @@ architecture Behavioral of audio_spdif is
   constant SYNC_LEVELS: integer := 3;
 
   type cmode_sync_t is array(0 to SYNC_LEVELS) of console_mode_t;
-  type volume_sync_t is array(0 to SYNC_LEVELS) of unsigned(7 downto 0);
 
   signal consolemode_sync: cmode_sync_t;
-  signal volume_sync     : volume_sync_t;
   attribute shreg_extract: string;
   attribute shreg_extract of consolemode_sync: signal is "no";
-  attribute shreg_extract of volume_sync: signal is "no";
 
   -- volume setting
   signal volume_adjusted     : signed(9 downto 0);
@@ -129,7 +127,7 @@ begin
     SyncBits    => 3,
     CompareBits => 2
   ) PORT MAP (
-    Clock       => Clock,
+    Clock       => Clock54,
     ClockEnable => true,
     Input       => I2S_BClock,
     Output      => bclock
@@ -139,7 +137,7 @@ begin
     SyncBits    => 3,
     CompareBits => 2
   ) PORT MAP (
-    Clock       => Clock,
+    Clock       => Clock54,
     ClockEnable => true,
     Input       => I2S_LRClock,
     Output      => lrclock
@@ -149,16 +147,16 @@ begin
     SyncBits    => 3,
     CompareBits => 2
   ) PORT MAP (
-    Clock       => Clock,
+    Clock       => Clock54,
     ClockEnable => true,
     Input       => I2S_Data,
     Output      => adata
   );
 
-  -- generate two clock enable signals for audio, 384fs for Wii and GC modes
-  process(Clock)
+  -- generate two clock enable signals for SPDIF, 384fs for Wii and GC modes
+  process(Clock162)
   begin
-    if rising_edge(Clock) then
+    if rising_edge(Clock162) then
       consolemode_sync(0 to SYNC_LEVELS-1) <= consolemode_sync(1 to SYNC_LEVELS);
       consolemode_sync(SYNC_LEVELS)        <= ConsoleMode;
       prev_mode         <= consolemode_sync(0);
@@ -190,9 +188,9 @@ begin
   end process;
 
   -- select one of the clock enable signals based on the current mode
-  process(Clock)
+  process(Clock162)
   begin
-    if rising_edge(Clock) then
+    if rising_edge(Clock162) then
       if consolemode_sync(0) = MODE_WII then
         clocken_spdif <= clocken_spdif_wii;
       else
@@ -204,8 +202,8 @@ begin
   -- read I2S audio data
   Inst_I2SDec: I2S_Decoder
     port map (
-      Clock       => Clock,
-      ClockEnable => clocken_spdif,
+      Clock       => Clock54,
+      ClockEnable => true,
       I2S_BClock  => bclock,
       I2S_LRClock => lrclock,
       I2S_Data    => adata,
@@ -216,22 +214,19 @@ begin
     );
 
   -- adjust volume
-  process(Clock, clocken_spdif)
+  process(Clock54)
     variable vol: unsigned(9 downto 0);
   begin
-    if rising_edge(Clock) and clocken_spdif then
+    if rising_edge(Clock54) then
       enable_l_dly <= enable_l;
       enable_r_dly <= enable_r;
 
-      volume_sync(0 to SYNC_LEVELS-1) <= volume_sync(1 to SYNC_LEVELS);
-      volume_sync(SYNC_LEVELS)        <= Volume;
-
-      vol(7 downto 0) := volume_sync(0);
+      vol(7 downto 0) := Volume;
       vol(9 downto 8) := "00";
       volume_adjusted <= signed(vol) + 1;
 
       if enable_l then
-        if volume_sync(0) = x"00" then
+        if Volume = x"00" then
           audio_left <= (others => '0');
         else
           audio_left <= scale_audio(audio_left_unscaled, volume_adjusted);
@@ -239,7 +234,7 @@ begin
       end if;
 
       if enable_r then
-        if volume_sync(0) = x"00" then
+        if Volume = x"00" then
           audio_right <= (others => '0');
         else
           audio_right <= scale_audio(audio_right_unscaled, volume_adjusted);
@@ -251,12 +246,13 @@ begin
   -- encode audio as SPDIF
   Inst_SPDIFEnc: SPDIF_Encoder
     port map (
-      Clock       => Clock,
-      ClockEnable => clocken_spdif,
-      AudioLeft   => audio_left,
-      AudioRight  => audio_right,
-      EnableLeft  => enable_l,
-      SPDIF       => SPDIF_Out
+      Clock54        => Clock54,
+      Clock162       => Clock162,
+      Clock162Enable => clocken_spdif,
+      AudioLeft      => audio_left,
+      AudioRight     => audio_right,
+      EnableLeft     => enable_l,
+      SPDIF          => SPDIF_Out
     );
 
 end Behavioral;

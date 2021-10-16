@@ -31,4 +31,9 @@
 NET "Inst_Datapipe/audio_main.Inst_Audio/clocken_spdif" TNM_NET = "MC_AUDIO";
 TIMESPEC TS_Audio = FROM "MC_AUDIO" TO "MC_AUDIO" TS_CLOCK_54 / 2;
 
-NET "Inst_Datapipe/audio_main.Inst_Audio/Clock" TNM_NET = "Clock_Audio";
+NET "Inst_Datapipe/audio_main.Inst_Audio/Clock162" TNM_NET = "Clock_Audio";
+
+# ignore timing from the 54MHz group into the SPDIF shifter
+# (i.e. copying the audio samples into it)
+NET "Inst_Datapipe/audio_main.Inst_Audio/Inst_SPDIFEnc/shifter*" TNM_NET = "TN_SPDIF_Shifter";
+TIMESPEC TS_AudioIgnore = FROM "CLOCK_54" TO "TN_SPDIF_Shifter" TIG;
