@@ -172,11 +172,8 @@ void update_infoframe(video_mode_t outmode) {
   }
 
   uint8_t vic = mode_to_vic[outmode];
-
-  if (video_settings_global & VIDEOIF_SET_169)
-    vic++;
-
   uint8_t pixelrep;
+
   if (VIDEOIF->flags & VIDEOIF_FLAG_LD_31KHZ) {
     pixelrep = DB5_PIXELREP_NONE;
   } else {
