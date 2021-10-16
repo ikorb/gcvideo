@@ -63,11 +63,11 @@ static valueitem_t value_tint_cr = { VALTYPE_SBYTE_99, true,
 /* --- menu definition --- */
 
 static menuitem_t osdset_items[] = {
-  { "Mode popup",       &value_resbox,   1, 0 }, // 0
+  { "Mode Popup",       &value_resbox,   1, 0 }, // 0
   { "BG Transparency",  &value_alpha,    2, 0 }, // 1
   { "BG Tint Blue",     &value_tint_cb,  3, 0 }, // 2
   { "BG Tint Red",      &value_tint_cr,  4, 0 }, // 3
-  { "IR key config...", NULL,            5, 0 }, // 4
+  { "IR Key Config...", NULL,            5, 0 }, // 4
   { "Exit",             NULL,            7, 0 }, // 5
 };
 

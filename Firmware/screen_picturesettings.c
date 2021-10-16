@@ -70,8 +70,8 @@ static menuitem_t pictureset_items[] = {
   { "Brightness",       &value_brightness, 1, 0 }, // 0
   { "Contrast",         &value_contrast,   2, 0 }, // 1
   { "Saturation",       &value_saturation, 3, 0 }, // 2
-  { "X position",       &value_xpos,       4, 0 }, // 3
-  { "Y position",       &value_ypos,       5, 0 }, // 4
+  { "X Position",       &value_xpos,       4, 0 }, // 3
+  { "Y Position",       &value_ypos,       5, 0 }, // 4
   { "Reset",            NULL,              6, 0 }, // 5
   { "Save and Exit",    NULL,              8, 0 }, // 6
   { "Cancel",           NULL,              9, 0 }, // 7

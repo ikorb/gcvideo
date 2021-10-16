@@ -67,14 +67,14 @@ void modeset_draw(menu_t *menu) {
 
   if (modeset_mode == VIDMODE_NONSTANDARD) {
     osd_gotoxy(menu->xpos + 8, menu->ypos + 1);
-    osd_puts("NonStd settings");
+    osd_puts("NonStd Settings");
 
     menu->items[MENUITEM_SLPROFILE].flags = MENU_FLAG_DISABLED;
     menu->items[MENUITEM_SLEVEN   ].flags = MENU_FLAG_DISABLED;
     menu->items[MENUITEM_SLALT    ].flags = MENU_FLAG_DISABLED;
   } else {
     osd_gotoxy(menu->xpos + 9, menu->ypos + 1);
-    printf("%s settings", mode_names[modeset_mode]);
+    printf("%s Settings", mode_names[modeset_mode]);
 
     /* update the item-enable flags based on current settings */
     if (modeset_mode <= VIDMODE_576i && !(video_settings[modeset_mode] & VIDEOIF_SET_LD_ENABLE)) {

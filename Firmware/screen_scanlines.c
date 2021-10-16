@@ -99,12 +99,12 @@ static valueitem_t value_slvalue    = { VALTYPE_FIXPOINT1, false, {{ get_slvalue
 static void scanline_draw(menu_t *menu);
 
 static menuitem_t scanline_items[] = {
-  { "Scanline profile", &value_profile,    1, 0 },
-  { " Full custom",     &value_custom,     2, 0 },
+  { "Scanline Profile", &value_profile,    1, 0 },
+  { " Full Custom",     &value_custom,     2, 0 },
   { " Brightness",      &value_slstrength, 3, 0 },
-  { " Hybrid factor",   &value_hybrid,     4, 0 },
+  { " Hybrid Factor",   &value_hybrid,     4, 0 },
   { " Luminance",       &value_slluma,     5, 0 },
-  { " Applied factor",  &value_slvalue,    6, MENU_FLAG_DISABLED },
+  { " Applied Factor",  &value_slvalue,    6, MENU_FLAG_DISABLED },
   { "Exit",             NULL,              8, 0 },
 };
 

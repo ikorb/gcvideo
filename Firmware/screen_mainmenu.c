@@ -60,14 +60,14 @@ static menuitem_t mainmenu_items[] = {
   { "Linedoubler",            &modeset_value_linedoubler, 2, 0 }, // 0
   { "Scanline Profile",       &modeset_value_slprofile,   3, 0 }, // 1
   { " Apply to",              &modeset_value_sleven,      4, 0 }, // 2
-  { " Alternating scanlines", &modeset_value_slalt,       5, 0 }, // 3
-  { "Scanline settings...",   NULL,                       7, 0 }, // 4
-  { "Picture settings...",    NULL,                       8, 0 }, // 5
-  { "OSD settings...",        NULL,                       9, 0 }, // 6
-  { "Output settings...",     NULL,                      10, 0 }, // 7
-  { "View all modes...",      NULL,                      11, 0 }, // 8
-  { "Advanced settings...",   NULL,                      12, 0 }, // 9
-  { "Store settings",         NULL,                      14, 0 }, // 10
+  { " Alternating Scanlines", &modeset_value_slalt,       5, 0 }, // 3
+  { "Scanline Settings...",   NULL,                       7, 0 }, // 4
+  { "Picture Settings...",    NULL,                       8, 0 }, // 5
+  { "OSD Settings...",        NULL,                       9, 0 }, // 6
+  { "Output Settings...",     NULL,                      10, 0 }, // 7
+  { "View All Modes...",      NULL,                      11, 0 }, // 8
+  { "Advanced Settings...",   NULL,                      12, 0 }, // 9
+  { "Store Settings",         NULL,                      14, 0 }, // 10
   { "About...",               NULL,                      15, 0 }, // 11
   { "Exit",                   NULL,                      16, 0 }, // 12
 };

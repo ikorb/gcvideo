@@ -130,14 +130,14 @@ static void outputset_draw(menu_t *menu);
 
 #ifdef OUTPUT_DUAL
 static menuitem_t outputset_items[] = {
-  { "Allow 480p mode",   &value_cabledetect, 1, 0 }, // 0
+  { "Allow 480p Mode",   &value_cabledetect, 1, 0 }, // 0
   { "Crop 486 to 480",   &value_crop486,     2, 0 }, // 1
   { "RGB Limited Range", &value_rgblimited,  3, 0 }, // 2
-  { "Enhanced DVI mode", &value_dvienhanced, 4, 0 }, // 3
+  { "Enhanced DVI Mode", &value_dvienhanced, 4, 0 }, // 3
   { "  Display as 16:9", &value_169,         5, 0 }, // 4
   { "Volume",            &value_volume,      6, 0 }, // 5
   { "Mute",              &value_mute,        7, 0 }, // 6
-  { "Analog output",     &value_analogmode,  8, 0 }, // 7
+  { "Analog Output",     &value_analogmode,  8, 0 }, // 7
   { "Exit",              NULL,              10, 0 }, // 8
 };
 
@@ -150,10 +150,10 @@ static menu_t outputset_menu = {
 };
 #else
 static menuitem_t outputset_items[] = {
-  { "Allow 480p mode",   &value_cabledetect, 1, 0 }, // 0
+  { "Allow 480p Mode",   &value_cabledetect, 1, 0 }, // 0
   { "Crop 486 to 480",   &value_crop486,     2, 0 }, // 1
   { "RGB Limited Range", &value_rgblimited,  3, 0 }, // 2
-  { "Enhanced DVI mode", &value_dvienhanced, 4, 0 }, // 3
+  { "Enhanced DVI Mode", &value_dvienhanced, 4, 0 }, // 3
   { "  Display as 16:9", &value_169,         5, 0 }, // 4
   { "Volume",            &value_volume,      6, 0 }, // 5
   { "Mute",              &value_mute,        7, 0 }, // 6
