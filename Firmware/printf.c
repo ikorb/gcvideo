@@ -1,7 +1,7 @@
 /* Small, noncompliant, not-full-featured printf implementation
  *
  *
- * Copyright (c) 2010-2020, Ingo Korb
+ * Copyright (c) 2010-2021, Ingo Korb
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without

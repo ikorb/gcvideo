@@ -1,6 +1,6 @@
 /* GCVideo DVI Firmware
 
-   Copyright (C) 2015-2020, Ingo Korb <ingo@akana.de>
+   Copyright (C) 2015-2021, Ingo Korb <ingo@akana.de>
    All rights reserved.
 
    Redistribution and use in source and binary forms, with or without
@@ -97,7 +97,7 @@ static void about_draw(menu_t *menu) {
       osd_putsat(11 + (23 - (13 + ver_len)) / 2, 10, "GCVideo DVI v" VERSION);
     }
   }
-  osd_putsat(12, 12, "Copyright \013 2015-2020");
+  osd_putsat(12, 12, "Copyright \013 2015-2021");
   osd_putsat(16, 13, "by Ingo Korb");
   osd_putsat(15, 14, "ingo@akana.de");
 }
