@@ -1,3 +1,10 @@
+2021-10-16: GCVideo DVI version 3.1
+- minor audio subsystem rework
+- improve enhanced mode compatibility with some Samsung TVs
+- fix incorrect video mode codes in 16:9 enhanced mode
+- avoid excessive screen blanking during menu transitions in some games
+- add 486p to 480p crop for GBI
+
 2020-05-21: GCVideo DVI version 3.0e
 - support another WiiDual board version
 - fix clock-related black screen on Wii

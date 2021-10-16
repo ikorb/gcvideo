@@ -29,7 +29,7 @@
 #           bundles main+flasher into a single binary
 #
 
-VERSION := 3.0e
+VERSION := 3.1
 
 PROMFILE := gcvideo-dvi-$(TARGET)-$(VERSION)-spirom
 PROMTYPE := M25P40
