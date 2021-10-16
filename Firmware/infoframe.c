@@ -144,7 +144,8 @@ static void build_one_set(uint32_t offset, uint8_t aspect, uint8_t vic, uint8_t 
   packetbody[2] = aspect | DB2_COLORIMETRY_NODATA;
   packetbody[3] = DB3_ITCONTENT | DB3_RGB_FULLRANGE;
   packetbody[4] = vic;
-  packetbody[5] = DB5_CONTENT_GAME | pixelrep;
+  // Samsung C7000 series TVs fail i -> p switches if DB5_CONTENT_GAME is set
+  packetbody[5] = /* DB5_CONTENT_GAME | */ pixelrep;
   update_checksum();
   store_shuffled(IFRAM->data + offset);
 
