@@ -52,7 +52,7 @@ typedef struct {
   uint8_t  size;
   uint8_t  resbox_enabled;
   uint8_t  volume;
-  uint8_t  mute;
+  uint8_t  mute_and_crop486;
   uint32_t video_settings[VIDMODE_COUNT];
   uint32_t video_settings_global;
   uint32_t osdbg_settings;
@@ -64,6 +64,8 @@ typedef struct {
   // scanline settings are stored seperately
 } storedsettings_t;
 
+#define STOREDSET_MUTE    (1<<0)
+#define STOREDSET_CROP486 (1<<1)
 
 /* number of lines per frame in each video mode */
 /* order matters! even are 60Hz, odd are 50Hz   */
@@ -103,6 +105,7 @@ uint8_t      scanline_selected_profile;
 uint16_t     scanline_strength;
 uint16_t     scanline_hybrid;
 minibool     scanline_custom;
+minibool     crop_486_to_480;
 
 static uint16_t current_setid;
 
@@ -148,6 +151,16 @@ video_mode_t detect_videomode(bool inputmode) {
   if (htotal > 870 || htotal < 800 || VIDEOIF->xres > 720 ||
       vtotal > 540000 || cur_yres > 576 )
     return VIDMODE_NONSTANDARD;
+
+  /* GBI 486i/p to 480i/p crop */
+  if (crop_486_to_480) {
+    if (cur_yres == 486) {
+      cur_yres = 480;
+    }
+    if (cur_yres == 243) {
+      cur_yres = 240;
+    }
+  }
 
   /* figure out the maximum number of lines based on mode flags */
   unsigned int max_lines = 240;
@@ -239,7 +252,9 @@ void settings_load(void) {
 
   resbox_enabled = set.st.resbox_enabled;
   audio_volume   = set.st.volume;
-  audio_mute     = set.st.mute;
+  audio_mute     = set.st.mute_and_crop486 & STOREDSET_MUTE;
+
+  crop_486_to_480 = !!(set.st.mute_and_crop486 & STOREDSET_CROP486);
 
   memcpy(video_settings, set.st.video_settings, sizeof(video_settings));
   video_settings_global = set.st.video_settings_global;
@@ -275,7 +290,12 @@ void settings_save(void) {
   set.st.osdbg_settings        = osdbg_settings;
   set.st.resbox_enabled        = resbox_enabled;
   set.st.volume                = audio_volume;
-  set.st.mute                  = audio_mute;
+  if (audio_mute) {
+    set.st.mute_and_crop486 |= STOREDSET_MUTE;
+  }
+  if (crop_486_to_480) {
+    set.st.mute_and_crop486 |= STOREDSET_CROP486;
+  }
   set.st.brightness            = picture_brightness;
   set.st.contrast              = picture_contrast;
   set.st.saturation            = picture_saturation;
@@ -356,6 +376,7 @@ void settings_init(void) {
   current_videomode = detect_input_videomode();
   screen_x_shift    = 0;
   screen_y_shift    = 0;
+  crop_486_to_480   = false;
 
   /* initialize scanline profiles */
   scanline_selected_profile = 1;

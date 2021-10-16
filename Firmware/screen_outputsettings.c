@@ -41,6 +41,7 @@
 
 enum {
   MENUITEM_CABLEDETECT,
+  MENUITEM_CROP486,
   MENUITEM_LIMITEDRGB,
   MENUITEM_DVIENHANCED,
   MENUITEM_169,
@@ -110,6 +111,8 @@ static bool set_analogmode(int value) {
 
 static valueitem_t value_cabledetect = { VALTYPE_BOOL, true,
                                          { .field = { NULL, VIDEOIF_BIT_CABLEDETECT, 0, VIFLAG_ALLMODES }} };
+static valueitem_t value_crop486     = { VALTYPE_BOOL, true,
+                                         { .field = { &crop_486_to_480, 8, 24, 0 }} };
 static valueitem_t value_rgblimited  = { VALTYPE_BOOL, true,
                                          { .field = { NULL, VIDEOIF_BIT_COLOR_RGBLIMITED, 0, VIFLAG_ALLMODES | VIFLAG_COLORMATRIX }} };
 static valueitem_t value_169         = { VALTYPE_BOOL, true,
@@ -128,18 +131,19 @@ static void outputset_draw(menu_t *menu);
 #ifdef OUTPUT_DUAL
 static menuitem_t outputset_items[] = {
   { "Allow 480p mode",   &value_cabledetect, 1, 0 }, // 0
-  { "RGB Limited Range", &value_rgblimited,  2, 0 }, // 1
-  { "Enhanced DVI mode", &value_dvienhanced, 3, 0 }, // 2
-  { "  Display as 16:9", &value_169,         4, 0 }, // 3
-  { "Volume",            &value_volume,      5, 0 }, // 4
-  { "Mute",              &value_mute,        6, 0 }, // 5
-  { "Analog output",     &value_analogmode,  7, 0 }, // 6
-  { "Exit",              NULL,               9, 0 }, // 7
+  { "Crop 486 to 480",   &value_crop486,     2, 0 }, // 1
+  { "RGB Limited Range", &value_rgblimited,  3, 0 }, // 2
+  { "Enhanced DVI mode", &value_dvienhanced, 4, 0 }, // 3
+  { "  Display as 16:9", &value_169,         5, 0 }, // 4
+  { "Volume",            &value_volume,      6, 0 }, // 5
+  { "Mute",              &value_mute,        7, 0 }, // 6
+  { "Analog output",     &value_analogmode,  8, 0 }, // 7
+  { "Exit",              NULL,              10, 0 }, // 8
 };
 
 static menu_t outputset_menu = {
   9, 9,
-  26, 11,
+  26, 12,
   outputset_draw,
   sizeof(outputset_items) / sizeof(*outputset_items),
   outputset_items
@@ -147,17 +151,18 @@ static menu_t outputset_menu = {
 #else
 static menuitem_t outputset_items[] = {
   { "Allow 480p mode",   &value_cabledetect, 1, 0 }, // 0
-  { "RGB Limited Range", &value_rgblimited,  2, 0 }, // 1
-  { "Enhanced DVI mode", &value_dvienhanced, 3, 0 }, // 2
-  { "  Display as 16:9", &value_169,         4, 0 }, // 3
-  { "Volume",            &value_volume,      5, 0 }, // 4
-  { "Mute",              &value_mute,        6, 0 }, // 5
-  { "Exit",              NULL,               8, 0 }, // 6
+  { "Crop 486 to 480",   &value_crop486,     2, 0 }, // 1
+  { "RGB Limited Range", &value_rgblimited,  3, 0 }, // 2
+  { "Enhanced DVI mode", &value_dvienhanced, 4, 0 }, // 3
+  { "  Display as 16:9", &value_169,         5, 0 }, // 4
+  { "Volume",            &value_volume,      6, 0 }, // 5
+  { "Mute",              &value_mute,        7, 0 }, // 6
+  { "Exit",              NULL,               9, 0 }, // 7
 };
 
 static menu_t outputset_menu = {
   9, 9,
-  26, 10,
+  26, 11,
   outputset_draw,
   sizeof(outputset_items) / sizeof(*outputset_items),
   outputset_items

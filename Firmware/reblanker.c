@@ -186,19 +186,28 @@ void update_reblanker(void) {
   }
 
   /* center image vertically */
-  uint32_t ld_yres = cur_yres; // y resolution after linedoubler
+  int32_t ld_yres = cur_yres; // y resolution after linedoubler
   if (video_settings[cur_inmode] & VIDEOIF_SET_LD_ENABLE) {
     ld_yres *= 2;
   }
 
-  uint32_t vactive = ModeParameters[cur_outmode].VActive;
+  int32_t vactive = ModeParameters[cur_outmode].VActive;
   int32_t v_pad_front = (vactive - ld_yres) / 2;
 
   /* limit shift to available padding space */
-  if (v_pad_front < actual_y_shift)
-    actual_y_shift = v_pad_front;
-  if (v_pad_front < -actual_y_shift)
-    actual_y_shift = -v_pad_front;
+  if (v_pad_front >= 0) {
+    /* regular case, GC image is smaller than available window */
+    if (v_pad_front < actual_y_shift)
+      actual_y_shift = v_pad_front;
+    if (v_pad_front < -actual_y_shift)
+      actual_y_shift = -v_pad_front;
+  } else {
+    /* cropping case, GC image exceeds available window */
+    if (actual_y_shift < v_pad_front)
+      actual_y_shift = v_pad_front;
+    if (actual_y_shift > -v_pad_front)
+      actual_y_shift = -v_pad_front;
+  }
 
   /* v active start/end are relative to output vsync */
   uint32_t v_act_start = ModeParameters[cur_outmode].VSync + ModeParameters[cur_outmode].VBackporch;

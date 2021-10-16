@@ -66,6 +66,7 @@ extern uint8_t      scanline_selected_profile;
 extern uint16_t     scanline_strength;
 extern uint16_t     scanline_hybrid;
 extern minibool     scanline_custom;
+extern minibool     crop_486_to_480;
 
 void set_all_modes(uint32_t flag, bool state);
 void update_scanlines(void);
