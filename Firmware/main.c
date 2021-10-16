@@ -75,16 +75,7 @@ int main(int argc, char **argv) {
   settings_init();
   osd_init();
   settings_load();
-
-  /* update hardware to current settings */
-  VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
-  VIDEOIF->osd_bg   = osdbg_settings;
-  if (audio_mute) {
-    VIDEOIF->audio_volume = 0;
-  } else {
-    VIDEOIF->audio_volume = audio_volume;
-  }
-  update_colormatrix();
+  settings_commit();
 
   run_mainloop();
 }

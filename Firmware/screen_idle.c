@@ -57,17 +57,21 @@ void screen_idle(void) {
     /* check for menu button combination on controller */
     if ((pad_buttons & (PAD_L | PAD_R | PAD_X | PAD_Y)) == (PAD_L | PAD_R | PAD_X | PAD_Y) &&
         time_after(now, pad_last_change + HZ)) {
-      if (pad_buttons & PAD_START)
+      if (pad_buttons & PAD_START) {
         /* restore defaults */
         settings_init();
+        settings_commit();
+      }
       return;
     }
 
     /* check for IR menu button */
     if (pad_buttons & IR_OK) {
-      if (!(IRRX->pulsedata & IRRX_BUTTON))
+      if (!(IRRX->pulsedata & IRRX_BUTTON)) {
         /* restore defaults if IR button is held */
         settings_init();
+        settings_commit();
+      }
       return;
     }
 

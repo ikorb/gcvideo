@@ -63,6 +63,7 @@ minibool     audio_mute;
 
 /* dummy functions */
 void update_colormatrix(void) {}
+void settings_commit(void) {}
 
 
 void settings_init(void) {

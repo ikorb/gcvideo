@@ -403,3 +403,15 @@ void settings_init(void) {
   SCANLINERAM->profiles[3 * 256 + 252] = scanline_hybrid;
   update_scanlines();
 }
+
+void settings_commit(void) {
+  /* update hardware to current settings */
+  VIDEOIF->settings = video_settings[current_videomode] | video_settings_global;
+  VIDEOIF->osd_bg   = osdbg_settings;
+  if (audio_mute) {
+    VIDEOIF->audio_volume = 0;
+  } else {
+    VIDEOIF->audio_volume = audio_volume;
+  }
+  update_colormatrix();
+}

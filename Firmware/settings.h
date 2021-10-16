@@ -75,6 +75,7 @@ void print_resolution(void);
 void settings_load(void);
 void settings_save(void);
 void settings_init(void);
+void settings_commit(void);
 
 static inline video_mode_t detect_input_videomode(void) {
    return detect_videomode(true);
