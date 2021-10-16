@@ -49,7 +49,9 @@ brightness/contrast/saturation settings in the picture settings menu.
 The on-screen display only checks the controller in a single port, usually
 port 1. It has only been tested with a genuine Nintendo controller and a
 Hama clone pad. I have no idea what will happen if you connect one of the more
-exotic controllers, for example a Bongo controller.
+exotic controllers, for example a Bongo controller. On a Wii, it is recommended
+to use an IR remote instead of a Gamecube controller as it has been observed that
+the system menu might not enable the controller port if it was empty during boot.
 
 To activate the OSD, hold the L, R, X and Y buttons down until the
 menu appears - this should take about one second. If you also hold
@@ -145,11 +147,9 @@ stored, make sure to use the "Store settings" menu item.
 The OSD has one additional function outside of the main menu: When
 the resolution of the video signal from the Gamecube changes, an information
 popup shows the new information in the top right corner for five seconds.
-This popup can be disabled in the "OSD settings..." submenu.
+This popup can be disabled in the "OSD Settings..." submenu.
 
-### Scanline settings ###
-
-![Scanline settings menu](doc/scanlines.png)
+### Scanline Settings ###
 
 GCVideo can optionally darken parts of the image to simulate the appearance
 of scanlines on a CRT display. To allow more flexibility, there are three
@@ -162,19 +162,21 @@ algorithm chooses the factor based on the luminance of the original pixel
 that is processed, so a blooming-like result can be achieved by weakening the
 scanline effect in bright parts of the picture.
 
+![Scanline Settings menu](doc/scanlines.png)
+
 The first line in the menu selects which scanline profile is changed using
 the settings below it. If the selected profile is the same one that is used
 for the current mode, it is marked with a * on the right side and
 all changes will be visible immediately.
 
-The "Full custom" option is meant for people who want to have extremely
+The "Full Custom" option is meant for people who want to have extremely
 fine-grained control over their scanline profiles. When it is off, the
 appearance of the scanlines are controlled only by the "Brightness" and "Hybrid
 factor" options below. When "Full custom" is on, these two entries are disabled
 and you can instead select an individual scanline brightness for each possible
 luminance value.
 
-To simplify the explanation, let us assume that the "Hybrid factor" is set
+To simplify the explanation, let us assume that the "Hybrid Factor" is set
 to 0.000 for now. In this case, the appearance of the scanline effect is
 independent of the luminance of the input pixel, so both a bright and a dark
 input pixel are darkened by the same factor. This factor is determined by
@@ -183,7 +185,7 @@ of 0 will turn every affected pixel to black and a factor of 1.000 will leave
 it as it is, effectively disabling the scanline effect. Factors between these
 limits darken the pixels proportionally.
 
-The "Hybrid factor" menu entry ranges from 0.000 to 1.992 and determines how
+The "Hybrid Factor" menu entry ranges from 0.000 to 1.992 and determines how
 much the scanline effect is weakened for bright pixels in the image. As stated
 above, at 0.000 the hybrid factor is disabled. When set to 0.5, the strength
 of the scanline effect is reduced by half for the brightest pixels and it
@@ -196,17 +198,17 @@ The hybrid factor implementation is inspired/adapted/stolen-with-permission
 from the hybrid scanlines of the OSSC by Marqs and borti, but the image may
 look slightly different due to implementation differences.
 
-The "Luminance" menu item is always active independent of the "Full custom"
+The "Luminance" menu item is always active independent of the "Full Custom"
 option. Its value can range from 16 to 235 and determines which factor is
-accessed/shown in the "Applied factor" menu item. With "Full custom" set to
+accessed/shown in the "Applied Factor" menu item. With "Full Custom" set to
 off, this can be used to check the table of scanline strengths that is
-calculated by the "Brightness" and "Hybrid factor" menu options.
+calculated by the "Brightness" and "Hybrid Factor" menu options.
 
-When "Full custom" is set to On, the last menu item "Applied factor" becomes
+When "Full Custom" is set to On, the last menu item "Applied Factor" becomes
 available. Together with the "Luminance" menu item, you can edit every single
 entry in the strength table that GCVideo uses to implement the scanline
 effect. The value here works the same as the "Brightness" value when "Hybrid
-factor" is set to 0.000, but it only affects pixels that have the luminance
+Factor" is set to 0.000, but it only affects pixels that have the luminance
 value set in the "Luminance" menu item. Even though you can only see a single
 value in this menu at a time, there is a full table with entries for all
 luminances from 16-235 that you can edit here one entry at a time.
@@ -214,16 +216,18 @@ Of course it would be much better to edit a table like this in graphical form,
 but unfortunately this would require too many FPGA resources to implement
 in GCVideo.
 
-Please note that turning "Full custom" off and changing either of the
-"Brightness" and "Hybrid factor" will reset the custom table back to calculated
+Please note that turning "Full Custom" off and changing either of the
+"Brightness" and "Hybrid Factor" will reset the custom table back to calculated
 values. Both fully-custom as well as normal scanline profiles can be saved
-togetierh with all the other settings by selecting "Store settings" in the
+togetierh with all the other settings by selecting "Store Settings" in the
 main menu.
 
-### Picture settings ###
+### Picture Settings ###
 
 The Picture Settings submenu has controls to change the brightness,
 contrast and saturation as well as the position of the picture.
+
+![Picture Settings menu](doc/picture.png)
 
 Each of the controls has a range from -128 to +127. When brightness,
 contrast and saturation are all set to 0, the picture is output exactly as
@@ -245,23 +249,27 @@ black or shifted tint in highly-saturated colors. If you encounter
 this, the recommended workaround is to use less extreme picture
 settings in GCVideo, prefereably neutral.
 
-The "X position" and "Y position" settings change the position of the game
+The "X Position" and "Y Position" settings change the position of the game
 image on screen. Althogh their range is from -128 to +127, the actual position
 of the image is constrained by the video signal generated by the console.
 For some games or software it may not be possible to shift the image at all
 even if you choose a non-zero setting here. This setting is also ignored for
 non-standard video modes.
 
+When one of GBI's 486 line video modes is detected and "Crop 486 to 480" in
+the Output Settings is enabled, you can use the "Y Position" setting to
+move the 480 line window that GCVideo shows within GBI's 486-line signal.
 
-### OSD settings ###
 
-![OSD settings menu](doc/osd.png)
+### OSD Settings ###
 
 The OSD settings menu has an option to disable the mode popup that shows for
 five secends whenever the console changes its output resolution as well
 as three settings to change the color and transparency of the OSD background.
 
-The "BG transparency" determines how much the console's image shines through
+![OSD Settings menu](doc/osd.png)
+
+The "BG Transparency" determines how much the console's image shines through
 the OSD and has a range from 0 to 255. At 0, the console's image is not
 visible at all through the OSD background and at 255 the console's image is
 fully visible, which may lead to readability issues if the image behind the
@@ -276,17 +284,17 @@ As usual, the settings chosen in this menu can be stored as power-up default
 using the "Store settings" entry on the main menu.
 
 Additionally, you can enter the IR button configuration screen from this
-menu by selecting the "IR key config..." entry.
+menu by selecting the "IR Key Config..." entry.
 
-### Output settings ###
-
-![Output settings menu](doc/output.png)
+### Output Settings ###
 
 This menu contains various output-related settings. The defaults are chosen
 for maximum compatibility, not maximum convenience, so you will probably want
 to change some of them.
 
-"Allow 480p mode" determines if GCVideo signals the presence of a progressive
+![Output Settings menu](doc/output.png)
+
+"Allow 480p Mode" determines if GCVideo signals the presence of a progressive
 video cable to the console. If this option if turned off on a Gamecube,
 games will never ask you if you want progressive mode(*); if it is turned off
 on a Wii, the 480p mode option will not be available in the console's setting.
@@ -296,6 +304,12 @@ detects the presence of a progressive mode video cable. On some hardware
 implementations the presence signal is always enabled, no matter what is
 set here.
 
+"Crop 486 to 480" is a special option to generate a standard 480-line image
+from GBI's 486-line video modes. As long as it is disabled, GBI's special
+486-line modes are passed through as-is. If it is enabled and one of the
+special modes is detected, the image is cropped to 480 lines, which improves
+compatibility with some displays.
+
 "RGB Limited Range" determines if GCVideo outputs a limited range ("On")
 or full range ("Off") RGB signal on its digital output. This option may be
 disabled if YCbCr output is selected in the advanced menu. Please check the
@@ -303,13 +317,13 @@ glossary below for an explanation about limited- and full-range RGB signals.
 It defaults to full range as the default output is standard DVI, which is
 always full range.
 
-"Enhanced DVI mode" chooses if the digital output transmits standard DVI ("Off")
+"Enhanced DVI Mode" chooses if the digital output transmits standard DVI ("Off")
 or an enhanced version that contains additional metadata and audio signals,
 which is not compatible with strictly-conforming DVI inputs. The default
 for this option is Off, because it is easier to turn it on if you do not get
 any audio than turning it off when you do not get any picture.
 
-When "Enhanced DVI mode" is On, the "Display as 16:9" option becomes available.
+When "Enhanced DVI Mode" is On, the "Display as 16:9" option becomes available.
 If turned on, it tells the display that the signal should be shown in a 16:9
 aspect ratio. Some displays (and scalers) respect this setting and automatically
 change their aspect ratio between 16:9 and 4:3 depending on the setting, some
@@ -322,13 +336,13 @@ temporarily mute the console's audio without having to dial down through
 the full range of the volume setting.
 
 Hardware implementations that feature an additional analog video output
-show a menu item "Analog output" here that is used to select the analog video
+show a menu item "Analog Output" here that is used to select the analog video
 signal format. "YPbPr" outputs component video, "RGB" outputs RGB and
 "RGsB" outputs RGB with sync-on-green. Please note that certain settings
-in the Advanced options menu may stop RGB/RGsB from working.
+in the Advanced Options menu may stop RGB/RGsB from working.
 
 As usual, the settings chosen in this menu can be stored as power-up default
-using the "Store settings" entry on the main menu.
+using the "Store Settings" entry on the main menu.
 
 (*) Please note that most PAL-region Gamecube games do not offer a progressive
 video option at all. For NTSC-region games, you may need to hold B while the
@@ -337,28 +351,28 @@ party software like [Swiss](https://github.com/emukidid/swiss-gc) can sometimes
 force PAL-region games to output progressive video.
 
 
-### View all modes ###
-
-![View all modes menu](doc/allmodes.png)
+### View All Modes ###
 
 As mentined before, the first four entries on the main menu screen are
 specific to the current video mode. Since it would be inconvenient to cycle
-through all modes on the console just to set each one of them, the "View all
-modes" menu lets you select which mode's settings you want to change.
+through all modes on the console just to configure each one of them, the "View All
+Modes" menu lets you select which mode's settings you want to change.
 Since it is not possible to change any of these settings in Non-Standard modes,
 there is no NonStd-entry in the mode menu.
 
-![Per-mode setting](doc/singlemode.png)
+![View All Modes menu](doc/allmodes.png)
 
 The per-mode menu has an entry to enable or disable the line doubler as
 well as settings related to scan lines. Depending on the mode, some settings
 may be disabled.
 
+![Per-mode setting](doc/singlemode.png)
+
 "Linedoubler" is available in 240p, 288p, 480i and 576i. If enabled, GCVideo
 outputs each video line twice, which results in an output of 480p or 576p.
 It is enabled by default for all modes to improve compatibility, but if your
 display accepts 480i/576i modes over a digital connection, it is recommened
-to turn the linedoubler off for these modes because it will likely result in a
+to turn the linedoubler off for these modes because that will likely result in a
 higher image quality. For more details about linedoubling vs.
 deinterlacing, check the glossary.
 
@@ -368,28 +382,30 @@ scanlines, just set "Scanline Profile" to "Off". Otherwise, the chosen profile
 is applied to the image according to the settings below it.
 
 "Apply to" chooses if scanlines are applied on the odd or even video lines and
-enabling "Alternating scanlines" swaps between even and odd video lines every
+enabling "Alternating Scanlines" swaps between even and odd video lines every
 frame. By enabling the linedoubler for 480i/576i and turning on alternating
 scanlines at a moderate strength, you can sometimes achieve a CRT-like effect
 for interlaced video.
 
 As usual, the settings chosen in this menu can be stored as power-up default
-using the "Store settings" entry on the main menu.
+using the "Store Settings" entry on the main menu.
 
 
-### Advanced settings ###
+### Advanced Settings ###
 
-The settings in this submenu are meant for advanced users only as they can
+The settings in this submenu are meant for advanced users only because they can
 reduce audio and/or image quality or reduce compatibility of the output signal
 with displays. On the other hand, changing some settings here may allow you to
 use a display that refuses to cooperate with the default settings, although
 possibly at reduced output quality.
 
+![Advanced Settings menu](doc/advanced.png)
+
 "Chroma Interpolation" is on by default. If you turn it off, the output image
 will have a slight color shift as well as stronger staircasing/pixelation
 on color transitions.
 
-"Fix resolution" is on by default. When it is on, GCVideo applies black borders
+"Fix Resolution" is on by default. When it is on, GCVideo applies black borders
 to the console's image to extend it to a standard-conforming resolution. Many
 games output a picture at a slightly reduced resolution as the edges of the
 image are usually not visible on a CRT display and not rendering there saves
@@ -398,7 +414,7 @@ no longer conforms to the relevant standards, which may cause issues with some
 displays or scalers - for example one of my TVs always scales such signals to
 the full panel size and disables its aspect options.
 
-"Fix sync timing" is on by default and is only available when "Fix resolution"
+"Fix Sync Timing" is on by default and is only available while "Fix Resolution"
 is turned on. It modifies the timing of the sync signals to be
 standards-compliant. There is little reason to turn this off, it is here
 mostly for completeness reasons. If this option is off, the X/Y position
@@ -413,7 +429,7 @@ may result in a distortion at the top of the picture. The X/Y position options
 in the picture menu may not have an effect on the analog output of this
 option is set to off.
 
-"Digital color format" is only avaiable if "Enhanced DVI mode" is enabled
+"Digital Color Format" is only avaiable if "Enhanced DVI Mode" is enabled
 in the output settings menu. When it is available, the options are "RGB-F",
 "RGB-L", "YC444" and "YC422". The first two stand for full-range and
 limited-range RGB and have the same effect as the RGB limited range toggle
@@ -426,23 +442,25 @@ result in incorrect colors on the auxiliary analog output (if available).
 "Report 240p as 480i" is off by default. As 240p/288p modes are less common
 as digital signals, some displays may not recognize their official mode numbers.
 Turning this option on changes the metadata that is sent when a non-linedoubled
-240p/288p mode is outputted, instead of sending the correct mode numbers
+240p/288p mode is displayed: Instead of sending the correct mode numbers,
 GCVideo uses the ones for 480i/576i instead. I'm not sure if this useful in
 practice - it was an attempt to get one of my displays to accept metadata in
 240p mode, but it was not successful.
 
-"Sample rate hack" is off by default and only relevant if the console is a
-Gamecube or a Wii in Gamecube mode. Due to an off-by-one bug, the audio sample
+"Sample Rate Hack" is off by default and only relevant if the console is a
+Gamecube or a Wii in Gamecube mode. Due to an off-by-one bug in the console's
+hardware, the audio sample
 rate of a Gamecube is not a standard 48.000Hz rate, but instead 48.042Hz.
 This is still (barely) within the official tolerance for SPDIF, but there
 have been reports of audio/video drift after longer times which may be caused
 by this difference. If you turn this option on, the output sample rate is
 forced to be exactly 48.000Hz by occasionally dropping a sample, which
 introduces slight fuzzing or crackling artifacts which may or may not be
-audible depending on the sound that is playing.
+audible depending on the sound that is playing. If you have turned this
+option on, please do not file any bugs about distorted audio.
 
 As usual, the settings chosen in this menu can be stored as power-up default
-using the "Store settings" entry on the main menu.
+using the "Store Settings" entry on the main menu.
 
 
 ### About ###
@@ -450,11 +468,13 @@ using the "Store settings" entry on the main menu.
 The about screen shows the firmware version, current console mode (on Wii) and
 has an option to boot into the firmware update tool, which is described below.
 
+![About screen](doc/about.png)
+
 
 ## Updating ##
 
 GCVideo includes a tool for flashing updates that can be accessed
-either by choosing the "Update firmware..." option in the About menu
+either by choosing the "Update Firmware..." option in the About menu
 or by holding the IR button while turning on the console.
 The update tool will also be automatically started when GCVideo detects
 that the main firmware is corrupted or missing.
