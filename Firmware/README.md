@@ -2,6 +2,32 @@
 
 This directory contains the firmware sources for GCVideo DVI.
 
+## List of shame ##
+
+Unfortunately, this needs to be at the top for visibility reasons.
+
+There are now many companies that sell devices based on this open
+source project. In the interest of fair competition, I prefer not
+to recommend any of these over the others. However, there are some
+that I would not consider buying myself due to issues which can
+significantly impact the end-user experience.
+
+These are the devices I know of which I would not buy myself:
+
+* **Hyperkin/Armor3 NuView HD**: The firmware of this device is a modified
+    version that appears to be based on one of the GCVideo 3.0 releases.
+    While the total extent of their modifications is unknown as of this writing,
+    the authors seem to have removed the firmware update function completely.
+    This will leave users stranded on the included, non-current firmware
+    version with no reasonable update path. While the authors seem to have
+    eagerly stripped all authorship information from the OSD and changed the
+    version number to "0.1", they have left this project's logo and name intact,
+    leading to user confusion as it does not match their product's branding
+    and no real GCVideo release ever used this version number.
+    Preliminary reports on the net indicate that there seems to be no included
+    documentation other than a link to a subpage of this Github repository,
+    which may be in violation of the license terms of the GCVideo project.
+
 ## Building ##
 
 To build the firmware, you will need a Linux or another
