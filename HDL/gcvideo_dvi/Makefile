@@ -111,7 +111,7 @@ dummy:
 	@echo "  - dual-gc"
 	@echo "  - dual-wii"
 	@echo "  - gcplug"
-  @echo "  - ave-hdmi"
+	@echo "  - ave-hdmi"
 	@false
 endif
 
