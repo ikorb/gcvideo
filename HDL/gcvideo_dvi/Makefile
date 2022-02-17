@@ -91,6 +91,12 @@ else ifeq ($(TARGET),gcplug)
   TOPLEVEL := toplevel_shuriken
   BOARD    := gcplug
   CONSOLE  := GC
+else ifeq ($(TARGET),ave-hdmi)
+  # HDMI
+  HWID     := 0x48444D49
+  TOPLEVEL := toplevel_avehdmi
+  BOARD    := ave-hdmi
+  CONSOLE  := WII
 else
 dummy:
 	@echo "TARGET variable not specified"
@@ -105,6 +111,7 @@ dummy:
 	@echo "  - dual-gc"
 	@echo "  - dual-wii"
 	@echo "  - gcplug"
+  @echo "  - ave-hdmi"
 	@false
 endif
 

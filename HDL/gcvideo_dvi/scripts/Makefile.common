@@ -105,6 +105,7 @@ SRC_P2XH     := src/toplevel_p2xh.vhd
 SRC_SHURIKEN := src/toplevel_shuriken.vhd
 SRC_GCDUAL   := src/toplevel_gcdual.vhd
 SRC_WIIDUAL  := src/toplevel_wiidual.vhd
+SRC_AVEHDMI  := src/toplevel_avehdmi.vhd
 BMM          := src/zpu_bootram.bmm
 PART         := xc3s200a-vq100-4
 COST_TABLE   ?= 2
@@ -179,6 +180,13 @@ else ifeq ($(TARGET),gcplug)
   CONSOLE  := GC
   FIRMWARE := gc-dvi
   GENERICS := SwapRed=\"YES\" SwapGreen=\"YES\" SwapBlue=\"YES\"
+else ifeq ($(TARGET),ave-hdmi)
+  SRC      += $(SRC_AVEHDMI)
+  TOPLEVEL := toplevel_avehdmi
+  BOARD    := avehdmi
+  CONSOLE  := WII
+  FIRMWARE := wii-dvi
+  GENERICS := SwapRed=\"YES\" SwapGreen=\"YES\" SwapBlue=\"YES\"
 else
 dummy:
 	@echo "TARGET variable not specified"
@@ -193,6 +201,7 @@ dummy:
 	@echo "  - dual-gc"
 	@echo "  - dual-wii"
 	@echo "  - gcplug"
+	@echo "  - ave-hdmi"
 	@false
 endif
 

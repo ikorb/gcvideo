@@ -24,7 +24,8 @@ fi
                          build/main-shuriken-v3-wii/toplevel_shuriken.tagmain \
                          build/main-dual-gc/toplevel_gcdual.tagmain \
                          build/main-dual-wii/toplevel_wiidual.tagmain \
-                         build/main-gcplug/toplevel_shuriken.tagmain
+                         build/main-gcplug/toplevel_shuriken.tagmain \
+                         build/main-avehdmi/toplevel_avehdmi.tagmain
 
 HBCDIR=build/GCVideo-Updater-$VERSION
 mkdir $HBCDIR
@@ -33,7 +34,8 @@ mkdir $HBCDIR
                          build/main-p2xh-wii/toplevel_p2xh.tagmain \
                          build/main-shuriken-wii/toplevel_shuriken.tagmain \
                          build/main-shuriken-v3-wii/toplevel_shuriken.tagmain \
-                         build/main-dual-wii/toplevel_wiidual.tagmain
+                         build/main-dual-wii/toplevel_wiidual.tagmain \
+                         build/main-avehdmi/toplevel_avehdmi.tagmain
 
 ./scripts/xmlgen.pl $VERSION $HBCDIR/meta.xml
 cd build

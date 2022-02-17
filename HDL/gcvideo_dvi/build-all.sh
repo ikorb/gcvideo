@@ -34,3 +34,4 @@ build shuriken-v3-wii
 build dual-gc
 build dual-wii
 build gcplug
+build ave-hdmi
