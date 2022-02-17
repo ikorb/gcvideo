@@ -38,7 +38,7 @@ use UNISIM.VComponents.all;
 use work.Component_Defs.all;
 use work.video_defs.all;
 
-entity toplevel_shuriken is
+entity toplevel_avehdmi is
   generic (
     TargetConsole: string; -- "GC" or "WII"
     SwapRed      : string := "NO";
@@ -83,9 +83,9 @@ entity toplevel_shuriken is
     DVI_Green  : out   std_logic_vector(1 downto 0);
     DVI_Blue   : out   std_logic_vector(1 downto 0)
   );
-end toplevel_shuriken;
+end toplevel_avehdmi;
 
-architecture Behavioral of toplevel_shuriken is
+architecture Behavioral of toplevel_avehdmi is
   signal swap_red       : Pair_Swap_t;
   signal swap_green     : Pair_Swap_t;
   signal swap_blue      : Pair_Swap_t;
