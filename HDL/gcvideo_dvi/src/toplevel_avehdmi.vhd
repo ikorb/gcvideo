@@ -74,6 +74,9 @@ entity toplevel_avehdmi is
     Flash_SCK  : out std_logic;
     Flash_SEL  : out std_logic;
 
+    -- board-internal
+    LED        : out std_logic;
+
     -- audio out
     SPDIF_Out  : out   std_logic;
 

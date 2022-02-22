@@ -394,6 +394,13 @@ package component_defs is
     );
   end component;
 
+  component Simple_Heartbeat is
+    port (
+      Clock          : in  std_logic;
+      HeartbeatVSync : out std_logic
+    );
+  end component;
+
   component Datapipe is
     generic (
       TargetConsole: string; -- "GC" or "WII"
