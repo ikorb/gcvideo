@@ -135,7 +135,7 @@ begin
   );
 
     -- heartbeat on LED
-    Inst_Heartbeat: Simple_Heartbeat port map (
+    Inst_SimpleHeartbeat: Simple_Heartbeat port map (
       Clock           => pipe_clock,
       HeartbeatVSync  => heartbeat_vsync
     );
