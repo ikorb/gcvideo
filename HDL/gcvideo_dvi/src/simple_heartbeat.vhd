@@ -48,7 +48,7 @@ entity Simple_Heartbeat is
 end Simple_Heartbeat;
 
 architecture Behavioral of Simple_Heartbeat is
-  type vsync_counter_t is range 0 to 119;
+  type vsync_counter_t is range 0 to 2 ** 25 - 1;
 
   signal vsync_counter  : vsync_counter_t := 0;
   signal hb_vsync       : std_logic := '0';
