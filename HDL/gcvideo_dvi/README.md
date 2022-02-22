@@ -372,6 +372,7 @@ You need to supply a target configuration (board+console) using the
 - `shuriken-v3-wii`: same, but for Wii
 - `dual-gc`: GC Dual board
 - `dual-wii`: Wii Dual board
+- `ave-hdmi`: AVE-HDMI board
 
 The output as well as all temporary files will be stored in
 the subdirectory `build`. If you want to build all target configurations,
