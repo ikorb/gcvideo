@@ -94,6 +94,7 @@ SRC_COMMON := \
 	src/edvi_ucode.vhd                 \
 	src/gcdv_decoder.vhd               \
 	src/led_heartbeat.vhd              \
+	src/simple_heartbeat.vhd           \
 	src/video_defs.vhd                 \
 	src/ycrange.vhd			   \
 	src/zpu_core_flex.vhd              \

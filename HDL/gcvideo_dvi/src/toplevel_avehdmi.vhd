@@ -89,6 +89,10 @@ architecture Behavioral of toplevel_avehdmi is
   signal swap_red       : Pair_Swap_t;
   signal swap_green     : Pair_Swap_t;
   signal swap_blue      : Pair_Swap_t;
+
+  signal pipe_clock     : std_logic;
+  signal heartbeat_vsync: std_logic;
+
 begin
 
   swap_red   <= Pair_Regular when SwapRed   = "NO" else Pair_Swapped;
@@ -122,8 +126,18 @@ begin
     DVI_Clock   => DVI_Clock,
     DVI_Red     => DVI_Red,
     DVI_Green   => DVI_Green,
-    DVI_Blue    => DVI_Blue
+    DVI_Blue    => DVI_Blue,
+
+    PipeClock   => pipe_clock
   );
+
+    -- heartbeat on LED
+    Inst_Heartbeat: Simple_Heartbeat port map (
+      Clock           => pipe_clock,
+      HeartbeatVSync  => heartbeat_vsync
+    );
+  
+    LED <= heartbeat_vsync;
 
 end Behavioral;
 

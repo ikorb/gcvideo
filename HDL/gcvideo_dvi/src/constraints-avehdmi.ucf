@@ -63,3 +63,6 @@ NET "I2S_Data"     LOC = P40;
 NET "I2S_LRClock"  LOC = P39;
 NET "I2S_BClock"   LOC = P41;
 NET "SPDIF_Out"    LOC = P72;
+
+# LED
+NET "LED"         LOC = P65 | IOSTANDARD = LVCMOS33;
