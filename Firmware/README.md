@@ -28,6 +28,16 @@ These are the devices I know of which I would not buy myself:
     documentation other than a link to a subpage of this Github repository,
     which may be in violation of the license terms of the GCVideo project.
 
+* **Bitfunx HDMI Line Doubler Adapter GC2HDMI**: According to user reports the
+    vendor of this device decided to omit the IR config button. Unfortunately
+    this button is essential, as it is the only way to reliably trigger the
+    IR remote config menu and the only way to recover from certain failure
+    situations when a firmware update is interrupted. Furthermore, there are
+    reports that the case of the device is glued shut, making it hard to
+    solder a replacement to the (very fine pitch!) pins of the FPGA if a
+    user decides that this button is more important than any vendor warranty.
+    Therefore I would not consider buying this device myself.
+
 ## Building ##
 
 To build the firmware, you will need a Linux or another
