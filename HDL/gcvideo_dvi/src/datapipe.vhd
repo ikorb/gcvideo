@@ -206,7 +206,7 @@ begin
 
   -- logic/bool adapters
   force_ypbpr <= (ForceYPbPr = '0');
-  obuf_oe     <= '1' when video_settings.DisableOutput else '0';
+  obuf_oe     <= clock_locked when video_settings.DisableOutput else '0';
 
   -- cable detect output
   process(video_settings)
